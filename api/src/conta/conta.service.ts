@@ -11,6 +11,9 @@ export class ContaService {
   async criar(dto:ContaDto){
     const response = await this.repository.create(dto) //usuario tem que 
   }
+  async listar(){
+    return this.repository.listar()
+  }
   async atualizar(id: number, dto: UpdateContaDto){
     const response = await this.repository.atualizar(id,dto)
     return response
