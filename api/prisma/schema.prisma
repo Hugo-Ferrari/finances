@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma/client.ts"
+  moduleFormat = "cjs"
+}
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario  {
+  id          Int    @id   @default(autoincrement())
+  email       String  @unique
+  senha       String  
+  conta       Conta[] 
+  categoria   Categoria[]
+
+}
+
+
+model Conta{
+  id              Int     @id       @default(autoincrement())  //autoincrement de uma chave primaria
+  nome            String  
+  tipo       Tipo @default(CORRENTE) //uso de unum com valor padrão
+  usuarioId       Int // guardando chave estrangeira que guarda o id do usuario
+  usuario         Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade) // a realção em si
+  transacao       Transacao[]
+}
+
+model Categoria{
+  id           Int     @id     @default(autoincrement())
+  nome         String  
+  usuarioId    Int 
+  usuario      Usuario      @relation(fields:[usuarioId],references:[id], onDelete:Cascade)    
+  transacao   Transacao[]
+
+   @@unique([usuarioId, nome]) // um usuario nn pode ter categorias com o mesmo nome 
+}
+
+model Transacao{
+  id              Int     @id      @default(autoincrement())
+  tipoTransacao   TipoTransacao   @default(ENTRADA)      
+  valor           Decimal  
+  descricao       String? 
+  data        DateTime      @default(now())
+  contaId         Int     
+  conta           Conta       @relation(fields:[contaId], references:[id], onDelete: Cascade)
+  categoriaId     Int 
+  categoria       Categoria   @relation(fields:[categoriaId], references:[id])
+}
+
+
+
+
+enum Tipo{
+    CORRENTE 
+    POUPANCA
+    CARTEIRA
+}
+
+enum TipoTransacao{
+  ENTRADA
+  SAIDA
+}
+
