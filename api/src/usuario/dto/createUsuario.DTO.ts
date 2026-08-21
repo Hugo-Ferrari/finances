@@ -1,8 +1,12 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
-export interface createUsuarioDto {
-  nome: string;
-  email: string 
-  senha: string 
-  cpf: string 
+export class createUsuarioDto {
+  @IsEmail()
+  email!: string 
+
+  nome!: string 
+  @IsString()
+  @MinLength(6)
+  senha!: string
+  
 }

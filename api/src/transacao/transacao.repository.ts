@@ -1,34 +1,52 @@
-import { Prisma } from 'src/generated/prisma/client';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransacaoRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async criarTransacao(dados: Prisma.TransacaoCreateInput) {
+  async criarTransacao(dados: Prisma.TransacaoUncheckedCreateInput) {
     return this.prisma.transacao.create({ data: dados });
   }
-  async buscarPorId(id: number) {
-    return this.prisma.transacao.findUnique({ where: { id: id } });
-  }
-  async atualizar(id: number, dados: Prisma.TransacaoUpdateInput) {
-    return this.prisma.transacao.update({ where: { id: id }, data: dados });
-  }
-  async remover(id: number) {
-    return this.prisma.transacao.delete({ where: { id: id } });
-  }
-  async listar() {
-    return this.prisma.transacao.findMany();
-  }
-  async listarCategoria(categoriaId: number) {
-    return this.prisma.transacao.findMany({
-      where: { categoriaId: categoriaId },
+
+  async buscarPorId(id: number, usuarioId: number) {
+    return this.prisma.transacao.findFirst({
+      where: { id, conta: { usuarioId } }
     });
   }
-  async listarPorConta(contaId: number) {
-    return await this.prisma.transacao.findMany({
-      where: { contaId: contaId },
+
+  async atualizar(id: number, dados: Prisma.TransacaoUpdateInput, usuarioId: number) {
+    const transacao = await this.prisma.transacao.findFirst({
+      where: { id, conta: { usuarioId } }
+    });
+    if (!transacao) return null;
+    return this.prisma.transacao.update({ where: { id }, data: dados });
+  }
+
+  async remover(id: number, usuarioId: number) {
+    const transacao = await this.prisma.transacao.findFirst({
+      where: { id, conta: { usuarioId } }
+    });
+    if (!transacao) return null;
+    return this.prisma.transacao.delete({ where: { id } });
+  }
+
+  async listar(usuarioId: number) {
+    return this.prisma.transacao.findMany({
+      where: { conta: { usuarioId } }
+    });
+  }
+
+  async listarCategoria(categoriaId: number, usuarioId: number) {
+    return this.prisma.transacao.findMany({
+      where: { categoriaId, conta: { usuarioId } }
+    });
+  }
+
+  async listarPorConta(contaId: number, usuarioId: number) {
+    return this.prisma.transacao.findMany({
+      where: { contaId, conta: { usuarioId } }
     });
   }
 }

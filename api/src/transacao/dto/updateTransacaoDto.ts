@@ -1,9 +1,18 @@
-import { Decimal } from "@prisma/client/runtime/client"
-import { TipoTransacao } from "src/generated/prisma/enums"
+import { Decimal } from '@prisma/client/runtime/client';
+import { IsDecimal, IsEnum, IsOptional, IsString } from 'class-validator';
+import { TipoTransacao } from 'src/generated/prisma/client.ts/enums';
 
-export interface updateTransacaoDto{
-        valor?: Decimal
-        descricao?: string
-        tipoTransacao ?: TipoTransacao
-    
+
+export class updateTransacaoDto {
+  @IsOptional()
+  @IsDecimal()
+  valor?: Decimal;
+
+  @IsString()
+  @IsOptional()
+  descricao?: string;
+
+  @IsOptional()
+  @IsEnum(TipoTransacao)
+  tipoTransacao?: TipoTransacao;
 }

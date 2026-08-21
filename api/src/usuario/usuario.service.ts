@@ -1,4 +1,4 @@
-import { response } from 'express';
+
 import { Injectable } from '@nestjs/common';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UsuarioRepository } from './usuario.repository';
@@ -12,8 +12,8 @@ export class UsuarioService {
 
   async criarUser(dto: createUsuarioDto) {
     const senhaUser = await bcrypt.hash(dto.senha,10)
-    dto.senha = senhaUser
-    await this.repository.create(dto)
+    const dados ={...dto, senha:senhaUser}
+    await this.repository.create(dados)
     return 'usuario criado com sucesso'
 
   }
@@ -27,7 +27,8 @@ export class UsuarioService {
     return res;
   }
 
-  async atualizar(id: number, dto: UpdateUsuarioDto) {
+  async atualizar(id: number, dto: UpdateUsuarioDto,) {
+
     const user = await this.repository.atualizar(id, dto);
     return user;
   }
