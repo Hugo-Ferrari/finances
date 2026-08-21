@@ -1,4 +1,9 @@
-export interface UpdateUsuarioDto {
-  nome: string 
-  email: string 
+import { IsEmail, IsOptional } from "class-validator"
+
+export class UpdateUsuarioDto {
+  @IsEmail()
+  @IsOptional()
+  email?: string 
+  
+
 }

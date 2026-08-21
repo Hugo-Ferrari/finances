@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createCategoriaDto } from './dto/createCategoriaDto';
 import { UpdateCategoriaDto } from './dto/updateCategoriaDto';
+import { Prisma } from 'src/generated/prisma/client.ts/client';
 
 @Injectable()
 export class CategoriaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async criar(dados:createCategoriaDto) {
+  async criar(dados: Prisma.CategoriaUncheckedCreateInput) {
     return this.prisma.categoria.create({ data: dados });
   }
-  async listar() {
-    return this.prisma.categoria.findMany();
+  async listar(usuarioId: number) {
+    return this.prisma.categoria.findMany({ where: { usuarioId: usuarioId } });
   }
-  async buscarPorId(id: number) {
-    return this.prisma.categoria.findUnique({ where: { id: id } });
+  async buscarPorId(id: number, usuarioId: number) {
+    return this.prisma.categoria.findFirst({
+      where: { id: id, AND: { usuarioId: usuarioId } },
+    });
   }
-  async atualizar(id: number, dados: UpdateCategoriaDto) {
+  async atualizar(id: number, dados: UpdateCategoriaDto, usuarioId: number) {
+    const categoria = await this.prisma.categoria.findFirst({
+      where: { id: id, AND: { usuarioId: usuarioId } },
+    });
+
+    if (!categoria) return null;
     return this.prisma.categoria.update({ where: { id: id }, data: dados });
   }
-  async delete(id: number) {
+  async delete(id: number, usuarioId: number) {
+    const categoria = await this.prisma.categoria.findFirst({
+      where: { id: id, AND: { usuarioId: usuarioId } },
+    });
+
+    if (!categoria) return null;
+
     return this.prisma.categoria.delete({ where: { id: id } });
   }
 }
