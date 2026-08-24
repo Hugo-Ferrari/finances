@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ContaRepository } from './conta.repository';
 import { UpdateContaDto } from './dto/updateConta.dto';
 import { createContaDto } from './dto/createConta.dto';
@@ -13,6 +13,7 @@ export class ContaService {
   async criar(dto:createContaDto, usuarioId:number){
     const dados ={...dto, usuarioId}
     return await this.repository.create(dados) 
+
   }
 
 
@@ -39,6 +40,7 @@ export class ContaService {
 
   async deletar(id:number,usuarioId:number ){
     const response = await this.repository.remover(id,usuarioId)
-    return response;
+    if(response.count ===0 ) throw new BadRequestException("Conta não encontrada")
+    return {mensagem: 'Conta removida com sucesso'};
   }
 }

@@ -3,9 +3,10 @@
 
 
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
 import { Prisma } from 'src/generated/prisma/client.ts/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 
 @Injectable()
@@ -24,7 +25,7 @@ export class UsuarioRepository {
   }
 
   async atualizar(id: number, dados: UpdateUsuarioDto) {
-    return await this.prisma.usuario.update({ where: { id: id }, data: dados }); // não pode retornar a senha
+    return await this.prisma.usuario.update({ where: { id: id }, data: dados }); 
   }
   async remover(id: number) {
     return this.prisma.usuario.delete({ where: { id: id } });

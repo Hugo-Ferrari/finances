@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { ContaService } from './conta.service';
 import { UpdateContaDto } from './dto/updateConta.dto';
 import { createContaDto } from './dto/createConta.dto';

@@ -29,8 +29,10 @@ model Conta{
   id              Int     @id       @default(autoincrement())  //autoincrement de uma chave primaria
   nome            String  
   tipo       Tipo @default(CORRENTE) //uso de unum com valor padrão
+  saldo       Decimal  @default(0)
+  ativa           Boolean @default(true)
   usuarioId       Int // guardando chave estrangeira que guarda o id do usuario
-  usuario         Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade) // a realção em si
+  usuario         Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade) 
   transacao       Transacao[]
 }
 
@@ -44,17 +46,18 @@ model Categoria{
    @@unique([usuarioId, nome]) // um usuario nn pode ter categorias com o mesmo nome 
 }
 
-model Transacao{
-  id              Int     @id      @default(autoincrement())
-  tipoTransacao   TipoTransacao   @default(ENTRADA)      
-  valor           Decimal  
-  descricao       String? 
-  data        DateTime      @default(now())
-  contaId         Int     
-  conta           Conta       @relation(fields:[contaId], references:[id], onDelete: Cascade)
-  categoriaId     Int 
-  categoria       Categoria   @relation(fields:[categoriaId], references:[id])
+model Transacao {
+  id            Int           @id @default(autoincrement())
+  tipoTransacao TipoTransacao @default(ENTRADA)
+  valor         Decimal
+  descricao     String?
+  data          DateTime      @default(now())
+  contaId       Int
+  conta         Conta         @relation(fields: [contaId], references: [id])
+  categoriaId   Int?
+  categoria     Categoria?    @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
 }
+
 
 
 

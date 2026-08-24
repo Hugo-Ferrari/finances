@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { updateTransacaoDto } from './dto/updateTransacaoDto';
 
 @Injectable()
 export class TransacaoRepository {
@@ -16,7 +17,7 @@ export class TransacaoRepository {
     });
   }
 
-  async atualizar(id: number, dados: Prisma.TransacaoUpdateInput, usuarioId: number) {
+  async atualizar(id: number, dados: updateTransacaoDto, usuarioId: number) {
     const transacao = await this.prisma.transacao.findFirst({
       where: { id, conta: { usuarioId } }
     });
