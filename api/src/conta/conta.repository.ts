@@ -2,6 +2,8 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { Injectable } from '@nestjs/common';
+import { Decimal } from '@prisma/client/runtime/client';
+import { UpdateContaDto } from './dto/updateConta.dto';
 @Injectable()
 export class ContaRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -21,7 +23,7 @@ export class ContaRepository {
   }
 
 
-  async atualizar(id: number, dados: Prisma.ContaUpdateInput, usuarioId:number) {
+  async atualizar(id: number, dados: UpdateContaDto, usuarioId:number) {
     const conta = await this.prisma.conta.findFirst({where:{id: id, AND:{usuarioId:usuarioId}}})
 
     if(!conta) return null
@@ -31,6 +33,12 @@ export class ContaRepository {
 
 
   async remover(id: number, usuarioId:number) {
-    return this.prisma.conta.delete({ where: { id: id, AND:{usuarioId:usuarioId}} });
+    return this.prisma.conta.deleteMany({ where: { id: id, AND:{usuarioId:usuarioId}} });
+  }
+
+  async atualizarSaldo(id: number, novoSaldo:Decimal,usuarioId:number){
+    const conta  = await this.prisma.conta.findFirst({where:{id:id, AND:{usuarioId:usuarioId}}})
+    if(!conta) return null
+    this.prisma.conta.update({where: {id: id},data: { saldo: novoSaldo}})
   }
 }
