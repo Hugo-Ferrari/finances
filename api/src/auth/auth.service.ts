@@ -20,6 +20,7 @@ export class AuthService {
         const token = await this.JwtService.signAsync({sub: user.id})
         return{
             access_token: token
+            
         }
         
     }

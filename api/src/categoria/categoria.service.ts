@@ -6,10 +6,10 @@ import { UpdateCategoriaDto } from './dto/updateCategoriaDto';
 @Injectable()
 export class CategoriaService {
   constructor(private readonly repository: CategoriaRepository) {}
-  //criar(), listar(),buscarPorId(),atualizar(),remover()
+  
 
   async criar(dto: createCategoriaDto, usuarioId: number) {
-    const nome = dto.nome.trim().toLocaleLowerCase();
+    const nome = dto.nome.trim().toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const dados = { ...dto, nome, usuarioId };
     const response = await this.repository.criar(dados);
     return response;
@@ -25,7 +25,7 @@ export class CategoriaService {
     return response;
   }
   async atualizar(id: number, dto: UpdateCategoriaDto, usuarioId: number) {
-    const nome = dto.nome?.trim().toLocaleLowerCase();
+    const nome = dto.nome?.trim().toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const dados = { ...dto, nome, usuarioId };
     const response = await this.repository.atualizar(id, dados, usuarioId);
 
@@ -35,7 +35,7 @@ export class CategoriaService {
     return response;
   }
 
-  
+
   async deletar(id: number, usuarioId: number) {
     const response = await this.repository.delete(id, usuarioId);
     if (!response) throw new NotFoundException('Categoria não encontrada');

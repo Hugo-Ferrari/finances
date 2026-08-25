@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsDecimal,
   IsEnum,
   IsInt,
@@ -26,4 +27,8 @@ export class createTransacaoDto {
   @IsOptional()
   @IsInt()
   categoriaId?: number;
+
+  @IsOptional()
+  @IsDateString()
+  data?: string;
 }

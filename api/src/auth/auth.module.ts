@@ -11,6 +11,7 @@ import { JwtStrategy } from './strategies/jwt.strategies';
     UsuarioModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
+      
     }),
   ],
   controllers: [AuthController],

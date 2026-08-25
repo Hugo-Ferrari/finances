@@ -1,13 +1,8 @@
-
-
-
-
 import { Injectable } from '@nestjs/common';
 
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
 import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-
 
 @Injectable()
 export class UsuarioRepository {
@@ -18,14 +13,14 @@ export class UsuarioRepository {
   }
 
   async buscarPorId(id: number) {
-    return this.prisma.usuario.findUnique({ where: { id: id } }); 
+    return this.prisma.usuario.findUnique({ where: { id: id } });
   }
   async buscarPorEmail(email: string) {
     return this.prisma.usuario.findUnique({ where: { email: email } });
   }
 
   async atualizar(id: number, dados: UpdateUsuarioDto) {
-    return await this.prisma.usuario.update({ where: { id: id }, data: dados }); 
+    return await this.prisma.usuario.update({ where: { id: id }, data: dados });
   }
   async remover(id: number) {
     return this.prisma.usuario.delete({ where: { id: id } });

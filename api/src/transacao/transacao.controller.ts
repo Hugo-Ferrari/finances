@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
 import { TransacaoService } from './transacao.service';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
@@ -25,6 +25,23 @@ export class TransacaoController {
   @Get('conta/:contaId')
   listarPorConta(@Req() req, @Param('contaId', ParseIntPipe) contaId: number) {
     return this.transacaoService.buscarPorConta(contaId, req.user.id);
+  }
+  
+  @Get('resumo')
+  obterResumo(@Req() req, @Query('inicio') inicio:string, @Query('fim') fim:string){
+    const dataInicio = new Date(inicio)
+    const dataFim = new Date(fim)
+     dataFim.setHours(23, 59, 59, 999);
+     return this.transacaoService.obterResumo(req.user.id, dataInicio,dataFim)
+
+  }
+  @Get('periodo')
+  listarPorPeriodo(@Query('inicio') inicio:string, @Query('fim') fim:string, @Req() req){
+    const dataInicio = new Date(inicio)
+    const dataFim = new Date(fim)
+    dataFim.setHours(23, 59, 59, 999);
+    
+    return this.transacaoService.listarPorPeriodo(req.user.id, dataInicio,dataFim)
   }
 
   @Get(':id')

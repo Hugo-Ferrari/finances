@@ -28,8 +28,8 @@ export class UsuarioService {
   }
 
   async atualizar(id: number, dto: UpdateUsuarioDto,) {
-
     const user = await this.repository.atualizar(id, dto);
+    
     return user;
   }
   async deletar(id: number) {

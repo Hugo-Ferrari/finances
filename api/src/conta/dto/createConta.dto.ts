@@ -12,5 +12,5 @@ export class createContaDto{
     saldo!: Decimal
     @IsEnum(Tipo)
     @IsOptional()
-    tipo? : Tipo; // enuns
+    tipo? : Tipo; 
 }

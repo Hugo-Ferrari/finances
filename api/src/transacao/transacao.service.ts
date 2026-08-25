@@ -1,9 +1,10 @@
 import { ContaRepository } from './../conta/conta.repository';
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { TransacaoRepository } from './transacao.repository';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Decimal } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class TransacaoService {
@@ -118,5 +119,13 @@ export class TransacaoService {
 
     return this.repository.remover(id, usuarioId,tx);
   })
+  }
+
+  async listarPorPeriodo(usuarioId:number, fim:Date, inicio:Date){
+    return this.repository.listarPorPeriodo(usuarioId,inicio,fim)
+  }
+
+  async obterResumo(usuarioId:number, inicio:Date, fim:Date){
+    return this.repository.obterResumo(usuarioId, inicio, fim )
   }
 }

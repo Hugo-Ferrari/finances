@@ -11,5 +11,5 @@ export class UpdateContaDto {
 
   @IsEnum(Tipo)
   @IsOptional()
-  tipo?: Tipo; // enuns
+  tipo?: Tipo; 
 }
