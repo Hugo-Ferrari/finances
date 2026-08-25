@@ -14,31 +14,36 @@ export class ContaRepository {
 
 
   async listar(usuarioId:number) {
+    
     return this.prisma.conta.findMany({where:{usuarioId:usuarioId}});
   }
 
 
-  async buscarPorId(id: number, usuarioId:number) {
-    return this.prisma.conta.findFirst({ where: { id: id, AND:{usuarioId: usuarioId}}});
+  async buscarPorId(id: number, usuarioId:number,tx?: Prisma.TransactionClient) {
+    const prisma = tx?? this.prisma
+    return prisma.conta.findFirst({ where: { id: id, AND:{usuarioId: usuarioId}}});
   }
 
 
-  async atualizar(id: number, dados: UpdateContaDto, usuarioId:number) {
-    const conta = await this.prisma.conta.findFirst({where:{id: id, AND:{usuarioId:usuarioId}}})
+  async atualizar(id: number, dados: UpdateContaDto, usuarioId:number,tx?: Prisma.TransactionClient) {
+    const prisma = tx?? this.prisma
+    const conta = await prisma.conta.findFirst({where:{id: id, AND:{usuarioId:usuarioId}}})
 
     if(!conta) return null
 
-    return this.prisma.conta.update({where:{id:id}, data:dados})
+    return prisma.conta.update({where:{id:id}, data:dados})
   }
 
 
-  async remover(id: number, usuarioId:number) {
+  async remover(id: number, usuarioId:number,) {
+    
     return this.prisma.conta.deleteMany({ where: { id: id, AND:{usuarioId:usuarioId}} });
   }
 
-  async atualizarSaldo(id: number, novoSaldo:Decimal,usuarioId:number){
-    const conta  = await this.prisma.conta.findFirst({where:{id:id, AND:{usuarioId:usuarioId}}})
+  async atualizarSaldo(id: number, novoSaldo:Decimal,usuarioId:number,tx?: Prisma.TransactionClient){
+    const prisma = tx?? this.prisma
+    const conta  = await prisma.conta.findFirst({where:{id:id, AND:{usuarioId:usuarioId}}})
     if(!conta) return null
-    this.prisma.conta.update({where: {id: id},data: { saldo: novoSaldo}})
+    return prisma.conta.update({where: {id: id},data: { saldo: novoSaldo}})
   }
 }

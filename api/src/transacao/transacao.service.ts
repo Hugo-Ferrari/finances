@@ -3,22 +3,26 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { TransacaoRepository } from './transacao.repository';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransacaoService {
   constructor(private readonly repository: TransacaoRepository, 
-          private readonly contaRepository:ContaRepository
-  ) {}
+          private readonly contaRepository:ContaRepository,
+          private readonly prisma: PrismaService
+  ){}
   //criar(), listar(),buscarPorId(), listarPorConta, listarPorCategoria,ListarPorPerido, atualizar(),remover(), obterResumo
 
   async criar(dto: createTransacaoDto, usuarioId: number) {
-    const conta = await this.contaRepository.buscarPorId(dto.contaId, usuarioId);
+    return this.prisma.$transaction(async(tx)=>{
+    const conta = await this.contaRepository.buscarPorId(dto.contaId, usuarioId,tx);
     if (!conta) throw new ForbiddenException('Conta não encontrada ou não pertence a você');
     if(conta.ativa === false) throw new BadRequestException ("Conta está inativa")
     
+    
     if(dto.tipoTransacao === "ENTRADA"){
       let novoSaldo = conta.saldo.add(dto.valor)
-      await this.contaRepository.atualizarSaldo(conta.id,novoSaldo,usuarioId)
+      await this.contaRepository.atualizarSaldo(conta.id,novoSaldo,usuarioId,tx)
     }
 
     else if(dto.tipoTransacao === "SAIDA"){
@@ -26,35 +30,46 @@ export class TransacaoService {
       throw new BadRequestException("Saldo indisponivel para realizar essa transação")
     }
       let novoSaldo = conta.saldo.sub(dto.valor)
-      await this.contaRepository.atualizarSaldo(conta.id, novoSaldo,usuarioId)
+      await this.contaRepository.atualizarSaldo(conta.id, novoSaldo,usuarioId,tx)
     }
 
-    return this.repository.criarTransacao(dto);
+    return this.repository.criarTransacao(dto,tx);
+    })
   }
 
   async listar(usuarioid: number) {
-    return this.repository.listar(usuarioid);
+    
+
+      return this.repository.listar(usuarioid);
   }
 
   async buscarPorId(id: number, usuarioId:number) {
-    return this.repository.buscarPorId(id, usuarioId);
+    
+
+      return this.repository.buscarPorId(id, usuarioId); 
   }
 
   async buscarPorConta(contaId: number, usuarioId:number) {
-    return this.repository.listarPorConta(contaId, usuarioId);
+    
+      
+      return this.repository.listarPorConta(contaId, usuarioId);
   }
 
   async listarPorCategoria(categoriaId: number, usuarioId: number) {
-    return this.repository.listarCategoria(categoriaId, usuarioId);
+    
+      
+      return this.repository.listarCategoria(categoriaId, usuarioId);
   }
 
   async atualizar(dto: updateTransacaoDto, id: number, usuarioId: number) {
-    const transacao = await this.repository.buscarPorId(id,usuarioId)
-    if(!transacao) throw new BadRequestException("transação não encontrada")
+    return this.prisma.$transaction(async(tx)=>{
+      
+      const transacao = await this.repository.buscarPorId(id,usuarioId,tx)
+      if(!transacao) throw new BadRequestException("transação não encontrada")
 
 
       if(dto.valor !== undefined){ 
-        const conta = await this.contaRepository.buscarPorId(transacao.contaId, usuarioId)
+        const conta = await this.contaRepository.buscarPorId(transacao.contaId, usuarioId,tx)
         if(!conta) throw new BadRequestException("Conta não encontrada")
         if(conta.ativa === false) throw new BadRequestException("Conta está inativa")
 
@@ -76,12 +91,32 @@ export class TransacaoService {
         }
         novoSaldo = novoSaldo.sub(dto.valor)
       }
-      await this.contaRepository.atualizarSaldo(conta.id, novoSaldo, usuarioId)
+      await this.contaRepository.atualizarSaldo(conta.id, novoSaldo, usuarioId,tx)
       
-      }
-    return this.repository.atualizar(id, dto, usuarioId);
+    }
+    return this.repository.atualizar(id, dto, usuarioId,tx);
+  })
   }
   async remover(id: number, usuarioId: number) {
-    return this.repository.remover(id, usuarioId);
+    return this.prisma.$transaction(async(tx)=>{
+      
+      const transacaoRemovida = await this.repository.buscarPorId(id,usuarioId,tx)
+      if(!transacaoRemovida) throw new BadRequestException("Transacao inexistente ")
+
+   const conta = await this.contaRepository.buscarPorId(transacaoRemovida.contaId,usuarioId,tx)
+
+      if(!conta ) throw new BadRequestException("Conta inexistente ")
+      let novoSaldo = conta.saldo
+    if(transacaoRemovida.tipoTransacao === "ENTRADA") {
+      novoSaldo = novoSaldo.sub(transacaoRemovida.valor)
+    }
+
+    else if(transacaoRemovida.tipoTransacao ==="SAIDA"){
+      novoSaldo = novoSaldo.add(transacaoRemovida.valor)
+    }
+     await this.contaRepository.atualizarSaldo( conta.id,novoSaldo, usuarioId,tx)
+
+    return this.repository.remover(id, usuarioId,tx);
+  })
   }
 }
