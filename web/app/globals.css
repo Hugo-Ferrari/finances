@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  /* Fundo */
+  --background: #f6f7fb;
+
+  /* Cards */
+  --surface: #ffffff;
+  --surface-dim: #e9eaf0;
+
+  /* Cores principais */
+  --primary: #11152f;
+  --primary-light: #eeeaff;
+
+  /* Destaques */
+  --secondary: #5ee7d4;
+  --accent: #8b7cf6;
+
+  /* Estados financeiros */
+  --income: #18a878;
+  --income-light: #dff8ef;
+
+  --expense: #d94f4f;
+  --expense-light: #ffe5e5;
+
+  /* Textos */
+  --foreground: #171936;
+  --muted: #73758b;
+  --muted-light: #a1a3b5;
+
+  /* Bordas */
+  --border: #e8e9ef;
+}
+
+@theme inline {
+  --color-background: var(--background);
+
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+
+  --color-income: var(--income);
+  --color-income-light: var(--income-light);
+
+  --color-expense: var(--expense);
+  --color-expense-light: var(--expense-light);
+
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-light: var(--muted-light);
+
+  --color-border: var(--border);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
