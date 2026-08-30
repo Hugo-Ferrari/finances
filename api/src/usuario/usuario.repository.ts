@@ -12,8 +12,8 @@ export class UsuarioRepository {
     return this.prisma.usuario.create({ data: dados });
   }
 
-  async buscarPorId(id: number) {
-    return this.prisma.usuario.findUnique({ where: { id: id } });
+  async buscarPorId(usuarioId: number) {
+    return this.prisma.usuario.findUnique({ where: { id: usuarioId }, select:{id:true, email:true, nome:true}});
   }
   async buscarPorEmail(email: string) {
     return this.prisma.usuario.findUnique({ where: { email: email } });

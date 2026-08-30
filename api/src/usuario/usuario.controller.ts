@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Patch, Post, Req} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Req} from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
@@ -13,6 +13,10 @@ export class UsuarioController {
     return this.usuarioService.criarUser(dto);
   }
 
+  @Get()
+  buscarPorId(@Req() req){
+    return this.usuarioService.buscarId(req.user.id)
+  }
   @Patch()
   atualizar(@Body() dto: UpdateUsuarioDto, @Req() req) {
     return this.usuarioService.atualizar(req.user.id, dto);

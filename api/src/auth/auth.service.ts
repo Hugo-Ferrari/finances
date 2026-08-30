@@ -11,19 +11,25 @@ export class AuthService {
                 private readonly JwtService: JwtService){}
 
     async login(dto: LoginDto) {
-        const user = await this.UsuarioRepository.buscarPorEmail(dto.email)
-        if(!user) throw new UnauthorizedException("E-mail ou senha incorretos")
+    const user = await this.UsuarioRepository.buscarPorEmail(dto.email);
 
-        const response = await bcrypt.compare(dto.senha, user.senha )
-        if(!response) throw new UnauthorizedException ("E-mail ou senha incorretos")
-        
-        const token = await this.JwtService.signAsync({sub: user.id})
-        return{
-            access_token: token
-            
-        }
-        
+    if (!user) {
+      throw new UnauthorizedException('E-mail ou senha incorretos');
     }
+
+    const senhaValida = await bcrypt.compare(dto.senha, user.senha);
+
+    if (!senhaValida) {
+      throw new UnauthorizedException('E-mail ou senha incorretos');
+    }
+
+    const token = await this.JwtService.signAsync({
+      sub: user.id,
+    });
+
+    return token;
+  }
 }
+
 
 

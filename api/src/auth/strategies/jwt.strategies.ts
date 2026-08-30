@@ -1,4 +1,5 @@
-import { Strategy, ExtractJwt } from 'passport-jwt';
+
+import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsuarioRepository } from 'src/usuario/usuario.repository';
@@ -7,7 +8,9 @@ import { UsuarioRepository } from 'src/usuario/usuario.repository';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly repository: UsuarioRepository) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (request) =>{
+        return request.cookies.access_token;
+      },
       secretOrKey: process.env.JWT_SECRET!
 ,
     });

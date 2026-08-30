@@ -1,4 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+
+import { Response } from 'express';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/loginDto';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -9,8 +11,13 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  login(@Body() dto:LoginDto){
-    return this.authService.login(dto)
-    
+  async login(@Body() dto: LoginDto,@Res({ passthrough: true }) response: Response,) {
+    const token = await this.authService.login(dto);
+    response.cookie('access_token', token, {
+      httpOnly: true,
+    });
+    return {
+      mensagem: 'Login realizado',
+    };
   }
 }

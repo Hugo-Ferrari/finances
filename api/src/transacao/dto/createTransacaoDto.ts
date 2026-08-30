@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsInt,
   IsOptional,
+  IsPositive,
   IsString,
 } from 'class-validator';
 
@@ -11,8 +12,8 @@ import { Decimal } from '@prisma/client/runtime/client';
 import { TipoTransacao } from 'src/generated/prisma/client.ts/enums';
 
 export class createTransacaoDto {
-  @IsDecimal()
-  valor!: Decimal;
+  @IsPositive()
+  valor!: number;
 
   @IsOptional()
   @IsString()

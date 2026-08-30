@@ -51,11 +51,13 @@ export class TransacaoRepository {
   }
 
   async listar(usuarioId: number) {
-    return this.prisma.transacao.findMany({
-      where: { conta: { usuarioId } },
-    });
-  }
-
+  return this.prisma.transacao.findMany({
+    where: { conta: { usuarioId } },
+    include: {
+      categoria: true,
+    },
+  });
+}
   async listarCategoria(categoriaId: number, usuarioId: number) {
     return this.prisma.transacao.findMany({
       where: { categoriaId, conta: { usuarioId } },
@@ -95,5 +97,46 @@ export class TransacaoRepository {
     const saldoPeriodo = totalEntradas.sub(totalSaidas);
 
     return { totalEntradas, totalSaidas, saldoPeriodo };
+  }
+
+  async despesaPorCategoria(usuarioId: number) {
+    return this.prisma.transacao.groupBy({
+      by: ['categoriaId'],
+      where: { tipoTransacao: 'SAIDA', conta: { usuarioId } },
+      _sum: { valor: true },
+    });
+  }
+  async obterResumoTotal(usuarioId: number) {
+    const entradas = await this.prisma.transacao.aggregate({
+      _sum: {
+        valor: true,
+      },
+      where: {
+        conta: {
+          usuarioId,
+        },
+        tipoTransacao: 'ENTRADA',
+      },
+    });
+
+    const saidas = await this.prisma.transacao.aggregate({
+      _sum: {
+        valor: true,
+      },
+      where: {
+        conta: {
+          usuarioId,
+        },
+        tipoTransacao: 'SAIDA',
+      },
+    });
+
+    const totalEntradas = entradas._sum.valor ?? new Decimal(0);
+    const totalSaidas = saidas._sum.valor ?? new Decimal(0);
+
+    return {
+      totalEntradas,
+      totalSaidas,
+    };
   }
 }

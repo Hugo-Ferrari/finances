@@ -22,8 +22,8 @@ export class UsuarioService {
     const user = await this.repository.buscarPorEmail(email);
     return user;
   }
-  async buscarId(id: number) {
-    const res = await this.repository.buscarPorId(id);
+  async buscarId(usuarioId: number) {
+    const res = await this.repository.buscarPorId(usuarioId);
     return res;
   }
 
