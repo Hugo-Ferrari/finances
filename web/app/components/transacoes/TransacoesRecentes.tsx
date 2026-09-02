@@ -23,7 +23,7 @@ function TransacoesRecentes() {
       try {
         const dados = await listarTodasTransacoes();
 
-        setTransacoes(dados.slice(-4).reverse());
+        setTransacoes(dados.slice(-5).reverse());
       } catch (error) {
         console.error("Erro ao carregar transações:", error);
       }
@@ -99,7 +99,7 @@ function TransacoesRecentes() {
                 className={` text-right font-semibold
                   ${entrada ? "text-income" : "text-expense"}`}
               >
-                {entrada ? "+" : "-"}
+                {entrada ? "+ " : "- "}
                 {formatarValor(transacao.valor)}
               </p>
             </div>

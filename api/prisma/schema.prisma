@@ -21,6 +21,7 @@ model Usuario  {
   senha       String  
   conta       Conta[] 
   categoria   Categoria[]
+  orcamento   Orcamento[]
 
 }
 
@@ -42,6 +43,7 @@ model Categoria{
   usuarioId    Int 
   usuario      Usuario      @relation(fields:[usuarioId],references:[id], onDelete:Cascade)    
   transacao   Transacao[]
+  orcamento   Orcamento[]
 
    @@unique([usuarioId, nome]) // um usuario nn pode ter categorias com o mesmo nome 
 }
@@ -57,8 +59,17 @@ model Transacao {
   categoriaId   Int?
   categoria     Categoria?    @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
 }
+model Orcamento {
+  id          Int      @id @default(autoincrement())
+  valor       Decimal
+  usuarioId   Int
+  categoriaId Int
 
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  categoria   Categoria @relation(fields: [categoriaId], references: [id] )
 
+  @@unique([usuarioId, categoriaId])
+}
 
 
 

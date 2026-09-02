@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtGuard } from './auth/guards/jwt-auth.guard';
+import { OrcamentoModule } from './orcamento/orcamento.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtGuard } from './auth/guards/jwt-auth.guard';
     CategoriaModule,
     TransacaoModule,
     AuthModule,
+    OrcamentoModule,
   ],
   controllers: [AppController],
   providers: [

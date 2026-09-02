@@ -1,20 +1,14 @@
 "use client";
 import { ListarDespesasCategoria } from "@/app/services/transacao.service";
+import { DespesaCategoria } from "@/app/types/categoria";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 const PieChart = dynamic(
   () => import("@mui/x-charts/PieChart").then((mod) => mod.PieChart),
   { ssr: false },
 );
-type DespesaCategoria = {
-  categoriaId: number | null;
-  valor: string;
-  categoria: { nome: string };
-};
 function DespesaPorCategoria() {
-  const [transacaoCategoria, setTransacaoCategoria] = useState<
-    DespesaCategoria[]
-  >([]);
+  const [transacaoCategoria, setTransacaoCategoria] = useState<DespesaCategoria[]>([]);
   useEffect(() => {
     async function carregarDespesaCategoria() {
       const dados = await ListarDespesasCategoria();
@@ -23,10 +17,10 @@ function DespesaPorCategoria() {
     carregarDespesaCategoria();
   }, []);
   const data = transacaoCategoria
-    .map((item) => ({
-      id: item.categoriaId ?? 0,
-      label: item.categoria?.nome.toLocaleUpperCase() ?? "Sem categoria",
-      value: Number(item.valor),
+    .map((item, index) => ({
+      id: item.categoriaId ?? item.id ?? `sem-categoria-${index}`,
+      label: (item.categoria?.nome ?? item.nome ?? "Sem categoria").toLocaleUpperCase(),
+      value: Number(item.valor ?? 0),
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 4);

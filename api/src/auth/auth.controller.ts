@@ -15,6 +15,7 @@ export class AuthController {
     const token = await this.authService.login(dto);
     response.cookie('access_token', token, {
       httpOnly: true,
+      maxAge: 6*60*60*1000
     });
     return {
       mensagem: 'Login realizado',

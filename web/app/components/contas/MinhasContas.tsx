@@ -1,6 +1,7 @@
 "use client";
 import { listarConta } from "@/app/services/conta.service";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 type Conta = {
   id: number;
@@ -8,7 +9,7 @@ type Conta = {
   tipo: "CORRENTE" | "POUPANCA" | "CARTEIRA";
   saldo: string;
   ativa: boolean;
-}; // adicionar incones antes do nome da conta
+};
 function MinhasContas() {
   const [contas, setContas] = useState<Conta[]>([]);
   useEffect(() => {
@@ -24,6 +25,10 @@ function MinhasContas() {
       currency: "BRL",
     }).format(Number(saldo));
   }
+  const saldoTotal = contas.reduce(
+    (total, conta) => total + Number(conta.saldo),
+    0,
+  );
   return (
     <div className="bg-surface rounded-2xl p-6 border border-border">
       <div className="flex items-start justify-between mb-5">
@@ -32,13 +37,13 @@ function MinhasContas() {
           <p className="text-sm text-muted mt-1">Visão geral das suas contas</p>
         </div>
 
-        <button
+        <Link href={'/contas'}
           type="button"
           className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-white hover:bg-primary/20 hover:text-black transition"
           aria-label="Adicionar conta"
         >
           <Plus size={18} />
-        </button>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -65,6 +70,15 @@ function MinhasContas() {
             </div>
           </div>
         ))}
+      </div>
+      <div>
+        <div className="p-3">
+          <p className="text-sm text-muted">Saldo total</p>
+
+          <p className="text-2xl font-bold text-amber-600">
+            {formatarSaldo(String(saldoTotal))}
+          </p>
+        </div>
       </div>
 
       {contas.length === 0 && (

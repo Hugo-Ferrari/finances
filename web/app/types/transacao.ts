@@ -1,4 +1,4 @@
-interface CreateTransacao {
+export interface CreateTransacao {
   tipoTransacao: "ENTRADA" | "SAIDA";
   valor: number;
   descricao?: string;

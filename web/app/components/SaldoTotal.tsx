@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import { obterResumoTotal } from "../services/transacao.service";
 type Resumo = { totalEntradas: string; totalSaidas: string };
 function SaldoTotal() {
-  const [resumo, setResumo] = useState<Resumo>({
-    totalEntradas: "0",
-    totalSaidas: "0",
-  });
+  const [resumo, setResumo] = useState<Resumo>({totalEntradas: "0", totalSaidas: "0",});
   useEffect(() => {
     async function carregarResumo() {
       try {
@@ -34,7 +31,7 @@ function SaldoTotal() {
     <div className="bg-surface rounded-2xl p-6 border border-border">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-muted">Saldo total</span>
+          <span className="text-sm font-medium text-muted">Saldo das Movimentações</span>
         </div>
         <p className="text-3xl font-extrabold tracking-tight">
           {formatarMoeda(total)}
