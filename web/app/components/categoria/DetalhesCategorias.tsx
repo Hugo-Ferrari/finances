@@ -1,6 +1,9 @@
 "use client";
 
-import { listarCategoria } from "@/app/services/categoria.service";
+import {
+  deletarCategoria,
+  listarCategoria,
+} from "@/app/services/categoria.service";
 import { listarOrcamento } from "@/app/services/orcamento.service";
 import React, { useEffect, useState } from "react";
 import { Home, MoreVertical } from "lucide-react";
@@ -9,6 +12,7 @@ import { ListarDespesasCategoria } from "@/app/services/transacao.service";
 import { DespesaCategoria } from "@/app/types/categoria";
 import { useCategoriaIconeStore } from "@/app/store/categoriaIcone.store";
 import { iconesCategoria } from "./iconesCategoria";
+import { Are_You_Serious } from "next/font/google";
 
 type Orcamento = {
   id: number;
@@ -28,6 +32,34 @@ function DetalhesCategorias() {
     DespesaCategoria[]
   >([]);
   const iconesSalvos = useCategoriaIconeStore((state) => state.icones);
+
+  const [modalAberto, setModalAberto] = useState(false);
+  const [categoriaParaExcluir, setCategoriaParaExcluir] =
+    useState<Categoria | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  async function handleExcluirCategoria() {
+    if (!categoriaParaExcluir) return;
+
+    try {
+      setExcluindo(true);
+
+      await deletarCategoria(categoriaParaExcluir.id);
+
+      setCategoria((categorias) =>
+        categorias.filter(
+          (categoria) => categoria.id !== categoriaParaExcluir.id,
+        ),
+      );
+
+      setCategoriaParaExcluir(null);
+      setModalAberto(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setExcluindo(false);
+    }
+  }
 
   const formatarMoeda = (valor: number | string) =>
     new Intl.NumberFormat("pt-BR", {
@@ -106,7 +138,11 @@ function DetalhesCategorias() {
 
                 <button
                   type="button"
-                  className="rounded-lg p-1 text-muted hover:bg-muted"
+                  className="rounded-lg p-1 text-muted hover:bg-muted/50"
+                  onClick={() => {
+                    setCategoriaParaExcluir(itemCat);
+                    setModalAberto(true);
+                  }}
                 >
                   <MoreVertical size={18} />
                 </button>
@@ -148,6 +184,45 @@ function DetalhesCategorias() {
         })
       )}
       <CriarCategoria />
+      {modalAberto && categoriaParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                Excluir categoria
+              </h2>
+
+              <p className="mt-2 text-sm text-muted">
+                Tem certeza que deseja excluir a categoria{" "}
+                <strong>{categoriaParaExcluir.nome}</strong>?
+              </p>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setModalAberto(false);
+                  setCategoriaParaExcluir(null);
+                }}
+                disabled={excluindo}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/10 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExcluirCategoria}
+                disabled={excluindo}
+                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {excluindo ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

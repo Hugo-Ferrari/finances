@@ -12,3 +12,9 @@ export async function criarCategoria(dados: CreateCategoria) {
     return response.data
     
 }
+
+export async function deletarCategoria(id: number) {
+    const response = await api.delete(`/categoria/${id}`)
+    return response.data
+    
+}

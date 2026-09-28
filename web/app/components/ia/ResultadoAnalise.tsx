@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import ConfigurarTransacao from "./ConfigurarTransacao";
 import SalvarTransacao from "./SalvarTransacao";
 import { File, FileText } from "lucide-react";
+import axios from "axios";
 
 function ResultadoAnalise() {
   const [descricao, setDescricao] = useState("");
@@ -35,9 +36,16 @@ function ResultadoAnalise() {
     try {
       const response = await RegistroDeComprovanteIA(imagem);
 
+      console.log("2. Resultado da IA:", response);
+
       setResultado(response);
       setDescricao(response.descricao);
+
+      console.log("3. Buscando categorias...");
+
       const categorias: DespesaCategoria[] = await listarCategoria();
+
+      console.log("4. Categorias:", categorias);
 
       const categoriaEncontrada = categorias.find(
         (categoria) =>
@@ -58,8 +66,28 @@ function ResultadoAnalise() {
       // A conta sempre precisa ser escolhida pelo usuário.
       setContaId(undefined);
     } catch (error) {
-      console.error(error);
-      setError("Erro ao analisar comprovante.");
+    console.error("Erro ao analisar comprovante:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 503) {
+        setError(
+          "A IA está temporariamente indisponível. Tente novamente em alguns segundos.",
+        );
+        return;
+      }
+
+      if (error.response?.status === 401) {
+        setError("Sua sessão expirou. Faça login novamente.");
+        return;
+      }
+
+      if (error.response?.status === 500) {
+        setError("Não foi possível processar o comprovante.");
+        return;
+      }
+    }
+
+    setError("Erro ao analisar comprovante.");
     } finally {
       setLoading(false);
     }
@@ -114,7 +142,9 @@ function ResultadoAnalise() {
             className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-12 transition hover:border-[#8b7cf6] hover:bg-[#eeeaff]"
           >
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#eeeaff]">
-              <span className="text-2xl"><FileText size={25}/> </span>
+              <span className="text-2xl">
+                <FileText size={25} />{" "}
+              </span>
             </div>
 
             <p className="font-medium text-[#11152f]">

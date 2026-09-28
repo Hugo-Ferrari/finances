@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "../store/auth.store";
@@ -90,7 +91,12 @@ function NavBar() {
       >
         <div className={`${open ? "flex" : "hidden"} items-center gap-2`}>
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary font-bold text-white shadow-sm">
-            F
+            <Image
+              src="/icons/icon-192.png"
+              alt="Logo"
+              width={36}
+              height={36}
+            />
           </div>
 
           <span className="text-base font-bold tracking-tight text-primary">
