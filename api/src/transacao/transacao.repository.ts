@@ -51,13 +51,16 @@ export class TransacaoRepository {
   }
 
   async listar(usuarioId: number) {
-  return this.prisma.transacao.findMany({
-    where: { conta: { usuarioId } },
-    include: {
-      categoria: true,
-    },
-  });
-}
+    const dados = await this.prisma.transacao.findMany({
+      where: { conta: { usuarioId } },
+      include: {
+        categoria: true,
+        conta: true,
+      },
+    });
+
+    return dados;
+  }
   async listarCategoria(categoriaId: number, usuarioId: number) {
     return this.prisma.transacao.findMany({
       where: { categoriaId, conta: { usuarioId } },

@@ -8,7 +8,9 @@ const PieChart = dynamic(
   { ssr: false },
 );
 function DespesaPorCategoria() {
-  const [transacaoCategoria, setTransacaoCategoria] = useState<DespesaCategoria[]>([]);
+  const [transacaoCategoria, setTransacaoCategoria] = useState<
+    DespesaCategoria[]
+  >([]);
   useEffect(() => {
     async function carregarDespesaCategoria() {
       const dados = await ListarDespesasCategoria();
@@ -19,7 +21,11 @@ function DespesaPorCategoria() {
   const data = transacaoCategoria
     .map((item, index) => ({
       id: item.categoriaId ?? item.id ?? `sem-categoria-${index}`,
-      label: (item.categoria?.nome ?? item.nome ?? "Sem categoria").toLocaleUpperCase(),
+      label: (
+        item.categoria?.nome ??
+        item.nome ??
+        "Sem categoria"
+      ).toLocaleUpperCase(),
       value: Number(item.valor ?? 0),
     }))
     .sort((a, b) => b.value - a.value)
@@ -37,14 +43,12 @@ function DespesaPorCategoria() {
     return `${((valor / total) * 100).toFixed(1)}%`;
   };
   const cores = [
-    "#F2B705",
-    "#2563EB",
-    "#10B981",
-    "#F97316",
-    "#8B5CF6",
-    "#EC4899",
-    "#06B6D4",
-    "#EF4444",
+    "var(--accent)",
+    "var(--income)",
+    "var(--secondary)",
+    "var(--expense)",
+    "var(--primary)",
+    "var(--muted)",
   ];
   const dadosGrafico = data.map((item, index) => ({
     ...item,

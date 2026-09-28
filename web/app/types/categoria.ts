@@ -8,3 +8,7 @@ export type DespesaCategoria = {
     nome?: string;
   } | null;
 };
+
+export type CreateCategoria ={
+    nome: string
+}

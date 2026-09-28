@@ -5,6 +5,10 @@ import { listarOrcamento } from "@/app/services/orcamento.service";
 import React, { useEffect, useState } from "react";
 import { Home, MoreVertical } from "lucide-react";
 import CriarCategoria from "./CriarCategoria";
+import { ListarDespesasCategoria } from "@/app/services/transacao.service";
+import { DespesaCategoria } from "@/app/types/categoria";
+import { useCategoriaIconeStore } from "@/app/store/categoriaIcone.store";
+import { iconesCategoria } from "./iconesCategoria";
 
 type Orcamento = {
   id: number;
@@ -20,8 +24,13 @@ type Categoria = {
 function DetalhesCategorias() {
   const [orcamento, setOrcamento] = useState<Orcamento[]>([]);
   const [categorias, setCategoria] = useState<Categoria[]>([]);
+  const [transacaoCategoria, setTransacaoCategoria] = useState<
+    DespesaCategoria[]
+  >([]);
+  const iconesSalvos = useCategoriaIconeStore((state) => state.icones);
 
-  const formatarMoeda = (valor: number | string) =>new Intl.NumberFormat("pt-BR", {
+  const formatarMoeda = (valor: number | string) =>
+    new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(Number(valor));
@@ -44,6 +53,14 @@ function DetalhesCategorias() {
     carregarCategoria();
   }, []);
 
+  useEffect(() => {
+    async function carregarDespesaCategoria() {
+      const dados = await ListarDespesasCategoria();
+      setTransacaoCategoria(dados);
+    }
+    carregarDespesaCategoria();
+  }, []);
+
   return (
     <div className="flex flex-wrap gap-5">
       {categorias.length === 0 ? (
@@ -57,24 +74,33 @@ function DetalhesCategorias() {
           const nomeCategoria =
             itemCat.nome.charAt(0).toUpperCase() + itemCat.nome.slice(1);
 
+          const gasto = transacaoCategoria
+            .filter((item) => item.categoriaId === itemCat.id)
+            .reduce((total, item) => total + Number(item.valor ?? 0), 0);
+
+          const limite = Number(orcamentoCategoria?.valor ?? 0);
+
+          const percentual =
+            limite > 0 ? Math.min((gasto / limite) * 100, 100) : 0;
+          const Icone =
+            iconesCategoria.find(
+              (icone) => icone.nome === iconesSalvos[itemCat.id],
+            )?.componente ?? Home;
           return (
             <div
               key={itemCat.id}
               className="w-full  max-w-sm    rounded-2xl border     border-border  bg-surface   p-5  hover:shadow-md"
             >
-             
               <div className="mb-5 flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full ">
-                    <Home size={20} className="text-foreground" />{/**o usuario que vai escolhe qual icone ele vai usar */}
+                    <Icone size={20} className="text-foreground" />
                   </div>
 
                   <div>
                     <h1 className="font-semibold text-foreground">
                       {nomeCategoria}
                     </h1>
-
-                    <p className="text-sm text-blue-500">Orçamento mensal</p>
                   </div>
                 </div>
 
@@ -86,7 +112,6 @@ function DetalhesCategorias() {
                 </button>
               </div>
 
-             
               {orcamentoCategoria ? (
                 <>
                   <div className="mb-2 flex items-baseline justify-between">
@@ -97,13 +122,16 @@ function DetalhesCategorias() {
                     <span className="text-sm text-muted">limite</span>
                   </div>
 
-                  
-                  <div className="mb-2 h-2 overflow-hidden rounded-full ">
-                    <div className="h-full w-0 rounded-full bg-foreground transition-all" />
+                  <div className="mb-2 h-2 overflow-hidden rounded-full bg-surface-dim">
+                    <div
+                      className={`h-full w-0 rounded-full transition-all ${percentual >= 100 ? "bg-expense" : "bg-income"}`}
+                      style={{ width: `${percentual}%` }}
+                    />
                   </div>
 
                   <p className="mb-4 text-right text-xs text-muted">
-                    Nenhum gasto registrado
+                    {formatarMoeda(gasto)} gastos ({percentual.toFixed(0)}% do
+                    limite)
                   </p>
                 </>
               ) : (
@@ -114,16 +142,12 @@ function DetalhesCategorias() {
                 </div>
               )}
 
-             
               <hr className="mb-3 border-border" />
-
-
-             
             </div>
           );
         })
       )}
-      <CriarCategoria/>
+      <CriarCategoria />
     </div>
   );
 }

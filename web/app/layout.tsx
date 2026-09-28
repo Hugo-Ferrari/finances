@@ -1,6 +1,11 @@
-
 import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
+import AuthInitializer from "./components/AuthInitializer";
+
+export const metadata = {
+  title: "FinLogic",
+  description: "Controle financeiro moderno e inteligente.",
+};
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -21,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${manrope.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AuthInitializer>{children}</AuthInitializer>
+      </body>
     </html>
   );
 }

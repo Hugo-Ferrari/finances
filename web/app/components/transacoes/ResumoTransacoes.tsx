@@ -3,13 +3,7 @@
 import { BarChart } from "@mui/x-charts/BarChart";
 import { listarPorPeriodo } from "@/app/services/transacao.service";
 import { useEffect, useState } from "react";
-
-type Transacao = {
-  id: number;
-  valor: string;
-  tipoTransacao: "ENTRADA" | "SAIDA";
-  data: string;
-};
+import { Transacao } from "@/app/types/transacao";
 
 type DadosGrafico = {
   chave: string;
@@ -280,15 +274,12 @@ function ResumoTransacoes() {
           grid={{
             horizontal: true,
           }}
-          slotProps={{
-            legend: {
-              labelStyle: {
-                fontSize: 12,
-                fill: "var(--muted)",
-              },
-            },
-          }}
           sx={{
+            "& .MuiChartsLegend-label": {
+              fontSize: 12,
+              fill: "var(--muted)",
+            },
+
             "& .MuiChartsGrid-line": {
               stroke: "var(--border)",
               strokeDasharray: "4 4",

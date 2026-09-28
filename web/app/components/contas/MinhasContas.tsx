@@ -1,15 +1,10 @@
 "use client";
 import { listarConta } from "@/app/services/conta.service";
-import { Plus } from "lucide-react";
+import { Conta } from "@/app/types/conta";
+import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-type Conta = {
-  id: number;
-  nome: string;
-  tipo: "CORRENTE" | "POUPANCA" | "CARTEIRA";
-  saldo: string;
-  ativa: boolean;
-};
+
 function MinhasContas() {
   const [contas, setContas] = useState<Conta[]>([]);
   useEffect(() => {
@@ -37,12 +32,13 @@ function MinhasContas() {
           <p className="text-sm text-muted mt-1">Visão geral das suas contas</p>
         </div>
 
-        <Link href={'/contas'}
+        <Link
+          href={"/contas"}
           type="button"
           className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-white hover:bg-primary/20 hover:text-black transition"
           aria-label="Adicionar conta"
         >
-          <Plus size={18} />
+          <ChevronRight size={18} />
         </Link>
       </div>
 

@@ -1,19 +1,10 @@
 "use client";
 
 import { listarTodasTransacoes } from "@/app/services/transacao.service";
+import { Transacao } from "@/app/types/transacao";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-
-type Transacao = {
-  id: number;
-  descricao: string;
-  valor: string;
-  tipoTransacao: "ENTRADA" | "SAIDA";
-  categoria: {
-    nome: string;
-  } | null;
-};
 
 function TransacoesRecentes() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
@@ -60,51 +51,52 @@ function TransacoesRecentes() {
         </Link>
       </div>
 
-      <div className=" grid grid-cols-[2fr_1fr_1fr_1fr] items-center gap-4 border-b border-surface-dim pb-3  text-sm  text-muted">
-        <p>Categoria</p>
+      <div className="overflow-x-auto">
+        <div className="min-w-[560px]">
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center gap-4 border-b border-surface-dim pb-3 text-sm text-muted">
+            <p>Categoria</p>
 
-        <p>Descrição</p>
+            <p>Descrição</p>
 
-        <p>Tipo</p>
+            <p>Tipo</p>
 
-        <p className="text-right">Valor</p>
-      </div>
+            <p className="text-right">Valor</p>
+          </div>
 
-      <div>
-        {transacoes.map((transacao) => {
-          const entrada = transacao.tipoTransacao === "ENTRADA";
+          <div>
+            {transacoes.map((transacao) => {
+              const entrada = transacao.tipoTransacao === "ENTRADA";
 
-          return (
-            <div
-              key={transacao.id}
-              className=" grid grid-cols-[2fr_1fr_1fr_1fr] items-center  gap-4  border-b  border-surface-dim  py-4 last:border-b-0 "
-            >
-              <p className="  truncate font-semibold text-primary ">
-                {transacao.categoria?.nome.toLocaleUpperCase()}
-              </p>
+              return (
+                <div
+                  key={transacao.id}
+                  className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center gap-4 border-b border-surface-dim py-4 last:border-b-0"
+                >
+                  <p className="truncate font-semibold text-primary">
+                    {transacao.categoria?.nome.toLocaleUpperCase()}
+                  </p>
 
-              <p className=" truncate  text-sm  text-muted">
-                {transacao.descricao ??
-                  "Sem categoria"}
-              </p>
+                  <p className="truncate text-sm text-muted">
+                    {transacao.descricao ?? "Sem categoria"}
+                  </p>
 
-              <span
-                className={` w-fit rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide
-                  ${entrada ? "bg-income-light text-income" : "bg-expense-light text-expense"}`}
-              >
-                {entrada ? "Receita" : "Despesa"}
-              </span>
+                  <span
+                    className={`w-fit rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${entrada ? "bg-income-light text-income" : "bg-expense-light text-expense"}`}
+                  >
+                    {entrada ? "Receita" : "Despesa"}
+                  </span>
 
-              <p
-                className={` text-right font-semibold
-                  ${entrada ? "text-income" : "text-expense"}`}
-              >
-                {entrada ? "+ " : "- "}
-                {formatarValor(transacao.valor)}
-              </p>
-            </div>
-          );
-        })}
+                  <p
+                    className={`text-right font-semibold ${entrada ? "text-income" : "text-expense"}`}
+                  >
+                    {entrada ? "+ " : "- "}
+                    {formatarValor(transacao.valor)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {transacoes.length === 0 && (

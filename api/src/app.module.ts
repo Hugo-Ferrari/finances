@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtGuard } from './auth/guards/jwt-auth.guard';
 import { OrcamentoModule } from './orcamento/orcamento.module';
+import { IaModule } from './IA/ia.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { OrcamentoModule } from './orcamento/orcamento.module';
     TransacaoModule,
     AuthModule,
     OrcamentoModule,
+    IaModule,
   ],
   controllers: [AppController],
   providers: [

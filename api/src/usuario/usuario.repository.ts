@@ -13,14 +13,21 @@ export class UsuarioRepository {
   }
 
   async buscarPorId(usuarioId: number) {
-    return this.prisma.usuario.findUnique({ where: { id: usuarioId }, select:{id:true, email:true, nome:true}});
+    return this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      select: { id: true, email: true, nome: true },
+    });
   }
   async buscarPorEmail(email: string) {
     return this.prisma.usuario.findUnique({ where: { email: email } });
   }
 
   async atualizar(id: number, dados: UpdateUsuarioDto) {
-    return await this.prisma.usuario.update({ where: { id: id }, data: dados });
+    return await this.prisma.usuario.update({
+      where: { id: id },
+      data: dados,
+      select: { id: true, email: true, nome: true },
+    });
   }
   async remover(id: number) {
     return this.prisma.usuario.delete({ where: { id: id } });

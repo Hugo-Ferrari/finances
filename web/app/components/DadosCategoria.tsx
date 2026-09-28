@@ -2,7 +2,7 @@ import React from 'react'
 
 function DadosCategoria() {
   return (
-    <div>DadosCategoria</div>
+    <div></div>
   )
 }
 

@@ -1,16 +1,17 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/loginDto';
 import { UsuarioRepository } from 'src/usuario/usuario.repository';
-import {  JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly UsuarioRepository : UsuarioRepository,
-                private readonly JwtService: JwtService){}
+  constructor(
+    private readonly UsuarioRepository: UsuarioRepository,
+    private readonly JwtService: JwtService,
+  ) {}
 
-    async login(dto: LoginDto) {
+  async login(dto: LoginDto) {
     const user = await this.UsuarioRepository.buscarPorEmail(dto.email);
 
     if (!user) {
@@ -23,13 +24,15 @@ export class AuthService {
       throw new UnauthorizedException('E-mail ou senha incorretos');
     }
 
-    const token = await this.JwtService.signAsync({
-      sub: user.id,
-    });
+    const token = await this.JwtService.signAsync(
+      {
+        sub: user.id,
+      },
+      {
+        expiresIn: dto.lembrarDeMim ? '30d' : '6h',
+      },
+    );
 
     return token;
   }
 }
-
-
-

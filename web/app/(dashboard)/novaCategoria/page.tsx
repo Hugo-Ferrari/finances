@@ -1,12 +1,12 @@
-import NovaCategoria from '@/app/components/categoria/NovaCategoria'
-import React from 'react'
+import NovaCategoria from "@/app/components/categoria/NovaCategoria";
+import React from "react";
 
 function page() {
   return (
-    <div>
-        <NovaCategoria/>
+    <div className="py-30">
+      <NovaCategoria />
     </div>
-  )
+  );
 }
 
-export default page
+export default page;

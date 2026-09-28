@@ -9,19 +9,19 @@ type Historico = {
 };
 const estilos = {
   ENTRADA: {
-    estilo: "bg-surface  ",
-    texto: "text-black/60",
-    valor: "text-black",
-    icone: "bg-secondary",
+    estilo: "bg-surface",
+    texto: "text-muted",
+    valor: "text-primary",
+    icone: "bg-income-light text-income",
   },
   SAIDA: {
-    estilo: "bg-surface ",
-    texto: "text-black/60",
-    valor: "text-black",
-    icone: "bg-muted-light/80",
+    estilo: "bg-surface",
+    texto: "text-muted",
+    valor: "text-primary",
+    icone: "bg-expense-light text-expense",
   },
   PERIODO: {
-    estilo: "bg-slate-900 ",
+    estilo: "bg-primary ",
     texto: "text-white/80",
     valor: "text-white",
     icone: "bg-white/20 text-white",
@@ -38,7 +38,7 @@ function HistoricoTransacao({ tipo, text, valor, icones: Icone }: Historico) {
   return (
     <div className="">
       <div
-        className={` flex h-35 items-center justify-between rounded-2xl p-5 transition-all duration-200 border-border border ${estilo.estilo} `}
+        className={`flex h-35 items-center justify-between rounded-2xl border border-border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${estilo.estilo}`}
       >
         <div>
           <p className={`text-sm font-medium ${estilo.texto}`}> {text} </p>

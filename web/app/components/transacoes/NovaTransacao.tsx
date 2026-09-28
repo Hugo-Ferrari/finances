@@ -2,7 +2,9 @@
 
 import { listarCategoria } from "@/app/services/categoria.service";
 import { listarConta } from "@/app/services/conta.service";
+
 import { criarTransacao } from "@/app/services/transacao.service";
+
 
 import {  useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -53,25 +55,41 @@ function NovaTransacao() {
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!valor || !contaId || !data) {
-      return;
-    }
-    const dados: CreateTransacao = {
-      tipoTransacao,
-      valor: Number(valor),
-      descricao: descricao || undefined,
-      data: new Date(data),
+  e.preventDefault();
+
+  console.log("1 - Clicou em salvar");
+
+  if (!valor || !contaId || !data) {
+    console.log("2 - Validação falhou", {
+      valor,
       contaId,
-      categoriaId: categoriaId ?? undefined,
-    };
-    try {
-      await criarTransacao(dados);
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Erro ao criar transação:", error);
-    }
+      data,
+    });
+    return;
+  }
+
+  const dados: CreateTransacao = {
+    tipoTransacao,
+    valor: Number(valor),
+    descricao: descricao || undefined,
+    data: new Date(data),
+    contaId,
+    categoriaId: categoriaId ?? undefined,
   };
+
+  console.log("3 - Dados montados:", dados);
+  console.log("4 - navigator.onLine:", navigator.onLine);
+
+  try {
+    const resultado = await criarTransacao(dados);
+
+    console.log("5 - Resultado:", resultado);
+
+    router.push("/dashboard");
+  } catch (error) {
+    console.error("6 - Erro:", error);
+  }
+};
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-background px-4 py-10 sm:px-6 lg:px-8">
@@ -248,6 +266,7 @@ function NovaTransacao() {
               <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
                 <button
                   type="button"
+                  onClick={()=> router.back()}
                   className="h-11 rounded-xl border border-border px-6 text-sm font-semibold text-muted transition hover:bg-surface-dim hover:text-primary"
                 >
                   Cancelar
