@@ -7,20 +7,84 @@
     },
     "web": {
       "root": "web",
-      "framework": "nextjs",
-      "bindings": [
-        {
-          "type": "service",
-          "service": "api",
-          "format": "url",
-          "env": "NEXT_PUBLIC_API_URL"
-        }
-      ]
+      "framework": "nextjs"
     }
   },
   "rewrites": [
     {
+      "source": "/auth/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/conta",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/conta/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/categoria",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/categoria/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/transacao",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/transacao/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/orcamento",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/orcamento/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/ia/comprovante",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
       "source": "/api/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/api",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/api-json",
       "destination": {
         "service": "api"
       }

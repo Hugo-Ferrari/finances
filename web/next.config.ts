@@ -5,6 +5,11 @@ const withSerwist = withSerwistInit({ // pega a configuração normal do nest e 
   swDest: "public/sw.js",
 });
 
-const nextConfig = {};
+const nextConfig = {
+  env: {
+    NEXT_PUBLIC_API_MODE:
+      process.env.VERCEL === "1" ? "same-origin" : "direct",
+  },
+};
 
 export default withSerwist(nextConfig);

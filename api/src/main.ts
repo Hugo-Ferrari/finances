@@ -9,10 +9,16 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  const configuredOrigins = (process.env.FRONTEND_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
     origin: [
       'http://localhost:3000',
       /\.vercel\.app$/, // Aceita qualquer subdomínio gerado pela Vercel automaticamente
+      ...configuredOrigins,
     ],
     credentials: true,
   });

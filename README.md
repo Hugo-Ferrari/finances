@@ -75,6 +75,7 @@ A API utiliza as seguintes variáveis:
 | `DATABASE_URL` | Sim         | String de conexão com o PostgreSQL usada pelo Prisma. |
 | `JWT_SECRET`   | Sim         | Chave usada para assinar e validar os tokens JWT.     |
 | `PORT`         | Não         | Porta da API. O padrão é `3001`.                      |
+| `FRONTEND_ORIGINS` | Não     | Origens adicionais para CORS, separadas por vírgula. |
 
 Crie `api/.env` com os valores do seu ambiente:
 
@@ -86,7 +87,9 @@ PORT=3001
 
 O arquivo `.env` não deve ser versionado. Nunca compartilhe o valor de `DATABASE_URL` ou `JWT_SECRET`.
 
-O frontend lê a URL da API de `NEXT_PUBLIC_API_URL` e envia cookies com `withCredentials`. O backend permite CORS para `http://localhost:3000`.
+Em desenvolvimento, o frontend usa `NEXT_PUBLIC_API_URL` quando definido e, sem ele, conecta-se à API em `http://localhost:3001`. No Docker Compose, a URL do exemplo usa a porta publicada `3002` (mapeada para a porta `3001` da API). Na Vercel, as chamadas usam o mesmo domínio do frontend e são encaminhadas ao serviço da API; não configure `NEXT_PUBLIC_API_URL` como `localhost` na Vercel. Cookies são enviados com `withCredentials`.
+
+O CORS aceita `http://localhost:3000` e subdomínios `vercel.app` por padrão. Use `FRONTEND_ORIGINS` para permitir domínios próprios quando a API for acessada diretamente, por exemplo `https://app.exemplo.com`.
 
 ### Docker Compose
 
@@ -233,7 +236,7 @@ A interface utiliza o App Router do Next.js:
 - `app/store`: estado global, incluindo autenticação.
 - `app/types`: tipos compartilhados da aplicação web.
 
-O cliente Axios usa `http://localhost:3001` como base URL, envia credenciais e redireciona para `/login` quando recebe resposta `401`.
+O cliente Axios usa `NEXT_PUBLIC_API_URL` em desenvolvimento/Docker e, na Vercel, utiliza rotas same-origin configuradas em `vercel.json`. Ele envia credenciais e redireciona para `/login` quando recebe resposta `401`.
 
 ## Rotas da aplicação web
 
@@ -384,8 +387,8 @@ Não edite uma migração já aplicada em um ambiente compartilhado. Crie uma no
 
 ## Observações do estado atual
 
-- O frontend ainda possui a URL da API fixa em `http://localhost:3001`; para implantação, esse valor deve ser movido para uma variável de ambiente.
-- O CORS da API está restrito a `http://localhost:3000`.
+- Na Vercel, as rotas dos módulos da API são encaminhadas ao serviço `api` antes do fallback para o frontend.
+- Em execução local sem Docker, a API escuta por padrão em `3001`; no Docker Compose, a porta `3001` do contêiner é publicada como `3002`.
 - As preferências da tela de configurações são armazenadas localmente no navegador.
 - O fluxo de logout ainda não possui um endpoint dedicado; a sessão depende da expiração ou da limpeza do cookie.
 - A interface cobre principalmente os fluxos de criação e consulta. Algumas operações de edição e exclusão estão disponíveis na API, mas não necessariamente possuem controles completos na interface.
