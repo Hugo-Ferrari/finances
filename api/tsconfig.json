@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "ES2023",
-    "rootDir": "./src",
-    "outDir": "./dist",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -12,8 +9,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
     "strict": true,
     "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -22,5 +22,6 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*", "prisma.config.ts"]
 }
