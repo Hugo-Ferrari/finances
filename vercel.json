@@ -26,6 +26,18 @@
       }
     },
     {
+      "source": "/usuario",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/usuario/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
       "source": "/(.*)",
       "destination": {
         "service": "web"
