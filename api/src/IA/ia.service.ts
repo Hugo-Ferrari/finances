@@ -2,10 +2,10 @@ import {
   Injectable,
   InternalServerErrorException,
   ServiceUnavailableException,
-} from "@nestjs/common";
+} from '@nestjs/common';
 
-import { GoogleGenAI } from "@google/genai";
-import { ResultadoComprovante } from "./dto/ia";
+import { GoogleGenAI } from '@google/genai';
+import { ResultadoComprovante } from './dto/ia';
 
 @Injectable()
 export class IaService {
@@ -21,11 +21,11 @@ export class IaService {
     imagem: Buffer,
     mimeType: string,
   ): Promise<ResultadoComprovante> {
-    const imagemBase64 = imagem.toString("base64");
+    const imagemBase64 = imagem.toString('base64');
 
     try {
       const response = await this.ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: 'gemini-3.8-flash',
 
         contents: [
           {
@@ -98,84 +98,82 @@ Retorne somente:
         ],
 
         config: {
-          responseMimeType: "application/json",
+          responseMimeType: 'application/json',
 
           responseSchema: {
-            type: "object",
+            type: 'object',
 
             properties: {
               tipoTransacao: {
-                type: "string",
-                enum: ["ENTRADA", "SAIDA"],
+                type: 'string',
+                enum: ['ENTRADA', 'SAIDA'],
               },
 
               valor: {
-                type: "number",
+                type: 'number',
               },
 
               data: {
-                type: "string",
+                type: 'string',
               },
 
               descricao: {
-                type: "string",
+                type: 'string',
               },
 
               categoria: {
-                type: "string",
+                type: 'string',
                 enum: [
-                  "SALARIO",
-                  "ALIMENTAÇÃO",
-                  "TRANSPORTE",
-                  "MORADIA",
-                  "SAÚDE",
-                  "EDUCAÇÃO",
-                  "LAZER",
-                  "ASSINATURAS",
-                  "VESTUÁRIO",
-                  "OUTROS",
+                  'SALARIO',
+                  'ALIMENTAÇÃO',
+                  'TRANSPORTE',
+                  'MORADIA',
+                  'SAÚDE',
+                  'EDUCAÇÃO',
+                  'LAZER',
+                  'ASSINATURAS',
+                  'VESTUÁRIO',
+                  'OUTROS',
                 ],
               },
             },
 
             required: [
-              "tipoTransacao",
-              "valor",
-              "data",
-              "descricao",
-              "categoria",
+              'tipoTransacao',
+              'valor',
+              'data',
+              'descricao',
+              'categoria',
             ],
           },
         },
       });
 
       if (!response.text) {
-        throw new Error("A resposta do Gemini está vazia.");
+        throw new Error('A resposta do Gemini está vazia.');
       }
 
       try {
         return JSON.parse(response.text) as ResultadoComprovante;
       } catch {
-        throw new Error("O Gemini retornou um JSON inválido.");
+        throw new Error('O Gemini retornou um JSON inválido.');
       }
     } catch (error: unknown) {
       const status =
-        typeof error === "object" &&
-        error !== null &&
-        "status" in error
+        typeof error === 'object' && error !== null && 'status' in error
           ? (error as { status?: number }).status
           : undefined;
 
       if (status === 503) {
         throw new ServiceUnavailableException(
-          "O serviço de IA está temporariamente indisponível. Tente novamente em alguns segundos.",
+          'O serviço de IA está temporariamente indisponível. Tente novamente em alguns segundos.',
         );
       }
 
-      console.error("Erro ao analisar comprovante:", error);
+      console.error('Erro ao analisar comprovante:', error);
 
       throw new InternalServerErrorException(
-        "Não foi possível processar o comprovante.",
+        'Não foi possível processar o comprovante.',
       );
     }
   }

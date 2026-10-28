@@ -6,7 +6,7 @@ import {
 } from "@/app/services/categoria.service";
 import { listarOrcamento } from "@/app/services/orcamento.service";
 import React, { useEffect, useState } from "react";
-import { Home, MoreVertical, Trash2 } from "lucide-react";
+import { Home, MoreVertical } from "lucide-react";
 import CriarCategoria from "./CriarCategoria";
 import { ListarDespesasCategoria } from "@/app/services/transacao.service";
 import { DespesaCategoria } from "@/app/types/categoria";
@@ -60,12 +60,6 @@ function DetalhesCategorias() {
       setExcluindo(false);
     }
   }
-
-  const formatarMoeda = (valor: number | string) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(Number(valor));
 
   useEffect(() => {
     async function carregarOrcamento() {

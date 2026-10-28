@@ -17,22 +17,10 @@ function ResumoTransacoes() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
 
-  const [incomeColor, setIncomeColor] = useState("#18a878");
-  const [expenseColor, setExpenseColor] = useState("#d94f4f");
-  const [mutedColor, setMutedColor] = useState("#73758b");
-  const [borderColor, setBorderColor] = useState("#e8e9ef");
-
-  useEffect(() => {
-    const root = getComputedStyle(document.documentElement);
-
-    setIncomeColor(root.getPropertyValue("--income").trim() || "#18a878");
-
-    setExpenseColor(root.getPropertyValue("--expense").trim() || "#d94f4f");
-
-    setMutedColor(root.getPropertyValue("--muted").trim() || "#73758b");
-
-    setBorderColor(root.getPropertyValue("--border").trim() || "#e8e9ef");
-  }, []);
+  const incomeColor = "var(--income)";
+  const expenseColor = "var(--expense)";
+  const mutedColor = "var(--muted)";
+  const borderColor = "var(--border)";
 
   useEffect(() => {
     async function carregarPorPeriodo() {
@@ -237,7 +225,7 @@ function ResumoTransacoes() {
               data: dadosGraficoArray.map((item) => item.mes),
               tickLabelStyle: {
                 fontSize: 12,
-                fill: "var(--muted)",
+                fill: mutedColor,
               },
             },
           ]}
@@ -246,7 +234,7 @@ function ResumoTransacoes() {
               width: 70,
               tickLabelStyle: {
                 fontSize: 11,
-                fill: "var(--muted)",
+                fill: mutedColor,
               },
               valueFormatter: (valor: number) => formatarMoeda(valor),
             },
@@ -255,12 +243,12 @@ function ResumoTransacoes() {
             {
               data: dadosGraficoArray.map((item) => item.entradas),
               label: "Entradas",
-              color: "var(--primary)",
+              color: incomeColor,
             },
             {
               data: dadosGraficoArray.map((item) => item.saidas),
               label: "Saídas",
-              color: "var(--secondary)",
+              color: expenseColor,
             },
           ]}
           height={320}
@@ -277,20 +265,20 @@ function ResumoTransacoes() {
           sx={{
             "& .MuiChartsLegend-label": {
               fontSize: 12,
-              fill: "var(--muted)",
+              fill: mutedColor,
             },
 
             "& .MuiChartsGrid-line": {
-              stroke: "var(--border)",
+              stroke: borderColor,
               strokeDasharray: "4 4",
             },
 
             "& .MuiChartsAxis-line": {
-              stroke: "var(--border)",
+              stroke: borderColor,
             },
 
             "& .MuiChartsAxis-tick": {
-              stroke: "var(--border)",
+              stroke: borderColor,
             },
           }}
         />

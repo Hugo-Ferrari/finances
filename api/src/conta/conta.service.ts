@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ContaRepository } from './conta.repository';
 import { UpdateContaDto } from './dto/updateConta.dto';
 import { createContaDto } from './dto/createConta.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class ContaService {
@@ -26,7 +28,7 @@ export class ContaService {
 
   async buscarPorId(id: number, usuarioId: number) {
     const response = await this.repository.buscarPorId(id, usuarioId);
-    if(!response) throw new NotFoundException("Conta inexistente")
+    if (!response) throw new NotFoundException('Conta inexistente');
     return response;
   }
 

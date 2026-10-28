@@ -22,11 +22,7 @@ export class ControllerIA {
       throw new BadRequestException('Nenhum arquivo enviado.');
     }
 
-    const tiposPermitidos = [
-      'image/jpeg',
-      'image/jpg',
-      'application/pdf',
-    ];
+    const tiposPermitidos = ['image/jpeg', 'image/jpg', 'application/pdf'];
 
     if (!tiposPermitidos.includes(imagem.mimetype)) {
       throw new BadRequestException(
@@ -34,9 +30,6 @@ export class ControllerIA {
       );
     }
 
-    return this.serviceIa.analisarComprovante(
-      imagem.buffer,
-      imagem.mimetype,
-    );
+    return this.serviceIa.analisarComprovante(imagem.buffer, imagem.mimetype);
   }
 }

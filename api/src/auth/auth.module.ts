@@ -11,11 +11,10 @@ import { JwtStrategy } from './strategies/jwt.strategies';
     UsuarioModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: {expiresIn: '6h'}
-
+      signOptions: { expiresIn: '6h' },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService,JwtGuard,JwtStrategy],
+  providers: [AuthService, JwtGuard, JwtStrategy],
 })
 export class AuthModule {}

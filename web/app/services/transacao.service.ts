@@ -45,7 +45,7 @@ export async function criarTransacao(dados: CreateTransacao) {
   try {
     console.log("TENTANDO API");
     return await enviarTransacaoParaApi(dados);
-  } catch (error) {
+  } catch {
     console.log("API FALHOU, ADICIONANDO NA FILA");
     const { adicionarNaFila } = await import("./offline/transacao.queue");
 

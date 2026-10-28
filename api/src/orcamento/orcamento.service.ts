@@ -44,7 +44,6 @@ export class OrcamentoService {
   }
 
   async delete(usuarioId: number, id: number) {
-
     return this.repository.delete(id, usuarioId);
   }
 }

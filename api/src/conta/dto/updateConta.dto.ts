@@ -1,9 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Tipo } from 'src/generated/prisma/client.ts/enums';
 
-
-
-
 export class UpdateContaDto {
   @IsString()
   @IsOptional()
@@ -11,5 +8,5 @@ export class UpdateContaDto {
 
   @IsEnum(Tipo)
   @IsOptional()
-  tipo?: Tipo; 
+  tipo?: Tipo;
 }

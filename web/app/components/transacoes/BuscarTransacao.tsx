@@ -8,6 +8,14 @@ import { useEffect, useState } from "react";
 type Categoria = { id: number; nome: string };
 type Conta = { id: number; nome: string };
 
+export type FiltrosTransacao = {
+  busca: string;
+  periodo: string;
+  conta: number | null;
+  categoria: number | null;
+  ativo: boolean;
+};
+
 interface BuscarTransacaoProps {
   filtros: FiltrosTransacao;
   onChange: (filtros: FiltrosTransacao) => void;

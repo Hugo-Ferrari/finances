@@ -3,13 +3,11 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { TransacaoRepository } from './transacao.repository';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Decimal } from '@prisma/client/runtime/client';
+import type { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransacaoService {
@@ -35,7 +33,7 @@ export class TransacaoService {
         throw new BadRequestException('Conta está inativa');
 
       if (dto.tipoTransacao === 'ENTRADA') {
-        let novoSaldo = conta.saldo.add(dto.valor);
+        const novoSaldo = conta.saldo.add(dto.valor);
         await this.contaRepository.atualizarSaldo(
           conta.id,
           novoSaldo,
@@ -48,7 +46,7 @@ export class TransacaoService {
             'Saldo indisponivel para realizar essa transação',
           );
         }
-        let novoSaldo = conta.saldo.sub(dto.valor);
+        const novoSaldo = conta.saldo.sub(dto.valor);
         await this.contaRepository.atualizarSaldo(
           conta.id,
           novoSaldo,
@@ -154,7 +152,7 @@ export class TransacaoService {
     });
   }
 
-  async listarPorPeriodo(usuarioId: number, inicio:Date, fim: Date) {
+  async listarPorPeriodo(usuarioId: number, inicio: Date, fim: Date) {
     return this.repository.listarPorPeriodo(usuarioId, inicio, fim);
   }
 

@@ -9,11 +9,7 @@ import { CategoriaModule } from 'src/categoria/categoria.module';
 import { OrcamentoRespository } from './orcamento.respository';
 
 @Module({
-  imports: [
-    PrismaModule,
-    UsuarioModule,
-    CategoriaModule,
-  ],
+  imports: [PrismaModule, UsuarioModule, CategoriaModule],
   controllers: [OrcamentoController],
   providers: [
     OrcamentoService,

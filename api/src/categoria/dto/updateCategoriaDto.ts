@@ -1,7 +1,7 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateCategoriaDto{
-    @IsString()
-    @IsOptional()
-    nome?:string 
+export class UpdateCategoriaDto {
+  @IsString()
+  @IsOptional()
+  nome?: string;
 }

@@ -1,9 +1,8 @@
-
 import { Injectable } from '@nestjs/common';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UsuarioRepository } from './usuario.repository';
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuarioService {
@@ -11,11 +10,10 @@ export class UsuarioService {
   //criar(), buscarPorId(),buscarPorEmail(),atualizar(),remover(),alterarSenha()(futuramente)
 
   async criarUser(dto: createUsuarioDto) {
-    const senhaUser = await bcrypt.hash(dto.senha,10)
-    const dados ={...dto, senha:senhaUser}
-    await this.repository.create(dados)
-    return 'usuario criado com sucesso'
-
+    const senhaUser = await bcrypt.hash(dto.senha, 10);
+    const dados = { ...dto, senha: senhaUser };
+    await this.repository.create(dados);
+    return 'usuario criado com sucesso';
   }
 
   async buscarEmail(email: string) {
@@ -27,9 +25,9 @@ export class UsuarioService {
     return res;
   }
 
-  async atualizar(id: number, dto: UpdateUsuarioDto,) {
+  async atualizar(id: number, dto: UpdateUsuarioDto) {
     const user = await this.repository.atualizar(id, dto);
-    
+
     return user;
   }
   async deletar(id: number) {

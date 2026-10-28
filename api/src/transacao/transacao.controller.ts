@@ -10,9 +10,14 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { TransacaoService } from './transacao.service';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
+
+type AuthenticatedRequest = Request & {
+  user: { id: number };
+};
 
 @Controller('transacao')
 export class TransacaoController {
@@ -20,7 +25,7 @@ export class TransacaoController {
 
   @Get('resumo')
   obterResumo(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Query('inicio') inicio: string,
     @Query('fim') fim: string,
   ) {
@@ -30,14 +35,14 @@ export class TransacaoController {
     return this.transacaoService.obterResumo(req.user.id, dataInicio, dataFim);
   }
   @Get('despesas-por-categoria')
-  async despesaPorCategoria(@Req() req) {
+  async despesaPorCategoria(@Req() req: AuthenticatedRequest) {
     return this.transacaoService.despesaPorCategoria(req.user.id);
   }
   @Get('periodo')
   listarPorPeriodo(
     @Query('inicio') inicio: string,
     @Query('fim') fim: string,
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
   ) {
     const dataInicio = new Date(inicio);
     const dataFim = new Date(fim);
@@ -50,37 +55,39 @@ export class TransacaoController {
     );
   }
   @Get('resumo-total')
-  obterResumoTotal(@Req() req) {
-    
+  obterResumoTotal(@Req() req: AuthenticatedRequest) {
     return this.transacaoService.obterResumoTotal(req.user.id);
   }
 
   @Post()
-  criar(@Body() dto: createTransacaoDto, @Req() req) {
+  criar(@Body() dto: createTransacaoDto, @Req() req: AuthenticatedRequest) {
     return this.transacaoService.criar(dto, req.user.id);
   }
 
   @Get()
-  listarTodos(@Req() req) {
+  listarTodos(@Req() req: AuthenticatedRequest) {
     return this.transacaoService.listar(req.user.id);
   }
 
   @Get('categoria/:categoriaId')
   listarPorCategoria(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Param('categoriaId', ParseIntPipe) categoriaId: number,
   ) {
     return this.transacaoService.listarPorCategoria(categoriaId, req.user.id);
   }
 
   @Get('conta/:contaId')
-  listarPorConta(@Req() req, @Param('contaId', ParseIntPipe) contaId: number) {
+  listarPorConta(
+    @Req() req: AuthenticatedRequest,
+    @Param('contaId', ParseIntPipe) contaId: number,
+  ) {
     return this.transacaoService.buscarPorConta(contaId, req.user.id);
   }
 
   @Patch(':id')
   atualizar(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: updateTransacaoDto,
   ) {
@@ -88,7 +95,10 @@ export class TransacaoController {
   }
 
   @Delete(':id')
-  deletar(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  deletar(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.transacaoService.remover(id, req.user.id);
   }
 }

@@ -1,6 +1,5 @@
 import {
   IsDateString,
-  IsDecimal,
   IsEnum,
   IsInt,
   IsOptional,
@@ -8,7 +7,6 @@ import {
   IsString,
 } from 'class-validator';
 
-import { Decimal } from '@prisma/client/runtime/client';
 import { TipoTransacao } from 'src/generated/prisma/client.ts/enums';
 
 export class createTransacaoDto {

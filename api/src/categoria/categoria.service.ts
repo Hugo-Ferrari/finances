@@ -7,15 +7,15 @@ import { UpdateCategoriaDto } from './dto/updateCategoriaDto';
 export class CategoriaService {
   constructor(private readonly repository: CategoriaRepository) {}
   private normalizarNome(nome: string) {
-  return nome
-    .trim()
-    .toLocaleLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+    return nome
+      .trim()
+      .toLocaleLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
 
   async criar(dto: createCategoriaDto, usuarioId: number) {
-    const nome = this.normalizarNome(dto.nome)
+    const nome = this.normalizarNome(dto.nome);
     const dados = { ...dto, nome, usuarioId };
     const response = await this.repository.criar(dados);
     return response;
@@ -31,15 +31,17 @@ export class CategoriaService {
     return response;
   }
   async atualizar(id: number, dto: UpdateCategoriaDto, usuarioId: number) {
- const dados: UpdateCategoriaDto = {...dto,nome: dto.nome ? this.normalizarNome(dto.nome) : undefined,};
-  const response = await this.repository.atualizar(id, dados, usuarioId);
+    const dados: UpdateCategoriaDto = {
+      ...dto,
+      nome: dto.nome ? this.normalizarNome(dto.nome) : undefined,
+    };
+    const response = await this.repository.atualizar(id, dados, usuarioId);
 
-  if (!response) {
-    throw new NotFoundException('Categoria não encontrada');
+    if (!response) {
+      throw new NotFoundException('Categoria não encontrada');
+    }
+    return response;
   }
-  return response;
-}
-
 
   async deletar(id: number, usuarioId: number) {
     const response = await this.repository.delete(id, usuarioId);
