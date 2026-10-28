@@ -2,115 +2,138 @@
 
 import { listarTodasTransacoes } from "@/app/services/transacao.service";
 import { Transacao } from "@/app/types/transacao";
-import { ChevronRight } from "lucide-react";
+import { formatarMoeda, formatarData } from "@/app/lib/formatters";
+import { Card, CardHeader } from "@/app/components/ui/Card";
+import EmptyState from "@/app/components/ui/EmptyState";
+import { ArrowDownLeft, ArrowUpRight, ChevronRight, ReceiptText } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+
+interface ItemProps {
+  transacao: Transacao;
+}
+
+function TransacaoRow({ transacao }: ItemProps) {
+  const isEntrada = transacao.tipoTransacao === "ENTRADA";
+  const Icon = isEntrada ? ArrowUpRight : ArrowDownLeft;
+
+  return (
+    <div className="flex items-center gap-4 border-b border-surface-dim py-3.5 last:border-b-0">
+      
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+          isEntrada ? "bg-income-light" : "bg-expense-light"
+        }`}
+      >
+        <Icon
+          size={18}
+          className={isEntrada ? "text-income" : "text-expense"}
+          strokeWidth={2.5}
+        />
+      </div>
+
+     
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-foreground">
+          {transacao.categoria?.nome
+            ? transacao.categoria.nome.charAt(0).toUpperCase() +
+              transacao.categoria.nome.slice(1).toLowerCase()
+            : "Sem categoria"}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-muted">
+          {transacao.descricao ?? transacao.conta.nome}
+        </p>
+      </div>
+
+     
+      <div className="flex flex-col items-end shrink-0">
+        <p
+          className={`text-sm font-bold ${
+            isEntrada ? "text-income" : "text-expense"
+          }`}
+        >
+          {isEntrada ? "+" : "−"} {formatarMoeda(transacao.valor)}
+        </p>
+        <p className="mt-0.5 text-[11px] text-muted-light">
+          {formatarData(transacao.data)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+function Skeleton() {
+  return (
+    <Card>
+      <div className="mb-5 flex justify-between">
+        <div className="skeleton h-5 w-40" />
+        <div className="skeleton h-9 w-9 rounded-full" />
+      </div>
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="flex items-center gap-3 py-3 border-b border-surface-dim last:border-b-0">
+          <div className="skeleton h-10 w-10 rounded-xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-4 w-32" />
+            <div className="skeleton h-3 w-24" />
+          </div>
+          <div className="skeleton h-4 w-20" />
+        </div>
+      ))}
+    </Card>
+  );
+}
+
 
 function TransacoesRecentes() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     async function listar() {
       try {
         const dados = await listarTodasTransacoes();
-
         setTransacoes(dados.slice(-5).reverse());
       } catch (error) {
         console.error("Erro ao carregar transações:", error);
+      } finally {
+        setCarregando(false);
       }
     }
-
     listar();
   }, []);
 
-  function formatarValor(valor: string) {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(Number(valor));
-  }
+  if (carregando) return <Skeleton />;
 
   return (
-    <div className="flex flex-col rounded-2xl bg-surface p-6 shadow-sm">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-primary">
-            Transações recentes
-          </h1>
+    <Card className="animate-fade-in">
+      <CardHeader
+        title="Transações Recentes"
+        subtitle="Últimas movimentações da sua conta"
+        action={
+          <Link
+            href="/transacoes"
+            aria-label="Ver todas as transações"
+            className="btn btn-icon btn-primary"
+          >
+            <ChevronRight size={18} />
+          </Link>
+        }
+      />
 
-          <p className="mt-1 text-sm text-muted">
-            Últimas movimentações da sua conta
-          </p>
-        </div>
-
-        <Link
-          href={"/transacoes"}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90"
-        >
-          <ChevronRight size={18} />
-        </Link>
+      <div className="mt-5">
+        {transacoes.length === 0 ? (
+          <EmptyState
+            icon={<ReceiptText size={22} />}
+            title="Nenhuma transação encontrada"
+            description="Suas movimentações aparecerão aqui após o primeiro lançamento."
+          />
+        ) : (
+          transacoes.map((t) => <TransacaoRow key={t.id} transacao={t} />)
+        )}
       </div>
-
-      <div className="overflow-x-auto">
-        <div className="min-w-[560px]">
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center gap-4 border-b border-surface-dim pb-3 text-sm text-muted">
-            <p>Categoria</p>
-
-            <p>Descrição</p>
-
-            <p>Tipo</p>
-
-            <p className="text-right">Valor</p>
-          </div>
-
-          <div>
-            {transacoes.map((transacao) => {
-              const entrada = transacao.tipoTransacao === "ENTRADA";
-
-              return (
-                <div
-                  key={transacao.id}
-                  className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center gap-4 border-b border-surface-dim py-4 last:border-b-0"
-                >
-                  <p className="truncate font-semibold text-primary">
-                    {transacao.categoria?.nome.toLocaleUpperCase()}
-                  </p>
-
-                  <p className="truncate text-sm text-muted">
-                    {transacao.descricao ?? "Sem categoria"}
-                  </p>
-
-                  <span
-                    className={`w-fit rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${entrada ? "bg-income-light text-income" : "bg-expense-light text-expense"}`}
-                  >
-                    {entrada ? "Receita" : "Despesa"}
-                  </span>
-
-                  <p
-                    className={`text-right font-semibold ${entrada ? "text-income" : "text-expense"}`}
-                  >
-                    {entrada ? "+ " : "- "}
-                    {formatarValor(transacao.valor)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {transacoes.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-10">
-          <p className="text-sm font-medium text-muted">
-            Nenhuma transação encontrada.
-          </p>
-
-          <p className="mt-1 text-xs text-muted">
-            Suas movimentações aparecerão aqui.
-          </p>
-        </div>
-      )}
-    </div>
+    </Card>
   );
 }
 

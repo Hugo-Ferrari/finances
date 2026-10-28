@@ -1,99 +1,454 @@
 @import "tailwindcss";
 
+/* ============================================================
+   DESIGN SYSTEM – FinLogic
+   Tokens, animações e utilitários globais
+   ============================================================ */
+
 :root {
-  /* Fundo */
-  --background: #f6f7fb;
+  /* ── Superfícies ─────────────────────────────────────────── */
+  --background:     #f5f6fa;
+  --surface:        #ffffff;
+  --surface-dim:    #eaebf2;
+  --surface-hover:  #f0f1f8;
 
-  /* Cards */
-  --surface: #ffffff;
-  --surface-dim: #e9eaf0;
+  /* ── Paleta principal ────────────────────────────────────── */
+  --primary:        #1a1f4b;
+  --primary-hover:  #141840;
+  --primary-light:  #eceeff;
 
-  /* Cores principais */
-  --primary: #11152f;
-  --primary-light: #eeeaff;
+  /* ── Destaques ───────────────────────────────────────────── */
+  --secondary:      #5ee7d4;
+  --accent:         #6c63ff;
+  --accent-light:   #eeecff;
 
-  /* Destaques */
-  --secondary: #5ee7d4;
-  --accent: #8b7cf6;
+  /* ── Estados financeiros ─────────────────────────────────── */
+  --income:         #16a870;
+  --income-light:   #dcf7ef;
+  --income-muted:   #a7e8cf;
 
-  /* Estados financeiros */
-  --income: #18a878;
-  --income-light: #dff8ef;
+  --expense:        #e03f3f;
+  --expense-light:  #fde8e8;
+  --expense-muted:  #f5b3b3;
 
-  --expense: #d94f4f;
-  --expense-light: #ffe5e5;
+  /* ── Texto ───────────────────────────────────────────────── */
+  --foreground:     #141629;
+  --muted:          #6b6e88;
+  --muted-light:    #9ea1bb;
 
-  /* Textos */
-  --foreground: #171936;
-  --muted: #73758b;
-  --muted-light: #a1a3b5;
+  /* ── Bordas & sombras ────────────────────────────────────── */
+  --border:         #e3e4ed;
+  --border-focus:   #6c63ff;
+  --shadow-xs:      0 1px 3px rgba(20, 22, 41, 0.06);
+  --shadow-sm:      0 2px 8px rgba(20, 22, 41, 0.08);
+  --shadow-md:      0 6px 24px rgba(20, 22, 41, 0.1);
+  --shadow-lg:      0 12px 40px rgba(20, 22, 41, 0.12);
 
-  /* Bordas */
-  --border: #e8e9ef;
+  /* ── Raios de borda ──────────────────────────────────────── */
+  --radius-sm:      0.5rem;
+  --radius-md:      0.75rem;
+  --radius-lg:      1rem;
+  --radius-xl:      1.25rem;
+  --radius-2xl:     1.5rem;
+  --radius-full:    9999px;
+
+  /* ── Transições ──────────────────────────────────────────── */
+  --transition-fast:   150ms ease;
+  --transition-base:   200ms ease;
+  --transition-slow:   300ms ease;
+
+  /* ── Z-index ─────────────────────────────────────────────── */
+  --z-nav:      20;
+  --z-modal:    50;
+  --z-toast:    60;
 }
 
+/* ── Mapeamento Tailwind v4 ──────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
+  --color-background:     var(--background);
+  --color-surface:        var(--surface);
+  --color-surface-dim:    var(--surface-dim);
+  --color-surface-hover:  var(--surface-hover);
 
-  --color-surface: var(--surface);
-  --color-surface-dim: var(--surface-dim);
+  --color-primary:        var(--primary);
+  --color-primary-hover:  var(--primary-hover);
+  --color-primary-light:  var(--primary-light);
 
-  --color-primary: var(--primary);
-  --color-primary-light: var(--primary-light);
+  --color-secondary:      var(--secondary);
+  --color-accent:         var(--accent);
+  --color-accent-light:   var(--accent-light);
 
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
+  --color-income:         var(--income);
+  --color-income-light:   var(--income-light);
 
-  --color-income: var(--income);
-  --color-income-light: var(--income-light);
+  --color-expense:        var(--expense);
+  --color-expense-light:  var(--expense-light);
 
-  --color-expense: var(--expense);
-  --color-expense-light: var(--expense-light);
+  --color-foreground:     var(--foreground);
+  --color-muted:          var(--muted);
+  --color-muted-light:    var(--muted-light);
 
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-muted-light: var(--muted-light);
-
-  --color-border: var(--border);
+  --color-border:         var(--border);
 }
 
-* {
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(94, 231, 212, 0.14),
-      transparent 26rem
-    ),
+    radial-gradient(ellipse 80% 50% at 100% -10%, rgba(108, 99, 255, 0.07), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(94, 231, 212, 0.06), transparent),
     var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Remove outline padrão e adiciona focus ring acessível */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 button {
   cursor: pointer;
 }
 
+/* ============================================================
+   COMPONENTES UTILITÁRIOS GLOBAIS
+   ============================================================ */
+
+/* Card padrão */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-income {
+  background: var(--income-light);
+  color: var(--income);
+}
+
+.badge-expense {
+  background: var(--expense-light);
+  color: var(--expense);
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-dim) 25%,
+    var(--surface-hover) 50%,
+    var(--surface-dim) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Separador */
+.divider {
+  height: 1px;
+  background: var(--border);
+  border: none;
+  margin: 0;
+}
+
+/* ============================================================
+   ANIMAÇÕES
+   ============================================================ */
+
+@keyframes skeleton-pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in    { animation: fade-in 0.3s ease both; }
+.animate-slide-in   { animation: slide-in-right 0.25s ease both; }
+.animate-scale-in   { animation: scale-in 0.2s ease both; }
+.animate-spin-slow  { animation: spin-slow 1.2s linear infinite; }
+
+/* ============================================================
+   SCROLLBAR PERSONALIZADA
+   ============================================================ */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: var(--border);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted-light); }
+
+/* ============================================================
+   FORMULÁRIOS GLOBAIS
+   ============================================================ */
+
+.form-input,
+.form-select {
+  height: 2.75rem;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.form-input::placeholder {
+  color: var(--muted-light);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+}
+
+/* Label de formulário */
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
+   BOTÕES GLOBAIS
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0 1.25rem;
+  height: 2.75rem;
+  border: none;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-dim);
+  color: var(--primary);
+}
+
+.btn-danger {
+  background: var(--expense);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.btn-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   PAGE HEADER (padrão de todas as páginas do dashboard)
+   ============================================================ */
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.page-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.375rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .page-title { font-size: 2rem; }
+}
+
+.page-subtitle {
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Container padrão das páginas */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
+@media (min-width: 640px)  { .page-container { padding: 1.5rem; } }
+@media (min-width: 1024px) { .page-container { padding: 2rem; } }
+
+/* ============================================================
+   NAVEGAÇÃO LATERAL (sidebar)
+   ============================================================ */
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  min-height: 100svh;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  padding: 0.875rem;
+  box-shadow: 4px 0 32px rgba(20, 22, 41, 0.04);
+  transition: width var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.site-nav-header,
+.site-nav-footer {
+  flex-shrink: 0;
+}
+
+/* ── Mobile: nav inferior ──────────────────────────────────── */
 @media (max-width: 640px) {
   .site-nav {
     position: fixed;
     inset: auto 0 0;
-    z-index: 40;
+    z-index: var(--z-nav);
     width: 100% !important;
-    min-height: 72px;
-    height: 72px;
+    min-height: 64px;
+    height: 64px;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
     border-top: 1px solid var(--border);
     border-right: 0;
     padding: 0.5rem 0.75rem;
+    box-shadow: 0 -4px 24px rgba(20, 22, 41, 0.06);
   }
 
   .site-nav-header,
@@ -102,9 +457,9 @@ button {
   }
 
   .site-nav-list {
-    display: flex;
+    display: flex !important;
     width: 100%;
-    flex-direction: row;
+    flex-direction: row !important;
     justify-content: space-around;
     gap: 0.25rem;
   }
@@ -113,16 +468,58 @@ button {
     flex: 1;
   }
 
-  .site-nav-list a {
+  .site-nav-list a,
+  .site-nav-list button {
     justify-content: center;
     padding: 0.5rem 0.25rem;
   }
 
-  .site-nav-list a span {
+  .site-nav-list a span,
+  .site-nav-list button span {
     display: none;
   }
 
   .dashboard-main {
-    padding-bottom: 5.5rem;
+    padding-bottom: 5rem;
   }
+}
+
+/* ============================================================
+   LOADING SPINNER GLOBAL
+   ============================================================ */
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin-slow 0.8s linear infinite;
+}
+
+/* ============================================================
+   MODAL OVERLAY
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(20, 22, 41, 0.45);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.2s ease;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: 1.75rem;
+  animation: scale-in 0.2s ease;
 }

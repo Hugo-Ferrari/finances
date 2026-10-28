@@ -6,13 +6,13 @@ import {
 } from "@/app/services/categoria.service";
 import { listarOrcamento } from "@/app/services/orcamento.service";
 import React, { useEffect, useState } from "react";
-import { Home, MoreVertical } from "lucide-react";
+import { Home, MoreVertical, Trash2 } from "lucide-react";
 import CriarCategoria from "./CriarCategoria";
 import { ListarDespesasCategoria } from "@/app/services/transacao.service";
 import { DespesaCategoria } from "@/app/types/categoria";
 import { useCategoriaIconeStore } from "@/app/store/categoriaIcone.store";
 import { iconesCategoria } from "./iconesCategoria";
-import { Are_You_Serious } from "next/font/google";
+import { formatarMoeda } from "@/app/lib/formatters";
 
 type Orcamento = {
   id: number;

@@ -1,28 +1,28 @@
 import DetalhesCategorias from "@/app/components/categoria/DetalhesCategorias";
 import OrcamentoMensalTotal from "@/app/components/categoria/OrcamentoMensalTotal";
-import React from "react";
 
-function page() {
+export default function Page() {
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-5 sm:p-6 lg:p-8">
-      <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-accent">
-          Planejamento
+    <div className="page-container">
+      
+      <header>
+        <p className="page-eyebrow">Planejamento</p>
+        <h1 className="page-title">Categorias e orçamento</h1>
+        <p className="page-subtitle">
+          Gerencie seus limites de gastos e acompanhe o uso por categoria.
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-          Categorias e orçamento
-        </h1>
-        <p className="mt-2 text-sm text-muted">
-          Gerencie seus limites de gastos e acompanhe o uso por categoria
-        </p>
-      </div>
+      </header>
 
+      
       <OrcamentoMensalTotal />
-      <h1 className="text-2xl font-bold py-5">Detalhamento Por Categoria</h1>
 
-      <DetalhesCategorias />
+      
+      <section>
+        <h2 className="mb-5 text-lg font-bold tracking-tight text-primary">
+          Detalhamento por categoria
+        </h2>
+        <DetalhesCategorias />
+      </section>
     </div>
   );
 }
-
-export default page;

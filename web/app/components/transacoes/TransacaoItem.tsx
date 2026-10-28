@@ -1,41 +1,43 @@
-"use client";
-
 import { Transacao } from "@/app/types/transacao";
+import { formatarMoeda, formatarData } from "@/app/lib/formatters";
 
-
-type Props = {
+interface TransacaoItemProps {
   transacao: Transacao;
-};
+}
 
-function TransacaoItem({ transacao }: Props) {
-  const valor = Number(transacao.valor);
- 
+function TransacaoItem({ transacao }: TransacaoItemProps) {
+  const isEntrada = transacao.tipoTransacao === "ENTRADA";
 
   return (
-    <div className="grid grid-cols-6 items-center border-b border-border p-4 text-sm transition last:border-b-0 hover:bg-background">
-      <span className="font-semibold text-muted">{transacao.id}</span>
-
-      <span>
-        {new Intl.DateTimeFormat("pt-BR").format(new Date(transacao.data))}
+    <div className="grid grid-cols-6 items-center gap-4 border-b border-border px-5 py-4 text-sm transition-colors last:border-b-0 hover:bg-surface-hover">
+     
+      <span className="font-mono text-xs font-semibold text-muted-light">
+        #{transacao.id}
       </span>
 
-      <span className="truncate text-primary">
+      
+      <span className="text-muted">{formatarData(transacao.data)}</span>
+
+      
+      <span className="truncate font-medium text-foreground">
         {transacao.descricao || "Sem descrição"}
       </span>
+
+      
       <span className="truncate text-muted">{transacao.conta.nome}</span>
+
+     
       <span className="truncate text-muted">
-        {transacao.categoria?.nome || "Sem categoria"}
+        {transacao.categoria?.nome || "—"}
       </span>
+
+     
       <span
-        className={
-          transacao.tipoTransacao === "ENTRADA" ? "text-income" : "text-expense"
-        }
+        className={`text-right font-bold ${
+          isEntrada ? "text-income" : "text-expense"
+        }`}
       >
-        {transacao.tipoTransacao === "ENTRADA" ? "+" : "-"}{" "}
-        {new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }).format(valor)}
+        {isEntrada ? "+" : "−"} {formatarMoeda(transacao.valor)}
       </span>
     </div>
   );

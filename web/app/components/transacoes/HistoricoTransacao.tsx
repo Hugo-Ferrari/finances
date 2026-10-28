@@ -1,58 +1,65 @@
 "use client";
+
 import { LucideIcon } from "lucide-react";
-import React from "react";
-type Historico = {
-  tipo: "ENTRADA" | "SAIDA" | "PERIODO";
+import { formatarMoeda } from "@/app/lib/formatters";
+
+type TipoHistorico = "ENTRADA" | "SAIDA" | "PERIODO";
+
+interface HistoricoTransacaoProps {
+  tipo: TipoHistorico;
   text: string;
   valor: number;
   icones: LucideIcon;
-};
-const estilos = {
+}
+
+const estiloMap: Record<
+  TipoHistorico,
+  { card: string; label: string; valor: string; iconBg: string; iconColor: string }
+> = {
   ENTRADA: {
-    estilo: "bg-surface",
-    texto: "text-muted",
-    valor: "text-primary",
-    icone: "bg-income-light text-income",
+    card: "bg-surface border border-border",
+    label: "text-muted",
+    valor: "text-income",
+    iconBg: "bg-income-light",
+    iconColor: "text-income",
   },
   SAIDA: {
-    estilo: "bg-surface",
-    texto: "text-muted",
-    valor: "text-primary",
-    icone: "bg-expense-light text-expense",
+    card: "bg-surface border border-border",
+    label: "text-muted",
+    valor: "text-expense",
+    iconBg: "bg-expense-light",
+    iconColor: "text-expense",
   },
   PERIODO: {
-    estilo: "bg-primary ",
-    texto: "text-white/80",
+    card: "bg-primary border border-primary",
+    label: "text-white/70",
     valor: "text-white",
-    icone: "bg-white/20 text-white",
+    iconBg: "bg-white/15",
+    iconColor: "text-white",
   },
 };
-function HistoricoTransacao({ tipo, text, valor, icones: Icone }: Historico) {
-  const estilo = estilos[tipo];
-  function formatarMoeda(valor: number) {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(valor);
-  }
+
+function HistoricoTransacao({ tipo, text, valor, icones: Icon }: HistoricoTransacaoProps) {
+  const estilo = estiloMap[tipo];
+
   return (
-    <div className="">
+    <div
+      className={`flex items-center justify-between rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${estilo.card}`}
+    >
+      <div>
+        <p className={`text-sm font-medium ${estilo.label}`}>{text}</p>
+        <p className={`mt-2.5 text-2xl font-extrabold tracking-tight ${estilo.valor}`}>
+          {formatarMoeda(valor)}
+        </p>
+      </div>
+
       <div
-        className={`flex h-35 items-center justify-between rounded-2xl border border-border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${estilo.estilo}`}
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${estilo.iconBg}`}
       >
-        <div>
-          <p className={`text-sm font-medium ${estilo.texto}`}> {text} </p>
-          <p className={` mt-2 text-2xl font-bold ${estilo.valor} `}>
-            {formatarMoeda(valor)}
-          </p>
-        </div>
-        <div
-          className={` flex h-11 w-11 items-center justify-center rounded-full ${estilo.icone} `}
-        >
-          <Icone size={22} strokeWidth={2} />
-        </div>
+        <Icon size={22} strokeWidth={2} className={estilo.iconColor} />
       </div>
     </div>
   );
 }
+
 export default HistoricoTransacao;
