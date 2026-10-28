@@ -5,6 +5,7 @@
   "author": "Hugo Ferrari",
   "private": true,
   "license": "UNLICENSED",
+  "main": "dist/src/main.js",
   "scripts": {
     "dev": "nest start --watch",
     "build": "npx prisma generate && nest build",
