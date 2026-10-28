@@ -7,7 +7,7 @@ import {
 import { TransacaoRepository } from './transacao.repository';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
-import type { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransacaoService {
