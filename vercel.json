@@ -2,8 +2,60 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/usuario",
+      "destination": "https://finances-koqv.onrender.com/usuario"
+    },
+    {
+      "source": "/usuario/(.*)",
+      "destination": "https://finances-koqv.onrender.com/usuario/$1"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "https://finances-koqv.onrender.com/auth/$1"
+    },
+    {
+      "source": "/conta",
+      "destination": "https://finances-koqv.onrender.com/conta"
+    },
+    {
+      "source": "/conta/(.*)",
+      "destination": "https://finances-koqv.onrender.com/conta/$1"
+    },
+    {
+      "source": "/categoria",
+      "destination": "https://finances-koqv.onrender.com/categoria"
+    },
+    {
+      "source": "/categoria/(.*)",
+      "destination": "https://finances-koqv.onrender.com/categoria/$1"
+    },
+    {
+      "source": "/transacao",
+      "destination": "https://finances-koqv.onrender.com/transacao"
+    },
+    {
+      "source": "/transacao/(.*)",
+      "destination": "https://finances-koqv.onrender.com/transacao/$1"
+    },
+    {
+      "source": "/orcamento",
+      "destination": "https://finances-koqv.onrender.com/orcamento"
+    },
+    {
+      "source": "/orcamento/(.*)",
+      "destination": "https://finances-koqv.onrender.com/orcamento/$1"
+    },
+    {
+      "source": "/ia/(.*)",
+      "destination": "https://finances-koqv.onrender.com/ia/$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "https://finances-koqv.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "$1"
     }
   ]
 }
