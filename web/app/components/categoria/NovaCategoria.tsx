@@ -20,7 +20,7 @@ function NovaCategoria() {
 
   const [nomeCategoria, setNomeCategoria] = useState("");
 
-  const [valorOrcamento, setValorOrcamento] = useState(0);
+  const [valorOrcamento, setValorOrcamento] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,14 +35,14 @@ function NovaCategoria() {
       });
 
       await criarOrcamento({
-        valor: valorOrcamento,
+        valor: Number(valorOrcamento),
         categoriaId: categoria.id,
       });
 
       definirIcone(categoria.id, iconeSelecionado);
 
       setNomeCategoria("");
-      setValorOrcamento(0);
+      setValorOrcamento('');
       setIconeSelecionado("Utensils");
       setTipoSelecionado("FIXA");
       router.push("/categorias");
@@ -145,7 +145,7 @@ function NovaCategoria() {
                   min="0"
                   step="0.01"
                   value={valorOrcamento}
-                  onChange={(e) => setValorOrcamento(Number(e.target.value))}
+                  onChange={(e) => setValorOrcamento((e.target.value))}
                   placeholder="0,00"
                   className="w-full rounded-xl border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition focus:border-foreground"
                 />
