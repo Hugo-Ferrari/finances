@@ -34,7 +34,7 @@ export class IaService {
 
   constructor(private readonly prisma: PrismaService) {
     this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    this.modelo = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
+    this.modelo = process.env.GEMINI_MODEL ?? 'gemini-3.8-flash';
   }
 
   async analisarComprovante(
