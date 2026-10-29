@@ -37,7 +37,7 @@ function Page() {
         <div>
           <p className="page-eyebrow">Visão geral</p>
           <h1 className="page-title">
-            {primeiroNome ? `Olá, ${primeiroNome} 👋` : "Dashboard"}
+            {primeiroNome ? `Olá, ${primeiroNome} ` : "Dashboard"}
           </h1>
           <p className="page-subtitle">
             Gerencie seus pagamentos e transações em um só lugar.
