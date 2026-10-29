@@ -1,7 +1,11 @@
+import { TipoTransacao } from '../ia.constants';
+
 export class ResultadoComprovante {
-  tipoTransacao!: 'ENTRADA' | 'SAIDA';
+  tipoTransacao!: TipoTransacao;
   valor!: number;
-  data!: string;
+  data!: string; 
+  dataEstimada!: boolean; 
   descricao!: string;
-  categoria!: string;
+  categoriaId!: number | null; 
+  categoriaNome!: string | null; 
 }

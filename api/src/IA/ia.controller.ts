@@ -2,34 +2,49 @@ import {
   BadRequestException,
   Controller,
   Post,
-  SetMetadata,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Request } from 'express';
+
 import { IaService } from './ia.service';
+import {
+  TAMANHO_MAXIMO_ARQUIVO,
+  TIPOS_ARQUIVO_PERMITIDOS,
+} from './ia.constants';
+
+type RequisicaoAutenticada = Request & { user: { id: number; email: string } };
 
 @Controller('ia')
 export class ControllerIA {
   constructor(private readonly serviceIa: IaService) {}
 
-  @SetMetadata('isPublic', true)
   @Post('comprovante')
-  @UseInterceptors(FileInterceptor('imagem'))
-  analisarComprovante(@UploadedFile() imagem: Express.Multer.File) {
-    if (!imagem) {
+  @UseInterceptors(
+    FileInterceptor('imagem', { limits: { fileSize: TAMANHO_MAXIMO_ARQUIVO } }),
+  )
+  analisarComprovante(
+    @Req() req: RequisicaoAutenticada,
+    @UploadedFile() arquivo: Express.Multer.File,
+  ) {
+    if (!arquivo) {
       throw new BadRequestException('Nenhum arquivo enviado.');
     }
 
-    const tiposPermitidos = ['image/jpeg', 'image/jpg', 'application/pdf'];
-
-    if (!tiposPermitidos.includes(imagem.mimetype)) {
+    if (
+      !(TIPOS_ARQUIVO_PERMITIDOS as readonly string[]).includes(arquivo.mimetype)
+    ) {
       throw new BadRequestException(
-        'Formato inválido. Envie JPG, JPEG ou PDF.',
+        'Formato inválido. Envie JPG, PNG, WEBP ou PDF.',
       );
     }
 
-    return this.serviceIa.analisarComprovante(imagem.buffer, imagem.mimetype);
+    return this.serviceIa.analisarComprovante(
+      req.user.id,
+      arquivo.buffer,
+      arquivo.mimetype,
+    );
   }
 }
