@@ -8,7 +8,6 @@ import CabecalhoMinhasContas from "./CabecalhoMinhasContas";
 import BlocoConta from "./BlocoConta";
 
 function ListaContas() {
-     
   const [contas, setContas] = useState<Conta[]>([]);
 
   useEffect(() => {
@@ -16,7 +15,6 @@ function ListaContas() {
       try {
         const dados = await listarConta();
         setContas(dados);
-        
       } catch (error) {
         console.error("Erro ao carregar contas:", error);
       }
@@ -44,7 +42,22 @@ function ListaContas() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {contas.map((item) => (
-            <BlocoConta key={item.id} conta={item} />
+            <BlocoConta
+              key={item.id}
+              conta={item}
+              onContaExcluida={(id) =>
+                setContas((contasAtuais) =>
+                  contasAtuais.filter((conta) => conta.id !== id),
+                )
+              }
+              onContaAtualizada={(contaAtualizada) =>
+                setContas((contasAtuais) =>
+                  contasAtuais.map((conta) =>
+                    conta.id === contaAtualizada.id ? contaAtualizada : conta,
+                  ),
+                )
+              }
+            />
           ))}
         </div>
       )}

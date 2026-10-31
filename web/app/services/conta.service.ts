@@ -1,4 +1,6 @@
+import { Ysabeau } from "next/font/google";
 import api from "./api";
+import { Conta } from "../types/conta";
 
 type NovaConta = {
   nome: string;
@@ -13,5 +15,15 @@ export async function criarConta(dados: NovaConta) {
 
 export async function listarConta() {
   const response = await api.get(`/conta`);
+  return response.data;
+}
+
+export async function excluirConta(id: number) {
+  const response = await api.delete(`/conta/${id}`);
+  return response.data;
+}
+
+export async function update(id: number, dados: Conta) {
+  const response = await api.patch(`/conta/${id}`, dados);
   return response.data;
 }
