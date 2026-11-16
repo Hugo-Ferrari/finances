@@ -163,3 +163,37 @@ export function lerValor(texto: string): number {
   const normalizado = limpo.includes(",") ? limpo.replace(/\./g, "").replace(",", ".") : limpo;
   return Number(normalizado);
 }
+
+/** "E se eu gastar X hoje?": mesma conta da API (planejamento/gastar-hoje.ts). */
+export function simularGasto(
+  r: { livre: number; dias: number },
+  valor: number,
+): { livreDepois: number; porDiaDepois: number } {
+  const livreDepois = Math.round((r.livre - valor) * 100) / 100;
+  const porDiaDepois =
+    r.dias > 1
+      ? Math.floor((Math.max(0, livreDepois) / (r.dias - 1)) * 100 + 1e-6) / 100
+      : Math.max(0, livreDepois);
+  return { livreDepois, porDiaDepois };
+}
+
+/** "sex., 4 de dez." a partir de AAAA-MM-DD. */
+export function diaPorExtenso(dia: string, opcoes: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }): string {
+  return new Date(`${dia}T12:00:00`).toLocaleDateString("pt-BR", opcoes);
+}
+
+/** "Hoje", "Amanhã" ou "qui., 19/11". */
+export function rotuloDia(dia: string, hoje: string): string {
+  const diff = Math.round((Date.parse(`${dia}T12:00:00`) - Date.parse(`${hoje}T12:00:00`)) / 86_400_000);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Amanhã";
+  if (diff === -1) return "Ontem";
+  return diaPorExtenso(dia, { weekday: "short", day: "2-digit", month: "2-digit" });
+}
+
+/** Soma dias a uma data AAAA-MM-DD. */
+export function somarDiasISO(dia: string, dias: number): string {
+  const d = new Date(`${dia}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}

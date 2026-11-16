@@ -8,20 +8,29 @@ interface CardEconomiaProps {
   caixinhas: { total: number; rendimentoMes: number };
   resumo: ResumoMes;
   nomeMes: string;
+  /** Meta de economia (fração da renda, ex.: 0.2). Padrão: 20%. */
+  meta?: number;
 }
 
-function mensagemTaxa(taxa: number | null, economia: number) {
+function mensagemTaxa(taxa: number | null, economia: number, meta: number) {
+  const pct = `${Math.round(meta * 100)}%`;
   if (taxa === null) return "Registre suas entradas do mês para acompanhar quanto você guarda.";
   if (economia < 0) return "Você gastou mais do que recebeu este mês. Reveja as maiores despesas.";
-  if (taxa >= META_TAXA_ECONOMIA) return "Ótimo! Você está acima da meta de guardar 20% da renda.";
-  return "Tente guardar pelo menos 20% do que entra. Você está quase lá.";
+  if (taxa >= meta) return `Ótimo! Você está acima da meta de guardar ${pct} da renda.`;
+  return `Tente guardar pelo menos ${pct} do que entra. Você está quase lá.`;
 }
 
 /** Destaque do dashboard: patrimônio e quanto sobrou no mês. */
-export default function CardEconomia({ saldoContas, caixinhas, resumo, nomeMes }: CardEconomiaProps) {
+export default function CardEconomia({
+  saldoContas,
+  caixinhas,
+  resumo,
+  nomeMes,
+  meta = META_TAXA_ECONOMIA,
+}: CardEconomiaProps) {
   const taxa = resumo.taxa;
   const percentual = taxa === null ? 0 : Math.max(0, Math.min(taxa, 1));
-  const atingiuMeta = taxa !== null && taxa >= META_TAXA_ECONOMIA;
+  const atingiuMeta = taxa !== null && taxa >= meta;
 
   return (
     <section className="hero-card p-6 sm:p-8" aria-label="Resumo financeiro">
@@ -84,7 +93,7 @@ export default function CardEconomia({ saldoContas, caixinhas, resumo, nomeMes }
                 atingiuMeta ? "bg-secondary text-primary" : "bg-white/10 text-white/80"
               }`}
             >
-              Meta 20%
+              Meta {Math.round(meta * 100)}%
             </span>
           </div>
 
@@ -95,12 +104,12 @@ export default function CardEconomia({ saldoContas, caixinhas, resumo, nomeMes }
             />
             <span
               className="absolute -top-1 h-4.5 w-0.5 rounded bg-white/70"
-              style={{ left: `${META_TAXA_ECONOMIA * 100}%` }}
+              style={{ left: `${Math.min(meta, 1) * 100}%` }}
               aria-hidden="true"
             />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/75">
-            {mensagemTaxa(taxa, resumo.economia)}
+            {mensagemTaxa(taxa, resumo.economia, meta)}
           </p>
         </div>
       </div>

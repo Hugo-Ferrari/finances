@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { startTransition, useEffect, useState } from "react";
 import { buscarUsuario, atualizarUsuario, encerrarSessao } from "@/app/services/auth.service";
+import CardMetaEconomia from "@/app/components/planejamento/CardMetaEconomia";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
 import { useAuthStore } from "@/app/store/auth.store";
@@ -248,6 +249,8 @@ function Page() {
             </button>
           </div>
         </section>
+
+        <CardMetaEconomia />
       </div>
 
       {(erro || sucesso) && (

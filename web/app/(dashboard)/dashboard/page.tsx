@@ -13,6 +13,11 @@ import FluxoCaixa from "@/app/components/dashboard/FluxoCaixa";
 import GastosCategoria from "@/app/components/dashboard/GastosCategoria";
 import TransacoesRecentes from "@/app/components/dashboard/TransacoesRecentes";
 import ContasResumo from "@/app/components/dashboard/ContasResumo";
+import CardGastarHoje from "@/app/components/dashboard/CardGastarHoje";
+import ProximosDias from "@/app/components/dashboard/ProximosDias";
+import ContasAPagar from "@/app/components/dashboard/ContasAPagar";
+import { obterGastarHoje } from "@/app/services/planejamento.service";
+import { GastarHoje } from "@/app/types/planejamento";
 
 import { useAuthStore } from "@/app/store/auth.store";
 import { listarTodasTransacoes } from "@/app/services/transacao.service";
@@ -30,6 +35,7 @@ import {
   resumoDoMes,
   saldoTotal,
   serieMensal,
+  somarDiasISO,
 } from "@/app/lib/financas";
 import { Transacao } from "@/app/types/transacao";
 import { Conta } from "@/app/types/conta";
@@ -39,17 +45,20 @@ type Dados = {
   contas: Conta[];
   orcamentos: Orcamento[];
   caixinhas: ResumoCaixinha[];
+  gastarHoje: GastarHoje | null;
 };
 
 async function buscarDados(): Promise<Dados> {
-  const [transacoes, contas, orcamentos, caixinhas] = await Promise.all([
+  const [transacoes, contas, orcamentos, caixinhas, gastarHoje] = await Promise.all([
     listarTodasTransacoes(),
     listarConta(),
     listarOrcamento(),
     // As caixinhas são um extra: se falharem, o dashboard abre sem elas.
     listarCaixinhas().catch(() => [] as ResumoCaixinha[]),
+    // O planejamento também: sem ele o dashboard abre com os cartões de sempre.
+    obterGastarHoje().catch(() => null),
   ]);
-  return { transacoes, contas, orcamentos, caixinhas };
+  return { transacoes, contas, orcamentos, caixinhas, gastarHoje };
 }
 
 function saudacao() {
@@ -149,7 +158,33 @@ function Page() {
               caixinhas={calculos.caixinhas}
               resumo={calculos.resumo}
               nomeMes={nomeDoMes(mes)}
+              meta={dados!.gastarHoje ? dados!.gastarHoje.metaPercentual / 100 : undefined}
             />
+          </div>
+          {dados!.gastarHoje ? (
+            <>
+              {/* No celular o "pode gastar hoje" vem primeiro. */}
+              <div className="order-first lg:order-none">
+                <CardGastarHoje dados={dados!.gastarHoje} />
+              </div>
+              <div className="lg:col-span-2">
+                <ProximosDias dias={dados!.gastarHoje.proximosDias} />
+              </div>
+              <ContasAPagar
+                contas={dados!.gastarHoje.contas}
+                hoje={dados!.gastarHoje.hoje}
+                ate={
+                  dados!.gastarHoje.proximoSalario
+                    ? dados!.gastarHoje.fimCiclo
+                    : somarDiasISO(dados!.gastarHoje.fimCiclo, -1)
+                }
+                onAtualizar={() => aplicar(buscarDados())}
+              />
+            </>
+          ) : null}
+
+          <div className="lg:col-span-2">
+            <FluxoCaixa serie={calculos.serie} />
           </div>
           <CardOrcamento
             gasto={calculos.gastoOrcado}
@@ -158,14 +193,12 @@ function Page() {
           />
 
           <div className="lg:col-span-2">
-            <FluxoCaixa serie={calculos.serie} />
-          </div>
-          <GastosCategoria gastos={calculos.gastos} />
-
-          <div className="lg:col-span-2">
             <TransacoesRecentes transacoes={calculos.recentes} />
           </div>
-          <ContasResumo contas={dados!.contas} caixinhas={dados!.caixinhas} />
+          <div className="flex flex-col gap-5">
+            <GastosCategoria gastos={calculos.gastos} />
+            <ContasResumo contas={dados!.contas} caixinhas={dados!.caixinhas} />
+          </div>
         </div>
       )}
     </div>

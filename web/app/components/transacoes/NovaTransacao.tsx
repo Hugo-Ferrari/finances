@@ -8,7 +8,8 @@ import { mensagemDeErro } from "@/app/lib/erros";
 import Button from "@/app/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CircleDollarSign } from "lucide-react";
+import { ArrowLeft, Calculator, CircleDollarSign } from "lucide-react";
+import Link from "next/link";
 
 interface CreateTransacao {
   tipoTransacao: "ENTRADA" | "SAIDA";
@@ -130,6 +131,12 @@ function NovaTransacao() {
           <p className="page-subtitle">
             Registre uma nova movimentação financeira.
           </p>
+          <Link
+            href="/planejamento?aba=parcelas"
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent-light px-3 py-1.5 text-xs font-bold text-accent transition hover:brightness-95"
+          >
+            <Calculator size={14} /> Compra parcelada? Simule antes de comprar
+          </Link>
         </div>
 
         

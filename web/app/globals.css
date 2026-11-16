@@ -92,12 +92,14 @@
 
   --color-income:         var(--income);
   --color-income-light:   var(--income-light);
+  --color-income-muted:   var(--income-muted);
 
   --color-warning:        var(--warning);
   --color-warning-light:  var(--warning-light);
 
   --color-expense:        var(--expense);
   --color-expense-light:  var(--expense-light);
+  --color-expense-muted:  var(--expense-muted);
 
   --color-foreground:     var(--foreground);
   --color-muted:          var(--muted);

@@ -3,6 +3,7 @@
 import {
   ArrowLeftRight,
   Bot,
+  CalendarClock,
   Landmark,
   LayoutGrid,
   LogOut,
@@ -31,6 +32,7 @@ type NavItemDef = {
 
 const NAV_ITEMS: NavItemDef[] = [
   { id: "dashboard",  label: "Dashboard",   icon: LayoutGrid,    href: "/dashboard" },
+  { id: "planejamento", label: "Planejar",  icon: CalendarClock, href: "/planejamento" },
   { id: "contas",     label: "Contas",       icon: Landmark,      href: "/contas" },
   { id: "caixinhas",  label: "Caixinhas",    icon: PiggyBank,     href: "/caixinhas" },
   { id: "transacoes", label: "Transações",   icon: ArrowLeftRight, href: "/transacoes" },
