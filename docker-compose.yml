@@ -30,8 +30,6 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-      args:
-        DATABASE_URL: ${DATABASE_URL}
 
     container_name: finlogic-api
     restart: unless-stopped

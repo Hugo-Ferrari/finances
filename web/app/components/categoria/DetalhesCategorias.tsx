@@ -38,6 +38,20 @@ function DetalhesCategorias() {
       .catch(() => setDados({ categorias: [], orcamentos: [], despesas: [] }));
   }, []);
 
+  useEffect(() => {
+    if (!paraExcluir) return;
+
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && !excluindo) {
+        setParaExcluir(null);
+        setErroExclusao("");
+      }
+    }
+
+    window.addEventListener("keydown", fecharComEscape);
+    return () => window.removeEventListener("keydown", fecharComEscape);
+  }, [paraExcluir, excluindo]);
+
   async function excluir() {
     if (!paraExcluir || !dados) return;
     setExcluindo(true);
@@ -162,8 +176,21 @@ function DetalhesCategorias() {
       </section>
 
       {paraExcluir && (
-        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="excluir-categoria-titulo">
-          <div className="modal-content">
+        <div
+          className="modal-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !excluindo) {
+              setParaExcluir(null);
+              setErroExclusao("");
+            }
+          }}
+        >
+          <div
+            className="modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="excluir-categoria-titulo"
+          >
             <h2 id="excluir-categoria-titulo" className="text-lg font-bold text-foreground">
               Excluir categoria
             </h2>
@@ -173,7 +200,7 @@ function DetalhesCategorias() {
               removido.
             </p>
             {erroExclusao && <p className="mt-3 text-sm font-medium text-expense">{erroExclusao}</p>}
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="modal-actions mt-6">
               <button type="button" className="btn btn-ghost h-10" onClick={() => setParaExcluir(null)} disabled={excluindo}>
                 Cancelar
               </button>

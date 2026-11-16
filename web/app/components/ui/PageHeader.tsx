@@ -16,7 +16,7 @@ export default function PageHeader({ eyebrow, title, subtitle, actions }: PageHe
         <h1 className="page-title">{title}</h1>
         {subtitle && <p className="page-subtitle">{subtitle}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+      {actions && <div className="page-header-actions flex flex-wrap items-center gap-3">{actions}</div>}
     </header>
   );
 }

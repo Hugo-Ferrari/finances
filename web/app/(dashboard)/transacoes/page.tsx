@@ -132,7 +132,15 @@ function Page() {
               {[0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-12 w-full" />)}
             </div>
           ) : (
-            <ListaTransacao key={JSON.stringify(filtros)} transacoes={filtradas} />
+            <ListaTransacao
+              key={JSON.stringify(filtros)}
+              transacoes={filtradas}
+              onExcluirTransacao={(id) =>
+                setTransacoes((atuais) =>
+                  atuais?.filter((transacao) => transacao.id !== id) ?? null,
+                )
+              }
+            />
           )}
         </div>
       </section>

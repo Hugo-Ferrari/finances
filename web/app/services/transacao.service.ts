@@ -31,6 +31,11 @@ export async function enviarTransacaoParaApi(dados: CreateTransacao) {
   return response.data;
 }
 
+export async function deletarTransacao(id: number) {
+  const response = await api.delete(`/transacao/${id}`);
+  return response.data;
+}
+
 export type ResultadoCriacao = { offline: true } | { offline: false };
 
 async function guardarNaFila(dados: CreateTransacao): Promise<ResultadoCriacao> {

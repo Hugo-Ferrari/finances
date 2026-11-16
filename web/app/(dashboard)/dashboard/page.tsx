@@ -144,8 +144,14 @@ function Page() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      {/*
+        No desktop são duas colunas independentes (cada uma empilha os próprios
+        cards, sem depender da altura da outra). No celular os wrappers viram
+        `contents`, então os cards voltam a ser filhos diretos do grid.
+      */}
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        {/* Coluna esquerda (desktop) */}
+        <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-5">
           {doMes && contas && guardado ? (
             <CardEconomia
               saldoContas={saldoTotal(contas)}
@@ -157,60 +163,69 @@ function Page() {
           ) : (
             <SkeletonCard altura={260} />
           )}
-        </div>
 
-        {gastarHoje !== null && (
-          <>
-            {/* No celular o "pode gastar hoje" vem primeiro. */}
-            <div className="order-first lg:order-none">
-              {gastarHoje ? <CardGastarHoje dados={gastarHoje} /> : <SkeletonCard altura={420} />}
-            </div>
-            <div className="lg:col-span-2">
-              {gastarHoje ? (
-                <ProximosDias dias={gastarHoje.proximosDias} />
-              ) : (
-                <SkeletonCard altura={180} />
-              )}
-            </div>
-            {gastarHoje ? (
-              <ContasAPagar
-                contas={gastarHoje.contas}
-                hoje={gastarHoje.hoje}
-                ate={
-                  gastarHoje.proximoSalario
-                    ? gastarHoje.fimCiclo
-                    : somarDiasISO(gastarHoje.fimCiclo, -1)
-                }
-                onAtualizar={carregar}
-              />
+          {gastarHoje !== null &&
+            (gastarHoje ? (
+              <ProximosDias dias={gastarHoje.proximosDias} />
             ) : (
-              <SkeletonCard altura={240} />
-            )}
-          </>
-        )}
+              <SkeletonCard altura={180} />
+            ))}
 
-        <div className="lg:col-span-2">
           {doMes ? <FluxoCaixa serie={doMes.serie} /> : <SkeletonCard altura={340} />}
-        </div>
-        {orcamento ? (
-          <CardOrcamento
-            gasto={orcamento.gastoOrcado}
-            limite={orcamento.limite}
-            diasRestantes={diasRestantesNoMes()}
-          />
-        ) : (
-          <SkeletonCard altura={240} />
-        )}
 
-        <div className="lg:col-span-2">
           {doMes ? (
             <TransacoesRecentes transacoes={doMes.recentes} />
           ) : (
             <SkeletonCard altura={340} />
           )}
         </div>
-        <div className="flex flex-col gap-5">
-          {orcamento ? <GastosCategoria gastos={orcamento.gastos} /> : <SkeletonCard altura={260} />}
+
+        {/* Coluna direita (desktop) */}
+        <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-5">
+          {gastarHoje !== null && (
+            <>
+              {/* No celular o "pode gastar hoje" vem primeiro. */}
+              <div className="order-first lg:order-none">
+                {gastarHoje ? (
+                  <CardGastarHoje dados={gastarHoje} />
+                ) : (
+                  <SkeletonCard altura={420} />
+                )}
+              </div>
+
+              {gastarHoje ? (
+                <ContasAPagar
+                  contas={gastarHoje.contas}
+                  hoje={gastarHoje.hoje}
+                  ate={
+                    gastarHoje.proximoSalario
+                      ? gastarHoje.fimCiclo
+                      : somarDiasISO(gastarHoje.fimCiclo, -1)
+                  }
+                  onAtualizar={carregar}
+                />
+              ) : (
+                <SkeletonCard altura={240} />
+              )}
+            </>
+          )}
+
+          {orcamento ? (
+            <CardOrcamento
+              gasto={orcamento.gastoOrcado}
+              limite={orcamento.limite}
+              diasRestantes={diasRestantesNoMes()}
+            />
+          ) : (
+            <SkeletonCard altura={240} />
+          )}
+
+          {orcamento ? (
+            <GastosCategoria gastos={orcamento.gastos} />
+          ) : (
+            <SkeletonCard altura={260} />
+          )}
+
           {contas && caixinhas ? (
             <ContasResumo contas={contas} caixinhas={caixinhas} />
           ) : (

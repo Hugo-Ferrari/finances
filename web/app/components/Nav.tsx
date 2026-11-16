@@ -63,6 +63,8 @@ function NavLink({ item, isActive, expanded, className }: NavLinkProps) {
       <Link
         href={item.href}
         aria-current={isActive ? "page" : undefined}
+        aria-label={item.label}
+        title={item.label}
         className={[
           "flex h-11 items-center rounded-xl text-sm transition-all duration-200",
           expanded ? "gap-3 px-3" : "justify-center",

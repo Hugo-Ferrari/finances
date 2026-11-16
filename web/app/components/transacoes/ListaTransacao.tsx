@@ -29,7 +29,13 @@ function rotuloDia(dia: string) {
 }
 
 /** Lista agrupada por dia, com o resultado de cada dia. */
-function ListaTransacao({ transacoes }: { transacoes: Transacao[] }) {
+function ListaTransacao({
+  transacoes,
+  onExcluirTransacao,
+}: {
+  transacoes: Transacao[];
+  onExcluirTransacao: (id: number) => void;
+}) {
   const [limite, setLimite] = useState(POR_PAGINA);
 
   if (transacoes.length === 0) {
@@ -67,7 +73,11 @@ function ListaTransacao({ transacoes }: { transacoes: Transacao[] }) {
             </div>
             <div className="divide-y divide-border px-5 sm:px-6">
               {itens.map((t) => (
-                <LinhaTransacao key={t.id} transacao={t} />
+                <LinhaTransacao
+                  key={t.id}
+                  transacao={t}
+                  onExcluir={onExcluirTransacao}
+                />
               ))}
             </div>
           </section>

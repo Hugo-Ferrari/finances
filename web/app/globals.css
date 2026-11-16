@@ -519,14 +519,14 @@ button {
     inset: auto 0 0;
     z-index: var(--z-nav);
     width: 100% !important;
-    min-height: 64px;
-    height: 64px;
+    min-height: calc(64px + env(safe-area-inset-bottom));
+    height: calc(64px + env(safe-area-inset-bottom));
     flex-direction: row;
     align-items: center;
     gap: 0.25rem;
     border-top: 1px solid var(--border);
     border-right: 0;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
     box-shadow: 0 -4px 24px rgba(20, 22, 41, 0.06);
   }
 
@@ -538,17 +538,26 @@ button {
   .site-nav-list {
     display: flex !important;
     width: 100%;
+    min-width: 0;
     flex-direction: row !important;
-    justify-content: space-around;
+    justify-content: flex-start;
     gap: 0.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
+  .site-nav-list::-webkit-scrollbar { display: none; }
+
   .site-nav-list li {
-    flex: 1;
+    flex: 0 0 2.75rem;
   }
 
   .site-nav-list a,
   .site-nav-list button {
+    width: 2.75rem;
+    min-height: 2.75rem;
     justify-content: center;
     padding: 0.5rem 0.25rem;
   }
@@ -559,7 +568,28 @@ button {
   }
 
   .dashboard-main {
-    padding-bottom: 5rem;
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
+  .page-header-actions { width: 100%; }
+  .page-header-actions > * { flex: 1 1 100%; }
+  .page-header-actions > .btn,
+  .page-header-actions > a,
+  .page-header-actions > button { width: 100%; }
+
+  .modal-overlay { padding: 1rem; }
+  .modal-content {
+    max-height: calc(100svh - 2rem);
+    padding: 1.25rem;
+    border-radius: var(--radius-xl);
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions > button {
+    width: 100%;
   }
 }
 
@@ -596,9 +626,19 @@ button {
 .modal-content {
   width: 100%;
   max-width: 480px;
+  max-height: calc(100svh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-lg);
   padding: 1.75rem;
   animation: scale-in 0.2s ease;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }

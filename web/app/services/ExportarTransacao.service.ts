@@ -1,5 +1,4 @@
 import { formatarData } from "@/app/lib/formatters";
-import * as XLSX from "xlsx";
 import { listarTodasTransacoes } from "./transacao.service";
 
 /** Gera o .xlsx. Retorna false quando não há transações para exportar. */
@@ -7,6 +6,7 @@ export async function exportarTransacoes(): Promise<boolean> {
   const transacoes = await listarTodasTransacoes();
   if (transacoes.length === 0) return false;
 
+  const ExcelJS = await import("exceljs");
   const dados = transacoes.map((transacao) => ({
     Data: formatarData(transacao.data),
     Descrição: transacao.descricao ?? "Sem descrição",
@@ -16,44 +16,44 @@ export async function exportarTransacoes(): Promise<boolean> {
     Valor: Number(transacao.valor),
   }));
 
-  const worksheet = XLSX.utils.json_to_sheet(dados);
-  worksheet["!cols"] = [
-    { wch: 14 }, // Data
-    { wch: 35 }, // Descrição
-    { wch: 12 }, // Tipo
-    { wch: 20 }, // Categoria
-    { wch: 20 }, // Conta
-    { wch: 15 }, // Valor
-  ];
-  const cabecalho = ["A1", "B1", "C1", "D1", "E1", "F1"];
-
-  cabecalho.forEach((celula) => {
-    worksheet[celula].s = {
-      font: {
-        bold: true,
-        color: { rgb: "FFFFFF" },
-      },
-      fill: {
-        fgColor: { rgb: "11152F" },
-      },
-      alignment: {
-        horizontal: "center",
-        vertical: "center",
-      },
-    };
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Transações", {
+    views: [{ state: "frozen", ySplit: 1 }],
   });
+  worksheet.autoFilter = `A1:F${dados.length + 1}`;
+  worksheet.columns = [
+    { header: "Data", key: "Data", width: 14 },
+    { header: "Descrição", key: "Descrição", width: 35 },
+    { header: "Tipo", key: "Tipo", width: 12 },
+    { header: "Categoria", key: "Categoria", width: 20 },
+    { header: "Conta", key: "Conta", width: 20 },
+    { header: "Valor", key: "Valor", width: 15 },
+  ];
+  worksheet.addRows(dados);
 
-  for (let i = 2; i <= dados.length + 1; i++) {
-    worksheet[`F${i}`].z = "R$ #,##0.00";
-  }
+  worksheet.getRow(1).eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF11152F" },
+    };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+  });
+  worksheet.getColumn("Valor").numFmt = '"R$" #,##0.00';
 
-  worksheet["!autofilter"] = {
-    ref: `A1:F${dados.length + 1}`,
-  };
-  const workbook = XLSX.utils.book_new();
+  const arquivo = await workbook.xlsx.writeBuffer();
+  const url = URL.createObjectURL(
+    new Blob([arquivo], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "transacoes.xlsx";
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Transações");
-
-  XLSX.writeFile(workbook, "transacoes.xlsx");
   return true;
 }

@@ -55,7 +55,7 @@ O projeto é dividido em dois aplicativos:
 - Zustand
 - React Hook Form e Zod
 - Lucide React
-- XLSX
+- ExcelJS
 
 ## Pré-requisitos
 
@@ -108,7 +108,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-O Compose aguarda o Postgres ficar saudável, aplica as migrações versionadas e aguarda a API responder antes de iniciar o frontend. A aplicação web fica disponível em `http://localhost:3000`, a API em `http://localhost:3002` e o Swagger em `http://localhost:3002/api`.
+O Compose aguarda o Postgres ficar saudável, aplica as migrações versionadas e aguarda a API responder antes de iniciar o frontend. A URL do banco é usada somente em runtime e não é embutida na imagem da API. A aplicação web fica disponível em `http://localhost:3000`, a API em `http://localhost:3002` e o Swagger em `http://localhost:3002/api`.
 
 O volume `postgres_data` mantém as credenciais iniciais do banco. Alterar `POSTGRES_USER` ou `POSTGRES_PASSWORD` no `.env` não altera uma base já criada. Se a API mostrar erro Prisma `P1000` após mudar essas variáveis, não apague o volume. Para alinhar a senha da role `postgres` sem expô-la na linha de comando:
 

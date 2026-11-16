@@ -47,7 +47,7 @@ export function CaixaErro({ texto }: { texto: string }) {
 
 export function Rodape({ onCancelar, salvando, rotulo }: { onCancelar: () => void; salvando: boolean; rotulo: string }) {
   return (
-    <div className="mt-2 flex justify-end gap-3">
+    <div className="modal-actions mt-2">
       <button type="button" className="btn btn-ghost h-10" onClick={onCancelar} disabled={salvando}>
         Cancelar
       </button>

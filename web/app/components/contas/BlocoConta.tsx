@@ -166,8 +166,8 @@ function BlocoConta({
 
       {modalAberto && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center  backdrop-blur-xs px-4 animate-in fade-in duration-200"
-          onClick={(event) => {
+          className="modal-overlay"
+          onMouseDown={(event) => {
             if (
               event.target === event.currentTarget &&
               !excluindo &&
@@ -184,7 +184,7 @@ function BlocoConta({
             aria-modal="true"
             aria-labelledby="gerenciar-conta-titulo"
             aria-describedby="gerenciar-conta-descricao"
-            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl border border-border/40 animate-in zoom-in-95 duration-200"
+            className="modal-content max-w-md"
           >
             <div className="flex items-start gap-4">
               <div
@@ -283,7 +283,7 @@ function BlocoConta({
               </div>
             )}
 
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="modal-actions mt-6">
               <button
                 type="button"
                 onClick={() => {
