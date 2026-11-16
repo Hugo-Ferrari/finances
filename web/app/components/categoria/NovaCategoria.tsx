@@ -1,12 +1,14 @@
 "use client";
 
-import { criarCategoria } from "@/app/services/categoria.service";
+import { criarCategoria, deletarCategoria } from "@/app/services/categoria.service";
+import { mensagemDeErro } from "@/app/lib/erros";
 import { criarOrcamento } from "@/app/services/orcamento.service";
 import { useCategoriaIconeStore } from "@/app/store/categoriaIcone.store";
 import { iconesCategoria } from "./iconesCategoria";
 import { useRouter } from "next/navigation";
 
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 function NovaCategoria() {
   const router = useRouter();
@@ -21,6 +23,8 @@ function NovaCategoria() {
   const [nomeCategoria, setNomeCategoria] = useState("");
 
   const [valorOrcamento, setValorOrcamento] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +33,24 @@ function NovaCategoria() {
       return;
     }
 
+    setErro("");
+    setSalvando(true);
+
     try {
       const categoria = await criarCategoria({
         nome: nomeCategoria.trim(),
       });
 
-      await criarOrcamento({
-        valor: Number(valorOrcamento),
-        categoriaId: categoria.id,
-      });
+      try {
+        await criarOrcamento({
+          valor: Number(valorOrcamento),
+          categoriaId: categoria.id,
+        });
+      } catch (error) {
+        // Sem orçamento a categoria ficaria pela metade: desfaz a criação.
+        await deletarCategoria(categoria.id).catch(() => undefined);
+        throw error;
+      }
 
       definirIcone(categoria.id, iconeSelecionado);
 
@@ -45,16 +58,37 @@ function NovaCategoria() {
       setValorOrcamento('');
       setIconeSelecionado("Utensils");
       setTipoSelecionado("FIXA");
+
       router.push("/categorias");
     } catch (error) {
-      console.error("Erro ao criar categoria:", error);
+      setErro(
+        mensagemDeErro(error, "Não foi possível criar a categoria. Tente novamente."),
+      );
+    } finally {
+      setSalvando(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto w-full max-w-2xl">
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+    <div className="px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-2xl animate-fade-in">
+        <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-5 flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-primary"
+          >
+            <ArrowLeft size={16} />
+            Voltar
+          </button>
+          <p className="page-eyebrow">Planejamento</p>
+          <h1 className="page-title">Nova categoria</h1>
+          <p className="page-subtitle">
+            Dê um nome, defina quanto pretende gastar por mês e escolha um ícone.
+          </p>
+        </div>
+
+        <div className="card p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label
@@ -85,7 +119,7 @@ function NovaCategoria() {
                   onClick={() => setTipoSelecionado("FIXA")}
                   className={`rounded-xl border p-4 text-left transition ${
                     tipoSelecionado === "FIXA"
-                      ? "border-foreground bg-foreground text-background"
+                      ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
                       : "border-muted/60 hover:bg-muted"
                   }`}
                 >
@@ -94,7 +128,7 @@ function NovaCategoria() {
                   <p
                     className={`mt-1 text-xs ${
                       tipoSelecionado === "FIXA"
-                        ? "text-background/70"
+                        ? "text-accent/80"
                         : "text-muted"
                     }`}
                   >
@@ -107,7 +141,7 @@ function NovaCategoria() {
                   onClick={() => setTipoSelecionado("VARIAVEL")}
                   className={`rounded-xl border p-4 text-left transition ${
                     tipoSelecionado === "VARIAVEL"
-                      ? "border-foreground bg-foreground text-background"
+                      ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
                       : "border-muted/60 hover:bg-muted"
                   }`}
                 >
@@ -116,7 +150,7 @@ function NovaCategoria() {
                   <p
                     className={`mt-1 text-xs ${
                       tipoSelecionado === "VARIAVEL"
-                        ? "text-background/70"
+                        ? "text-accent/80"
                         : "text-muted"
                     }`}
                   >
@@ -179,7 +213,7 @@ function NovaCategoria() {
                       onClick={() => setIconeSelecionado(item.nome)}
                       className={`flex h-12 items-center justify-center rounded-xl border transition ${
                         selecionado
-                          ? "border-foreground bg-foreground text-background"
+                          ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
                           : "border-border bg-background text-foreground hover:bg-muted"
                       }`}
                     >
@@ -190,21 +224,30 @@ function NovaCategoria() {
               </div>
             </div>
 
+            {erro && (
+              <div
+                role="alert"
+                className="rounded-xl border border-expense/20 bg-expense-light px-4 py-3 text-sm font-medium text-expense animate-fade-in"
+              >
+                {erro}
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 border-t border-border pt-5">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="rounded-xl bg-primary/50 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-expense"
+                className="btn btn-ghost"
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                onClick={handleSubmit}
-                className="rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:bg-secondary hover:text-black"
+                disabled={salvando}
+                className="btn btn-primary"
               >
-                Salvar Categoria
+                {salvando ? "Salvando..." : "Salvar Categoria"}
               </button>
             </div>
           </form>

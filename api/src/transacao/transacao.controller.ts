@@ -14,6 +14,7 @@ import type { Request } from 'express';
 import { TransacaoService } from './transacao.service';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
+import { fimDoDia, inicioDoDia } from 'src/common/datas';
 
 type AuthenticatedRequest = Request & {
   user: { id: number };
@@ -29,14 +30,23 @@ export class TransacaoController {
     @Query('inicio') inicio: string,
     @Query('fim') fim: string,
   ) {
-    const dataInicio = new Date(inicio);
-    const dataFim = new Date(fim);
-    dataFim.setHours(23, 59, 59, 999);
-    return this.transacaoService.obterResumo(req.user.id, dataInicio, dataFim);
+    return this.transacaoService.obterResumo(
+      req.user.id,
+      inicioDoDia(inicio),
+      fimDoDia(fim),
+    );
   }
   @Get('despesas-por-categoria')
-  async despesaPorCategoria(@Req() req: AuthenticatedRequest) {
-    return this.transacaoService.despesaPorCategoria(req.user.id);
+  async despesaPorCategoria(
+    @Req() req: AuthenticatedRequest,
+    @Query('inicio') inicio?: string,
+    @Query('fim') fim?: string,
+  ) {
+    const periodo =
+      inicio && fim
+        ? { inicio: inicioDoDia(inicio), fim: fimDoDia(fim) }
+        : undefined;
+    return this.transacaoService.despesaPorCategoria(req.user.id, periodo);
   }
   @Get('periodo')
   listarPorPeriodo(
@@ -44,14 +54,10 @@ export class TransacaoController {
     @Query('fim') fim: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    const dataInicio = new Date(inicio);
-    const dataFim = new Date(fim);
-    dataFim.setHours(23, 59, 59, 999);
-
     return this.transacaoService.listarPorPeriodo(
       req.user.id,
-      dataInicio,
-      dataFim,
+      inicioDoDia(inicio),
+      fimDoDia(fim),
     );
   }
   @Get('resumo-total')

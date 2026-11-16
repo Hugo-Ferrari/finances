@@ -11,9 +11,16 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtGuard } from './auth/guards/jwt-auth.guard';
 import { OrcamentoModule } from './orcamento/orcamento.module';
 import { IaModule } from './IA/ia.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    // Limites aplicados só nas rotas marcadas com ThrottlerPorContaGuard.
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 60 }],
+      errorMessage:
+        'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+    }),
     PrismaModule,
     UsuarioModule,
     ContaModule,

@@ -27,3 +27,20 @@ export function truncate(str: string, max: number): string {
   if (str.length <= max) return str;
   return str.slice(0, max).trimEnd() + "…";
 }
+
+/** Data local no formato AAAA-MM-DD (o mesmo do <input type="date">). */
+export function paraDiaISO(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
+/** Primeiro e último dia do mês atual, no formato AAAA-MM-DD. */
+export function intervaloMesAtual(): { inicio: string; fim: string } {
+  const hoje = new Date();
+  return {
+    inicio: paraDiaISO(new Date(hoje.getFullYear(), hoje.getMonth(), 1)),
+    fim: paraDiaISO(new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)),
+  };
+}

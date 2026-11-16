@@ -1,76 +1,155 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import DespesaPorCategoria from "@/app/components/categoria/DespesaPorCategoria";
-import SaldoTotal from "@/app/components/SaldoTotal";
-import TransacoesRecentes from "@/app/components/transacoes/TransacoesRecentes";
-import { buscarUsuario } from "@/app/services/auth.service";
-import ResumoTransacoes from "@/app/components/transacoes/ResumoTransacoes";
-import MinhasContas from "@/app/components/contas/MinhasContas";
-import ExportarPlanilha from "@/app/components/transacoes/ExportarPlanilha";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 
-type Usuario = { id: number; nome: string; email: string };
+import PageHeader from "@/app/components/ui/PageHeader";
+import SkeletonCard from "@/app/components/ui/Skeleton";
+import ExportarPlanilha from "@/app/components/transacoes/ExportarPlanilha";
+import CardEconomia from "@/app/components/dashboard/CardEconomia";
+import CardOrcamento from "@/app/components/dashboard/CardOrcamento";
+import FluxoCaixa from "@/app/components/dashboard/FluxoCaixa";
+import GastosCategoria from "@/app/components/dashboard/GastosCategoria";
+import TransacoesRecentes from "@/app/components/dashboard/TransacoesRecentes";
+import ContasResumo from "@/app/components/dashboard/ContasResumo";
+
+import { useAuthStore } from "@/app/store/auth.store";
+import { listarTodasTransacoes } from "@/app/services/transacao.service";
+import { listarConta } from "@/app/services/conta.service";
+import { listarOrcamento } from "@/app/services/orcamento.service";
+import {
+  Orcamento,
+  chaveMesAtual,
+  diasRestantesNoMes,
+  gastosPorCategoria,
+  nomeDoMes,
+  ordenarPorDataDesc,
+  resumoDoMes,
+  saldoTotal,
+  serieMensal,
+} from "@/app/lib/financas";
+import { Transacao } from "@/app/types/transacao";
+import { Conta } from "@/app/types/conta";
+
+type Dados = { transacoes: Transacao[]; contas: Conta[]; orcamentos: Orcamento[] };
+
+async function buscarDados(): Promise<Dados> {
+  const [transacoes, contas, orcamentos] = await Promise.all([
+    listarTodasTransacoes(),
+    listarConta(),
+    listarOrcamento(),
+  ]);
+  return { transacoes, contas, orcamentos };
+}
+
+function saudacao() {
+  const hora = new Date().getHours();
+  if (hora < 12) return "Bom dia";
+  if (hora < 18) return "Boa tarde";
+  return "Boa noite";
+}
 
 function Page() {
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const usuario = useAuthStore((state) => state.usuario);
+  const primeiroNome = usuario?.nome.split(" ")[0] ?? "";
 
-  useEffect(() => {
-    async function carregarUsuario() {
-      try {
-        const dados = await buscarUsuario();
-        setUsuario(dados);
-      } catch {
-       
-      }
-    }
-    carregarUsuario();
+  const [dados, setDados] = useState<Dados | null>(null);
+  const [erro, setErro] = useState(false);
+
+  const aplicar = useCallback((busca: Promise<Dados>) => {
+    busca.then(setDados).catch(() => setErro(true));
   }, []);
 
-  const primeiroNome = usuario?.nome.split(" ")[0] ?? "";
+  useEffect(() => {
+    aplicar(buscarDados());
+  }, [aplicar]);
+
+  function tentarNovamente() {
+    setErro(false);
+    aplicar(buscarDados());
+  }
+
+  const mes = chaveMesAtual();
+  const calculos = useMemo(() => {
+    if (!dados) return null;
+    const gastos = gastosPorCategoria(dados.transacoes, mes, dados.orcamentos);
+    const limite = dados.orcamentos.reduce((t, o) => t + Number(o.valor), 0);
+    // Só conta no orçamento o que foi gasto em categorias com limite definido.
+    const comLimite = new Set(dados.orcamentos.map((o) => o.categoriaId));
+    const gastoOrcado = gastos
+      .filter((g) => g.categoriaId !== null && comLimite.has(g.categoriaId))
+      .reduce((t, g) => t + g.valor, 0);
+    return {
+      resumo: resumoDoMes(dados.transacoes, mes),
+      serie: serieMensal(dados.transacoes, 6),
+      gastos,
+      limite,
+      gastoOrcado,
+      recentes: ordenarPorDataDesc(dados.transacoes).slice(0, 6),
+      saldo: saldoTotal(dados.contas),
+    };
+  }, [dados, mes]);
 
   return (
     <div className="page-container animate-fade-in">
-      
-      <header className="page-header">
-        <div>
-          <p className="page-eyebrow">Visão geral</p>
-          <h1 className="page-title">
-            {primeiroNome ? `Olá, ${primeiroNome} ` : "Dashboard"}
-          </h1>
-          <p className="page-subtitle">
-            Gerencie seus pagamentos e transações em um só lugar.
-          </p>
-        </div>
+      <PageHeader
+        eyebrow={nomeDoMes(mes) + " de " + mes.slice(0, 4)}
+        title={primeiroNome ? `${saudacao()}, ${primeiroNome}` : "Visão geral"}
+        subtitle="Acompanhe quanto entra, quanto sai e quanto você está guardando."
+        actions={
+          <>
+            <Link href="/ia" className="btn btn-ghost">
+              <Sparkles size={16} /> Ler comprovante
+            </Link>
+            <ExportarPlanilha />
+            <Link href="/novaTransacao" className="btn btn-primary">
+              <Plus size={17} /> Nova transação
+            </Link>
+          </>
+        }
+      />
 
-        <div className="flex items-center gap-3">
-          <ExportarPlanilha />
-          <Link
-            href="/novaTransacao"
-            className="btn btn-primary"
-          >
-            <Plus size={17} />
-            Nova Transação
-          </Link>
+      {erro && (
+        <div className="card flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted">Não foi possível carregar seus dados.</p>
+          <button type="button" className="btn btn-ghost h-10" onClick={tentarNovamente}>
+            Tentar novamente
+          </button>
         </div>
-      </header>
+      )}
 
-      
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
-        
-        <div className="flex flex-col gap-5 lg:col-span-1">
-          <SaldoTotal />
-          <MinhasContas />
-          <DespesaPorCategoria />
+      {!calculos && !erro && (
+        <div className="grid gap-5 lg:grid-cols-3">
+          <SkeletonCard altura={260} className="lg:col-span-2" />
+          <SkeletonCard altura={260} />
+          <SkeletonCard altura={340} className="lg:col-span-2" />
+          <SkeletonCard altura={340} />
         </div>
+      )}
 
-        
-        <div className="flex flex-col gap-5 lg:col-span-2">
-          <ResumoTransacoes />
-          <TransacoesRecentes />
+      {calculos && (
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <CardEconomia saldoContas={calculos.saldo} resumo={calculos.resumo} nomeMes={nomeDoMes(mes)} />
+          </div>
+          <CardOrcamento
+            gasto={calculos.gastoOrcado}
+            limite={calculos.limite}
+            diasRestantes={diasRestantesNoMes()}
+          />
+
+          <div className="lg:col-span-2">
+            <FluxoCaixa serie={calculos.serie} />
+          </div>
+          <GastosCategoria gastos={calculos.gastos} />
+
+          <div className="lg:col-span-2">
+            <TransacoesRecentes transacoes={calculos.recentes} />
+          </div>
+          <ContasResumo contas={dados!.contas} />
         </div>
-      </div>
+      )}
     </div>
   );
 }

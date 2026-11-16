@@ -1,8 +1,10 @@
 "use client";
 
+import { formatarNomeCategoria } from "@/app/lib/financas";
 import { listarCategoria } from "@/app/services/categoria.service";
 import { listarConta } from "@/app/services/conta.service";
 import { criarTransacao } from "@/app/services/transacao.service";
+import { mensagemDeErro } from "@/app/lib/erros";
 import Button from "@/app/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,7 +14,7 @@ interface CreateTransacao {
   tipoTransacao: "ENTRADA" | "SAIDA";
   valor: number;
   descricao?: string;
-  data: Date;
+  data: string;
   contaId: number;
   categoriaId?: number;
 }
@@ -53,6 +55,7 @@ function NovaTransacao() {
  
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
+  const [aviso, setAviso] = useState("");
 
   useEffect(() => {
     async function carregarDados() {
@@ -70,6 +73,7 @@ function NovaTransacao() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+    setAviso("");
 
     if (!valor || !contaId || !data) {
       setErro("Preencha o valor, a conta e a data para continuar.");
@@ -80,17 +84,27 @@ function NovaTransacao() {
       tipoTransacao,
       valor: Number(valor),
       descricao: descricao.trim() || undefined,
-      data: new Date(data),
+      data, // YYYY-MM-DD do <input type="date">
       contaId,
       categoriaId: categoriaId ?? undefined,
     };
 
     try {
       setCarregando(true);
-      await criarTransacao(dados);
+      const resultado = await criarTransacao(dados);
+      if (resultado.offline) {
+        setAviso(
+          "Você está sem conexão. A transação foi guardada e será enviada automaticamente quando a internet voltar.",
+        );
+        setValor("");
+        setDescricao("");
+        return;
+      }
       router.push("/dashboard");
-    } catch {
-      setErro("Não foi possível salvar a transação. Tente novamente.");
+    } catch (error) {
+      setErro(
+        mensagemDeErro(error, "Não foi possível salvar a transação. Tente novamente."),
+      );
     } finally {
       setCarregando(false);
     }
@@ -219,7 +233,7 @@ function NovaTransacao() {
                     <option value="">Selecione uma categoria</option>
                     {categorias.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.nome.charAt(0).toUpperCase() + c.nome.slice(1).toLowerCase()}
+                        {formatarNomeCategoria(c.nome)}
                       </option>
                     ))}
                   </select>
@@ -272,6 +286,15 @@ function NovaTransacao() {
                   className="rounded-xl border border-expense/20 bg-expense-light px-4 py-3 text-sm font-medium text-expense animate-fade-in"
                 >
                   {erro}
+                </div>
+              )}
+
+              {aviso && (
+                <div
+                  role="status"
+                  className="rounded-xl border border-income/20 bg-income-light px-4 py-3 text-sm font-medium text-income animate-fade-in"
+                >
+                  {aviso}
                 </div>
               )}
 

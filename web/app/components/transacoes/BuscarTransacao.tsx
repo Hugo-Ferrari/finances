@@ -1,4 +1,5 @@
 "use client";
+import { formatarNomeCategoria } from "@/app/lib/financas";
 
 import { listarCategoria } from "@/app/services/categoria.service";
 import { listarConta } from "@/app/services/conta.service";
@@ -132,7 +133,7 @@ function BuscarTransacao({ filtros, onChange }: BuscarTransacaoProps) {
             <option value="">Todas</option>
             {categorias.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.nome}
+                {formatarNomeCategoria(c.nome)}
               </option>
             ))}
           </select>
@@ -140,20 +141,20 @@ function BuscarTransacao({ filtros, onChange }: BuscarTransacaoProps) {
 
        
         <div className="flex flex-col gap-1.5">
-          <label className="form-label">Ativo</label>
+          <label className="form-label">Contas</label>
           <button
             type="button"
             role="switch"
             aria-checked={filtros.ativo}
             onClick={() => atualizar({ ativo: !filtros.ativo })}
-            className={`relative h-[2.75rem] w-full rounded-xl border transition-colors ${
+            className={`relative h-[2.75rem] w-full whitespace-nowrap rounded-xl border px-4 transition-colors xl:min-w-[9.5rem] ${
               filtros.ativo
                 ? "border-accent bg-accent-light"
                 : "border-border bg-background"
             }`}
           >
             <span className="text-xs font-semibold text-foreground">
-              {filtros.ativo ? "Somente ativos" : "Todos"}
+              {filtros.ativo ? "Só as ativas" : "Todas as contas"}
             </span>
           </button>
         </div>

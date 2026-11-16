@@ -4,10 +4,13 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { TransacaoRepository } from './transacao.repository';
 import { createTransacaoDto } from './dto/createTransacaoDto';
 import { updateTransacaoDto } from './dto/updateTransacaoDto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { dataDaTransacao } from 'src/common/datas';
+import { Decimal } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class TransacaoService {
@@ -18,8 +21,26 @@ export class TransacaoService {
   ) {}
   //criar(), listar(),buscarPorId(), listarPorConta, listarPorCategoria,ListarPorPerido, atualizar(),remover(), obterResumo
 
+  private async validarCategoria(
+    categoriaId: number | undefined,
+    usuarioId: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    if (categoriaId === undefined) return;
+
+    const categoria = await tx.categoria.findFirst({
+      where: { id: categoriaId, usuarioId },
+    });
+    if (!categoria)
+      throw new ForbiddenException(
+        'Categoria não encontrada ou não pertence a você',
+      );
+  }
+
   async criar(dto: createTransacaoDto, usuarioId: number) {
     return this.prisma.$transaction(async (tx) => {
+      await this.validarCategoria(dto.categoriaId, usuarioId, tx);
+
       const conta = await this.contaRepository.buscarPorId(
         dto.contaId,
         usuarioId,
@@ -32,30 +53,24 @@ export class TransacaoService {
       if (conta.ativa === false)
         throw new BadRequestException('Conta está inativa');
 
-      if (dto.tipoTransacao === 'ENTRADA') {
-        const novoSaldo = conta.saldo.add(dto.valor);
-        await this.contaRepository.atualizarSaldo(
-          conta.id,
-          novoSaldo,
-          usuarioId,
-          tx,
-        );
-      } else if (dto.tipoTransacao === 'SAIDA') {
-        if (conta.saldo.lt(dto.valor)) {
-          throw new BadRequestException(
-            'Saldo indisponivel para realizar essa transação',
-          );
-        }
-        const novoSaldo = conta.saldo.sub(dto.valor);
-        await this.contaRepository.atualizarSaldo(
-          conta.id,
-          novoSaldo,
-          usuarioId,
-          tx,
+      const valor = new Decimal(dto.valor);
+      const delta = dto.tipoTransacao === 'ENTRADA' ? valor : valor.neg();
+      const ok = await this.contaRepository.ajustarSaldo(
+        conta.id,
+        delta,
+        tx,
+        true,
+      );
+      if (!ok) {
+        throw new BadRequestException(
+          'Saldo indisponivel para realizar essa transação',
         );
       }
 
-      return this.repository.criarTransacao(dto, tx);
+      return this.repository.criarTransacao(
+        { ...dto, data: dataDaTransacao(dto.data) },
+        tx,
+      );
     });
   }
 
@@ -80,6 +95,8 @@ export class TransacaoService {
       const transacao = await this.repository.buscarPorId(id, usuarioId, tx);
       if (!transacao) throw new BadRequestException('transação não encontrada');
 
+      await this.validarCategoria(dto.categoriaId, usuarioId, tx);
+
       if (dto.valor !== undefined) {
         const conta = await this.contaRepository.buscarPorId(
           transacao.contaId,
@@ -90,32 +107,28 @@ export class TransacaoService {
         if (conta.ativa === false)
           throw new BadRequestException('Conta está inativa');
 
-        let novoSaldo = conta.saldo;
-
-        if (transacao.tipoTransacao === 'ENTRADA') {
-          novoSaldo = novoSaldo.sub(transacao.valor);
-        } else {
-          novoSaldo = novoSaldo.add(transacao.valor);
-        }
-
-        if (transacao.tipoTransacao === 'ENTRADA') {
-          novoSaldo = novoSaldo.add(dto.valor);
-        } else {
-          if (novoSaldo.lt(dto.valor)) {
-            throw new BadRequestException(
-              'Saldo indisponivel para atualizar essa transação',
-            );
-          }
-          novoSaldo = novoSaldo.sub(dto.valor);
-        }
-        await this.contaRepository.atualizarSaldo(
+        // Diferença entre o valor novo e o antigo, com o sinal do tipo.
+        const diferenca = new Decimal(dto.valor).sub(transacao.valor);
+        const delta =
+          transacao.tipoTransacao === 'ENTRADA' ? diferenca : diferenca.neg();
+        const ok = await this.contaRepository.ajustarSaldo(
           conta.id,
-          novoSaldo,
-          usuarioId,
+          delta,
           tx,
+          true,
         );
+        if (!ok) {
+          throw new BadRequestException(
+            'Saldo indisponivel para atualizar essa transação',
+          );
+        }
       }
-      return this.repository.atualizar(id, dto, usuarioId, tx);
+      return this.repository.atualizar(
+        id,
+        { ...dto, data: dto.data ? dataDaTransacao(dto.data) : undefined },
+        usuarioId,
+        tx,
+      );
     });
   }
   async remover(id: number, usuarioId: number) {
@@ -135,18 +148,12 @@ export class TransacaoService {
       );
 
       if (!conta) throw new BadRequestException('Conta inexistente ');
-      let novoSaldo = conta.saldo;
-      if (transacaoRemovida.tipoTransacao === 'ENTRADA') {
-        novoSaldo = novoSaldo.sub(transacaoRemovida.valor);
-      } else if (transacaoRemovida.tipoTransacao === 'SAIDA') {
-        novoSaldo = novoSaldo.add(transacaoRemovida.valor);
-      }
-      await this.contaRepository.atualizarSaldo(
-        conta.id,
-        novoSaldo,
-        usuarioId,
-        tx,
-      );
+      // Desfaz o efeito da transação no saldo.
+      const delta =
+        transacaoRemovida.tipoTransacao === 'ENTRADA'
+          ? transacaoRemovida.valor.neg()
+          : transacaoRemovida.valor;
+      await this.contaRepository.ajustarSaldo(conta.id, delta, tx);
 
       return this.repository.remover(id, usuarioId, tx);
     });
@@ -159,30 +166,35 @@ export class TransacaoService {
   async obterResumo(usuarioId: number, inicio: Date, fim: Date) {
     return this.repository.obterResumo(usuarioId, inicio, fim);
   }
-  async despesaPorCategoria(usuarioId: number) {
-    const despesas = await this.repository.despesaPorCategoria(usuarioId);
+  async despesaPorCategoria(
+    usuarioId: number,
+    periodo?: { inicio: Date; fim: Date },
+  ) {
+    const despesas = await this.repository.despesaPorCategoria(
+      usuarioId,
+      periodo,
+    );
     if (!despesas.length) {
       return [];
     }
-    const dados = await Promise.all(
-      despesas.map(async (item) => {
-        if (item.categoriaId === null) {
-          return {
-            categoriaId: null,
-            valor: item._sum.valor,
-            categoria: { nome: 'Sem categoria' },
-          };
-        }
-        const categoria = await this.prisma.categoria.findUnique({
-          where: { id: item.categoriaId },
-        });
-        return {
-          categoriaId: item.categoriaId,
-          valor: item._sum.valor,
-          categoria: { nome: categoria?.nome ?? 'Sem categoria' },
-        };
-      }),
-    );
+    const categoriaIds = despesas
+      .map((item) => item.categoriaId)
+      .filter((id): id is number => id !== null);
+    const categorias = await this.prisma.categoria.findMany({
+      where: { id: { in: categoriaIds }, usuarioId },
+      select: { id: true, nome: true },
+    });
+    const nomePorId = new Map(categorias.map((c) => [c.id, c.nome]));
+
+    const dados = despesas.map((item) => ({
+      categoriaId: item.categoriaId,
+      valor: item._sum.valor,
+      categoria: {
+        nome:
+          (item.categoriaId !== null && nomePorId.get(item.categoriaId)) ||
+          'Sem categoria',
+      },
+    }));
     return dados;
   }
 

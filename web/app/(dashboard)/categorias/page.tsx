@@ -1,28 +1,22 @@
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import DetalhesCategorias from "@/app/components/categoria/DetalhesCategorias";
-import OrcamentoMensalTotal from "@/app/components/categoria/OrcamentoMensalTotal";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default function Page() {
   return (
-    <div className="page-container">
-      
-      <header>
-        <p className="page-eyebrow">Planejamento</p>
-        <h1 className="page-title">Categorias e orçamento</h1>
-        <p className="page-subtitle">
-          Gerencie seus limites de gastos e acompanhe o uso por categoria.
-        </p>
-      </header>
-
-      
-      <OrcamentoMensalTotal />
-
-      
-      <section>
-        <h2 className="mb-5 text-lg font-bold tracking-tight text-primary">
-          Detalhamento por categoria
-        </h2>
-        <DetalhesCategorias />
-      </section>
+    <div className="page-container animate-fade-in">
+      <PageHeader
+        eyebrow="Planejamento"
+        title="Categorias e orçamento"
+        subtitle="Defina limites por categoria e veja onde dá para economizar."
+        actions={
+          <Link href="/novaCategoria" className="btn btn-primary">
+            <Plus size={17} /> Nova categoria
+          </Link>
+        }
+      />
+      <DetalhesCategorias />
     </div>
   );
 }

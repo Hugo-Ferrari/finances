@@ -7,42 +7,54 @@
 
 :root {
   /* ── Superfícies ─────────────────────────────────────────── */
-  --background:     #f5f6fa;
+  --background:     #f3f6f5;
   --surface:        #ffffff;
-  --surface-dim:    #eaebf2;
-  --surface-hover:  #f0f1f8;
+  --surface-dim:    #ebf0ee;
+  --surface-hover:  #f5f8f7;
 
-  /* ── Paleta principal ────────────────────────────────────── */
-  --primary:        #1a1f4b;
-  --primary-hover:  #141840;
-  --primary-light:  #eceeff;
+  /* ── Paleta principal (tinta azul-petróleo) ──────────────── */
+  --primary:        #0c2230;
+  --primary-hover:  #081a25;
+  --primary-light:  #e4f2ee;
 
-  /* ── Destaques ───────────────────────────────────────────── */
-  --secondary:      #5ee7d4;
-  --accent:         #6c63ff;
-  --accent-light:   #eeecff;
+  /* ── Destaques (verde-esmeralda = dinheiro guardado) ─────── */
+  --secondary:      #9ff0d3;
+  --accent:         #0b9b78;
+  --accent-light:   #e1f5ee;
 
   /* ── Estados financeiros ─────────────────────────────────── */
-  --income:         #16a870;
-  --income-light:   #dcf7ef;
-  --income-muted:   #a7e8cf;
+  --income:         #14975a;
+  --income-light:   #e0f6ea;
+  --income-muted:   #a8e3c3;
 
-  --expense:        #e03f3f;
-  --expense-light:  #fde8e8;
-  --expense-muted:  #f5b3b3;
+  --expense:        #d9434b;
+  --expense-light:  #fcebec;
+  --expense-muted:  #f3b8bb;
+
+  --warning:        #c27c0e;
+  --warning-light:  #fdf3e1;
+
+  /* ── Gráficos (categorias) ───────────────────────────────── */
+  --chart-1: #0b9b78;
+  --chart-2: #3b82f6;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #ef5a6f;
+  --chart-6: #06b6d4;
+  --chart-7: #94a3b8;
 
   /* ── Texto ───────────────────────────────────────────────── */
-  --foreground:     #141629;
-  --muted:          #6b6e88;
-  --muted-light:    #9ea1bb;
+  --foreground:     #0f1d26;
+  --muted:          #5c6b74;
+  --muted-light:    #95a3ab;
 
   /* ── Bordas & sombras ────────────────────────────────────── */
-  --border:         #e3e4ed;
-  --border-focus:   #6c63ff;
-  --shadow-xs:      0 1px 3px rgba(20, 22, 41, 0.06);
-  --shadow-sm:      0 2px 8px rgba(20, 22, 41, 0.08);
-  --shadow-md:      0 6px 24px rgba(20, 22, 41, 0.1);
-  --shadow-lg:      0 12px 40px rgba(20, 22, 41, 0.12);
+  --border:         #e1e8e5;
+  --border-focus:   #0b9b78;
+  --shadow-xs:      0 1px 2px rgba(12, 34, 48, 0.05);
+  --shadow-sm:      0 2px 8px rgba(12, 34, 48, 0.06);
+  --shadow-md:      0 8px 24px rgba(12, 34, 48, 0.08);
+  --shadow-lg:      0 16px 48px rgba(12, 34, 48, 0.14);
 
   /* ── Raios de borda ──────────────────────────────────────── */
   --radius-sm:      0.5rem;
@@ -81,6 +93,9 @@
   --color-income:         var(--income);
   --color-income-light:   var(--income-light);
 
+  --color-warning:        var(--warning);
+  --color-warning-light:  var(--warning-light);
+
   --color-expense:        var(--expense);
   --color-expense-light:  var(--expense-light);
 
@@ -109,8 +124,8 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(ellipse 80% 50% at 100% -10%, rgba(108, 99, 255, 0.07), transparent),
-    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(94, 231, 212, 0.06), transparent),
+    radial-gradient(ellipse 70% 45% at 100% -10%, rgba(11, 155, 120, 0.08), transparent),
+    radial-gradient(ellipse 50% 35% at 0% 100%, rgba(59, 130, 246, 0.04), transparent),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
@@ -144,7 +159,69 @@ button {
 }
 
 .card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Números alinhados (valores monetários) */
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Card de destaque (saldo / economia) */
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(159, 240, 211, 0.28), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgba(11, 155, 120, 0.35), transparent 50%),
+    linear-gradient(135deg, #0c2230 0%, #0f3a3f 55%, #0b6b58 100%);
   box-shadow: var(--shadow-md);
+}
+
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(120deg, transparent 30%, #000 100%);
+  pointer-events: none;
+}
+
+/* Barra de progresso */
+.progress {
+  height: 0.5rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-dim);
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chip de categoria */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 100%;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-dim);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Badge */
@@ -263,7 +340,7 @@ button {
 .form-input:focus,
 .form-select:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(11, 155, 120, 0.14);
 }
 
 /* Label de formulário */

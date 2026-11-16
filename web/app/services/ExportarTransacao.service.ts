@@ -1,11 +1,14 @@
+import { formatarData } from "@/app/lib/formatters";
 import * as XLSX from "xlsx";
 import { listarTodasTransacoes } from "./transacao.service";
 
-export async function exportarTransacoes() {
+/** Gera o .xlsx. Retorna false quando não há transações para exportar. */
+export async function exportarTransacoes(): Promise<boolean> {
   const transacoes = await listarTodasTransacoes();
+  if (transacoes.length === 0) return false;
 
   const dados = transacoes.map((transacao) => ({
-    Data: new Intl.DateTimeFormat("pt-BR").format(new Date(transacao.data)),
+    Data: formatarData(transacao.data),
     Descrição: transacao.descricao ?? "Sem descrição",
     Tipo: transacao.tipoTransacao === "ENTRADA" ? "Entrada" : "Saída",
     Categoria: transacao.categoria?.nome ?? "Sem categoria",
@@ -52,4 +55,5 @@ export async function exportarTransacoes() {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Transações");
 
   XLSX.writeFile(workbook, "transacoes.xlsx");
+  return true;
 }

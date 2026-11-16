@@ -4,8 +4,11 @@ import {
   Post,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { ThrottlerPorContaGuard } from 'src/common/guards/throttler-por-conta.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 
@@ -22,6 +25,8 @@ export class ControllerIA {
   constructor(private readonly serviceIa: IaService) {}
 
   @Post('comprovante')
+  @UseGuards(ThrottlerPorContaGuard)
+  @Throttle({ default: { limit: 20, ttl: 60 * 60_000 } })
   @UseInterceptors(
     FileInterceptor('imagem', { limits: { fileSize: TAMANHO_MAXIMO_ARQUIVO } }),
   )
@@ -34,7 +39,9 @@ export class ControllerIA {
     }
 
     if (
-      !(TIPOS_ARQUIVO_PERMITIDOS as readonly string[]).includes(arquivo.mimetype)
+      !(TIPOS_ARQUIVO_PERMITIDOS as readonly string[]).includes(
+        arquivo.mimetype,
+      )
     ) {
       throw new BadRequestException(
         'Formato inválido. Envie JPG, PNG, WEBP ou PDF.',

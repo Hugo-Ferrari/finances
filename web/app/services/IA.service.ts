@@ -7,13 +7,7 @@ export async function RegistroDeComprovanteIA(arquivo: File): Promise<RegistroDe
 
     formData.append('imagem', arquivo)
 
-    try{
-        const response = await api.post('/ia/comprovante', formData)
-        return response.data
-    }
-    catch(erro){
-        console.log("Erro ao enviar comprovante: ", erro )
-        throw erro
-    }
+    const response = await api.post('/ia/comprovante', formData)
+    return response.data
    
 }

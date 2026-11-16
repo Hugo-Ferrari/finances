@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   LogOut,
   LucideIcon,
-  Menu,
   Settings,
   Tags,
   X,
@@ -37,17 +36,26 @@ const NAV_ITEMS: NavItemDef[] = [
   { id: "ia",         label: "IA",           icon: Bot,           href: "/ia" },
 ];
 
+// No celular a barra inferior não tem rodapé: Configurações entra na lista.
+const ITEM_CONFIGURACOES: NavItemDef = {
+  id: "configuracoes",
+  label: "Ajustes",
+  icon: Settings,
+  href: "/configuracoes",
+};
+
 
 interface NavLinkProps {
   item: NavItemDef;
   isActive: boolean;
   expanded: boolean;
+  className?: string;
 }
 
-function NavLink({ item, isActive, expanded }: NavLinkProps) {
+function NavLink({ item, isActive, expanded, className }: NavLinkProps) {
   const Icon = item.icon;
   return (
-    <li>
+    <li className={className}>
       <Link
         href={item.href}
         aria-current={isActive ? "page" : undefined}
@@ -55,8 +63,8 @@ function NavLink({ item, isActive, expanded }: NavLinkProps) {
           "flex h-11 items-center rounded-xl text-sm transition-all duration-200",
           expanded ? "gap-3 px-3" : "justify-center",
           isActive
-            ? "bg-primary font-semibold text-white shadow-sm"
-            : "text-muted hover:bg-primary-light hover:text-primary",
+            ? "bg-primary font-semibold text-white shadow-sm ring-1 ring-accent/30"
+            : "text-muted hover:bg-accent-light hover:text-accent",
         ].join(" ")}
       >
         <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className="shrink-0" />
@@ -128,7 +136,13 @@ function NavBar() {
           aria-label={toggleLabel}
           className="flex h-9 w-9 items-center justify-center rounded-xl text-muted transition-colors hover:bg-primary-light hover:text-primary"
         >
-          {expanded ? <X size={18} /> : <Menu size={20} />}
+          {expanded ? (
+            <X size={18} />
+          ) : (
+            <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-primary">
+              <Image src="/icons/icon-192.png" alt="" width={36} height={36} />
+            </span>
+          )}
         </button>
       </div>
 
@@ -142,6 +156,12 @@ function NavBar() {
             expanded={expanded}
           />
         ))}
+        <NavLink
+          item={ITEM_CONFIGURACOES}
+          isActive={pathname === ITEM_CONFIGURACOES.href}
+          expanded={expanded}
+          className="sm:hidden"
+        />
       </ul>
 
       

@@ -1,92 +1,139 @@
 "use client";
 
-import BuscarTransacao, {
-  FiltrosTransacao,
-} from "@/app/components/transacoes/BuscarTransacao";
-import HistoricoTransacao from "@/app/components/transacoes/HistoricoTransacao";
-import ListaTransacao from "@/app/components/transacoes/ListaTransacao";
-import { obterResumoTotal } from "@/app/services/transacao.service";
-import { ArrowUpRight, ChevronDown, ChevronUp, Wallet } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ArrowDownRight, ArrowUpRight, PiggyBank, Plus } from "lucide-react";
+
+import PageHeader from "@/app/components/ui/PageHeader";
+import BuscarTransacao, { FiltrosTransacao } from "@/app/components/transacoes/BuscarTransacao";
+import ListaTransacao from "@/app/components/transacoes/ListaTransacao";
+import ExportarPlanilha from "@/app/components/transacoes/ExportarPlanilha";
+import { listarTodasTransacoes } from "@/app/services/transacao.service";
+import { filtrarTransacoes } from "@/app/lib/filtrarTransacoes";
+import { formatarMoeda } from "@/app/lib/formatters";
+import { Transacao } from "@/app/types/transacao";
 
 const FILTROS_INICIAIS: FiltrosTransacao = {
   busca: "",
-  periodo: "",
+  periodo: "mes",
   conta: null,
   categoria: null,
   ativo: true,
 };
 
-type Resumo = { totalEntradas: string; totalSaidas: string };
+const ROTULO_PERIODO: Record<string, string> = {
+  "": "Todo o período",
+  hoje: "Hoje",
+  semana: "Esta semana",
+  mes: "Este mês",
+  ano: "Este ano",
+};
+
+function Metrica({
+  rotulo,
+  valor,
+  icone,
+  destaque = false,
+  cor,
+}: {
+  rotulo: string;
+  valor: number;
+  icone: React.ReactNode;
+  destaque?: boolean;
+  cor: string;
+}) {
+  return (
+    <div className={destaque ? "hero-card p-5" : "card p-5"}>
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-xs font-medium ${destaque ? "text-white/70" : "text-muted"}`}>{rotulo}</p>
+          <p className={`num mt-1 truncate text-2xl font-extrabold ${cor}`}>{formatarMoeda(valor)}</p>
+        </div>
+        <span
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+            destaque ? "bg-white/10 text-secondary" : "bg-surface-dim"
+          } ${destaque ? "" : cor}`}
+        >
+          {icone}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function Page() {
-  const [resumo, setResumo] = useState<Resumo>({ totalEntradas: "0", totalSaidas: "0" });
+  const [transacoes, setTransacoes] = useState<Transacao[] | null>(null);
+  const [erro, setErro] = useState(false);
   const [filtros, setFiltros] = useState<FiltrosTransacao>(FILTROS_INICIAIS);
 
   useEffect(() => {
-    async function carregarResumo() {
-      try {
-        const dados = await obterResumoTotal();
-        setResumo(dados);
-      } catch (error) {
-        console.error("Erro ao carregar resumo:", error);
-      }
-    }
-    carregarResumo();
+    listarTodasTransacoes()
+      .then(setTransacoes)
+      .catch(() => setErro(true));
   }, []);
 
-  const entradas = Number(resumo.totalEntradas);
-  const saidas = Number(resumo.totalSaidas);
-  const saldoPeriodo = entradas - saidas;
+  const filtradas = useMemo(
+    () => (transacoes ? filtrarTransacoes(transacoes, filtros) : []),
+    [transacoes, filtros],
+  );
+
+  const entradas = filtradas.filter((t) => t.tipoTransacao === "ENTRADA").reduce((s, t) => s + Number(t.valor), 0);
+  const saidas = filtradas.filter((t) => t.tipoTransacao === "SAIDA").reduce((s, t) => s + Number(t.valor), 0);
+  const resultado = entradas - saidas;
 
   return (
     <div className="page-container animate-fade-in">
-      
-      <header className="page-header">
-        <div>
-          <p className="page-eyebrow">Movimentações</p>
-          <h1 className="page-title">Histórico de transações</h1>
-          <p className="page-subtitle">
-            Acompanhe e gerencie todas as suas movimentações financeiras.
-          </p>
-        </div>
+      <PageHeader
+        eyebrow="Movimentações"
+        title="Transações"
+        subtitle="Tudo o que entrou e saiu, com filtros para encontrar o que precisa."
+        actions={
+          <>
+            <ExportarPlanilha />
+            <Link href="/novaTransacao" className="btn btn-primary">
+              <Plus size={17} /> Nova transação
+            </Link>
+          </>
+        }
+      />
 
-        <Link
-          href="/novaTransacao"
-          className="btn btn-primary"
-        >
-          Nova transação
-          <ArrowUpRight size={16} />
-        </Link>
-      </header>
-
-      
-      <section aria-label="Resumo financeiro">
+      <section aria-label="Resumo do período">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-primary">Resumo do período</h2>
-          <span className="text-xs text-muted">Valores acumulados</span>
+          <h2 className="text-sm font-bold text-primary">Resumo</h2>
+          <span className="chip">{ROTULO_PERIODO[filtros.periodo] ?? "Período filtrado"}</span>
         </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <HistoricoTransacao tipo="ENTRADA" text="Total de Entradas" valor={entradas}      icones={ChevronUp}   />
-          <HistoricoTransacao tipo="SAIDA"   text="Total de Saídas"   valor={saidas}        icones={ChevronDown} />
-          <HistoricoTransacao tipo="PERIODO" text="Saldo do Período"  valor={saldoPeriodo}  icones={Wallet}      />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Metrica rotulo="Entradas" valor={entradas} icone={<ArrowUpRight size={20} />} cor="text-income" />
+          <Metrica rotulo="Saídas" valor={saidas} icone={<ArrowDownRight size={20} />} cor="text-expense" />
+          <Metrica
+            rotulo={resultado >= 0 ? "Você guardou" : "Gastou além do que entrou"}
+            valor={resultado}
+            icone={<PiggyBank size={20} />}
+            destaque
+            cor="text-white"
+          />
         </div>
       </section>
 
-     
       <section className="flex flex-col gap-4" aria-label="Lista de transações">
         <BuscarTransacao filtros={filtros} onChange={setFiltros} />
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-          <div className="border-b border-border px-5 py-4 sm:px-6">
-            <h2 className="text-sm font-bold text-primary">Todas as transações</h2>
-            <p className="mt-0.5 text-xs text-muted">
-              Consulte os detalhes das suas movimentações
-            </p>
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4 sm:px-6">
+            <h2 className="text-sm font-bold text-primary">Movimentações</h2>
+            <span className="num text-xs text-muted">
+              {filtradas.length} {filtradas.length === 1 ? "transação" : "transações"}
+            </span>
           </div>
-          <ListaTransacao filtros={filtros} />
+          {erro ? (
+            <p className="p-6 text-sm text-expense">Não foi possível carregar as transações.</p>
+          ) : transacoes === null ? (
+            <div className="flex flex-col gap-3 p-6">
+              {[0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-12 w-full" />)}
+            </div>
+          ) : (
+            <ListaTransacao key={JSON.stringify(filtros)} transacoes={filtradas} />
+          )}
         </div>
       </section>
     </div>

@@ -2,7 +2,7 @@ import { defaultCache } from "@serwist/next/worker";
 
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
-import { Serwist } from "serwist";
+import { NetworkOnly, Serwist } from "serwist";
 
 declare global {
   interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
@@ -28,7 +28,16 @@ const serwist = new Serwist({
     ],
   },
 
-  runtimeCaching: defaultCache,
+  runtimeCaching: [
+    // Dados da API nunca vêm do cache: evita mostrar saldo/usuário antigos
+    // (ou de outra pessoa no mesmo aparelho) quando o servidor demora.
+    {
+      matcher: ({ sameOrigin, url: { pathname } }) =>
+        sameOrigin && pathname.startsWith("/api/"),
+      handler: new NetworkOnly(),
+    },
+    ...defaultCache,
+  ],
 });
 
 serwist.addEventListeners();

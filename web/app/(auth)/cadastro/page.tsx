@@ -1,80 +1,15 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, TrendingUp, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import NextImage from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cadastro } from "../../services/auth.service";
 import Button from "../../components/ui/Button";
+import PainelAuth from "../../components/PainelAuth";
 
 
-function PainelDecorativo() {
-  return (
-    <aside
-      className="relative hidden min-h-screen overflow-hidden bg-primary p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14"
-      aria-hidden="true"
-    >
-      
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      
-      <div className="absolute -right-24 -top-24 h-[480px] w-[480px] rounded-full bg-accent/15 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 h-[420px] w-[420px] rounded-full bg-secondary/8 blur-3xl" />
-
-      
-      <div className="relative z-10">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/8 px-4 py-2 text-xs font-semibold text-secondary">
-          <TrendingUp size={14} />
-          Comece sua organização financeira
-        </div>
-        <h2 className="text-4xl font-extrabold leading-[1.1] tracking-tight xl:text-[2.75rem]">
-          Sua vida financeira,<br />mais clara e organizada.
-        </h2>
-        <p className="mt-5 max-w-md text-[15px] leading-7 text-white/55">
-          Crie sua conta e tenha uma visão simples das suas receitas, despesas,
-          contas e objetivos financeiros — tudo em um só lugar.
-        </p>
-      </div>
-
-      
-      <div className="relative z-10 pb-4">
-        <div className="relative w-full max-w-sm rounded-2xl bg-surface p-5 text-foreground shadow-2xl">
-          <p className="text-xs font-semibold text-muted">Meta do mês</p>
-          <p className="mt-1 text-xl font-bold text-foreground">Guardar R$ 1.200,00</p>
-
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-surface-dim">
-            <div className="h-full w-[68%] rounded-full bg-accent" />
-          </div>
-          <p className="mt-2 text-xs text-muted">68% da meta alcançada</p>
-
-          
-          <div className="absolute -right-4 -top-5 flex items-center gap-2 rounded-xl bg-income-light px-4 py-2.5 shadow-lg">
-            <TrendingUp size={14} className="text-income" />
-            <div className="leading-tight">
-              <p className="text-[10px] font-medium text-income/70">Economia</p>
-              <p className="text-sm font-bold text-income">+R$ 350,40</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      
-      <div className="relative z-10 flex justify-center gap-2">
-        <span className="h-1.5 w-5 rounded-full bg-secondary" />
-        <span className="h-1.5 w-1.5 rounded-full bg-white/25" />
-        <span className="h-1.5 w-1.5 rounded-full bg-white/25" />
-      </div>
-    </aside>
-  );
-}
 
 
 function CadastroPage() {
@@ -253,7 +188,7 @@ function CadastroPage() {
         </section>
 
         
-        <PainelDecorativo />
+        <PainelAuth />
       </div>
     </main>
   );

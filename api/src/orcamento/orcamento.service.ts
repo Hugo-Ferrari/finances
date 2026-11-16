@@ -27,23 +27,11 @@ export class OrcamentoService {
     return this.repository.listar(usuarioId);
   }
 
-  async atualizar(
-    usuarioId: number,
-    dados: UpdateOrcamento,
-    id: number,
-    categoriaId: number,
-  ) {
-    const user = await this.usuarioRespository.buscarPorId(usuarioId);
-    if (!user) throw new BadRequestException('Usuario não encontrado');
-    const categoria = await this.CategoriaRepository.buscarPorId(
-      categoriaId,
-      usuarioId,
-    );
-    if (!categoria) throw new BadRequestException('Categoria não encontrado');
-    return this.repository.atualizar(dados, id, usuarioId);
+  async atualizar(id: number, dados: UpdateOrcamento, usuarioId: number) {
+    return this.repository.atualizar(id, dados, usuarioId);
   }
 
-  async delete(usuarioId: number, id: number) {
+  async delete(id: number, usuarioId: number) {
     return this.repository.delete(id, usuarioId);
   }
 }

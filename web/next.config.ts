@@ -3,6 +3,10 @@ import withSerwistInit from "@serwist/next";
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
+  // Não recarregar a página quando a internet volta: o reload interrompia
+  // o envio da fila offline (transação duplicada) e fazia a tela "piscar".
+  // A sincronização é feita pelo useOfflineSync.
+  reloadOnOnline: false,
 });
 
 const BACKEND_URL =

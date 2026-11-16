@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,6 +23,7 @@ export class ContaService {
 
   async atualizar(id: number, dto: UpdateContaDto, usuarioId: number) {
     const response = await this.repository.atualizar(id, dto, usuarioId);
+    if (!response) throw new NotFoundException('Conta não encontrada');
     return response;
   }
 
@@ -33,9 +34,16 @@ export class ContaService {
   }
 
   async deletar(id: number, usuarioId: number) {
-    const response = await this.repository.remover(id, usuarioId);
-    if (response.count === 0)
-      throw new BadRequestException('Conta não encontrada');
+    const conta = await this.repository.buscarPorId(id, usuarioId);
+    if (!conta) throw new NotFoundException('Conta não encontrada');
+
+    if (await this.repository.possuiTransacoes(id)) {
+      throw new ConflictException(
+        'Esta conta tem transações registradas e não pode ser excluída.',
+      );
+    }
+
+    await this.repository.remover(id, usuarioId);
     return { mensagem: 'Conta removida com sucesso' };
   }
 }

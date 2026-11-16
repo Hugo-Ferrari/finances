@@ -1,216 +1,183 @@
 "use client";
 
-import {
-  deletarCategoria,
-  listarCategoria,
-} from "@/app/services/categoria.service";
+import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
+
+import { deletarCategoria, listarCategoria } from "@/app/services/categoria.service";
 import { listarOrcamento } from "@/app/services/orcamento.service";
-import React, { useEffect, useState } from "react";
-import { Home, MoreVertical } from "lucide-react";
-import CriarCategoria from "./CriarCategoria";
 import { ListarDespesasCategoria } from "@/app/services/transacao.service";
+import { formatarMoeda, intervaloMesAtual } from "@/app/lib/formatters";
+import { diasRestantesNoMes, formatarNomeCategoria, Orcamento } from "@/app/lib/financas";
+import { mensagemDeErro } from "@/app/lib/erros";
 import { DespesaCategoria } from "@/app/types/categoria";
-import { useCategoriaIconeStore } from "@/app/store/categoriaIcone.store";
-import { iconesCategoria } from "./iconesCategoria";
-import { formatarMoeda } from "@/app/lib/formatters";
+import CardOrcamento from "@/app/components/dashboard/CardOrcamento";
+import SkeletonCard from "@/app/components/ui/Skeleton";
+import CriarCategoria from "./CriarCategoria";
+import IconeCategoria from "./IconeCategoria";
 
-type Orcamento = {
-  id: number;
-  valor: number | string;
-  categoriaId: number;
-};
+type Categoria = { id: number; nome: string };
+type Dados = { categorias: Categoria[]; orcamentos: Orcamento[]; despesas: DespesaCategoria[] };
 
-type Categoria = {
-  id: number;
-  nome: string;
-};
+function situacao(uso: number | null) {
+  if (uso === null) return { texto: "Sem limite", classe: "bg-surface-dim text-muted", cor: "var(--chart-7)" };
+  if (uso >= 1) return { texto: "Estourou", classe: "bg-expense-light text-expense", cor: "var(--expense)" };
+  if (uso >= 0.8) return { texto: "Atenção", classe: "bg-warning-light text-warning", cor: "var(--warning)" };
+  return { texto: "No controle", classe: "bg-income-light text-income", cor: "var(--accent)" };
+}
 
+/** Resumo do orçamento do mês e um card por categoria. */
 function DetalhesCategorias() {
-  const [orcamento, setOrcamento] = useState<Orcamento[]>([]);
-  const [categorias, setCategoria] = useState<Categoria[]>([]);
-  const [transacaoCategoria, setTransacaoCategoria] = useState<
-    DespesaCategoria[]
-  >([]);
-  const iconesSalvos = useCategoriaIconeStore((state) => state.icones);
-
-  const [modalAberto, setModalAberto] = useState(false);
-  const [categoriaParaExcluir, setCategoriaParaExcluir] =
-    useState<Categoria | null>(null);
+  const [dados, setDados] = useState<Dados | null>(null);
+  const [paraExcluir, setParaExcluir] = useState<Categoria | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState("");
 
-  async function handleExcluirCategoria() {
-    if (!categoriaParaExcluir) return;
+  useEffect(() => {
+    Promise.all([listarCategoria(), listarOrcamento(), ListarDespesasCategoria(intervaloMesAtual())])
+      .then(([categorias, orcamentos, despesas]) => setDados({ categorias, orcamentos, despesas }))
+      .catch(() => setDados({ categorias: [], orcamentos: [], despesas: [] }));
+  }, []);
 
+  async function excluir() {
+    if (!paraExcluir || !dados) return;
+    setExcluindo(true);
+    setErroExclusao("");
     try {
-      setExcluindo(true);
-
-      await deletarCategoria(categoriaParaExcluir.id);
-
-      setCategoria((categorias) =>
-        categorias.filter(
-          (categoria) => categoria.id !== categoriaParaExcluir.id,
-        ),
-      );
-
-      setCategoriaParaExcluir(null);
-      setModalAberto(false);
+      await deletarCategoria(paraExcluir.id);
+      setDados({ ...dados, categorias: dados.categorias.filter((c) => c.id !== paraExcluir.id) });
+      setParaExcluir(null);
     } catch (error) {
-      console.error(error);
+      setErroExclusao(mensagemDeErro(error, "Não foi possível excluir a categoria."));
     } finally {
       setExcluindo(false);
     }
   }
 
-  useEffect(() => {
-    async function carregarOrcamento() {
-      const dados = await listarOrcamento();
-      setOrcamento(dados);
-    }
+  if (!dados) {
+    return (
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <SkeletonCard altura={240} />
+        <SkeletonCard altura={240} />
+        <SkeletonCard altura={240} />
+      </div>
+    );
+  }
 
-    carregarOrcamento();
-  }, []);
+  const gastoDe = (id: number) =>
+    dados.despesas.filter((d) => d.categoriaId === id).reduce((t, d) => t + Number(d.valor ?? 0), 0);
+  const limiteDe = (id: number) => {
+    const o = dados.orcamentos.find((x) => x.categoriaId === id);
+    return o ? Number(o.valor) : null;
+  };
 
-  useEffect(() => {
-    async function carregarCategoria() {
-      const dados = await listarCategoria();
-      setCategoria(dados);
-    }
+  const limiteTotal = dados.orcamentos.reduce((t, o) => t + Number(o.valor), 0);
+  const gastoOrcado = dados.orcamentos.reduce((t, o) => t + gastoDe(o.categoriaId), 0);
 
-    carregarCategoria();
-  }, []);
+  const cards = dados.categorias
+    .map((c) => {
+      const gasto = gastoDe(c.id);
+      const limite = limiteDe(c.id);
+      return { ...c, gasto, limite, uso: limite ? gasto / limite : null };
+    })
+    .sort((a, b) => (b.uso ?? -1) - (a.uso ?? -1));
 
-  useEffect(() => {
-    async function carregarDespesaCategoria() {
-      const dados = await ListarDespesasCategoria();
-      setTransacaoCategoria(dados);
-    }
-    carregarDespesaCategoria();
-  }, []);
+  const estouradas = cards.filter((c) => c.uso !== null && c.uso >= 1).length;
 
   return (
-    <div className="flex flex-wrap gap-5">
-      {categorias.length === 0 ? (
-        <p className="text-sm text-muted">Nenhuma categoria encontrada</p>
-      ) : (
-        categorias.map((itemCat) => {
-          const orcamentoCategoria = orcamento.find(
-            (item) => item.categoriaId === itemCat.id,
-          );
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-5 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <CardOrcamento gasto={gastoOrcado} limite={limiteTotal} diasRestantes={diasRestantesNoMes()} />
+        </div>
+        <section className="card flex flex-col justify-center gap-3 p-6">
+          <p className="text-sm text-muted">Categorias no mês</p>
+          <p className="num text-3xl font-extrabold text-primary">{cards.length}</p>
+          <p className={`text-sm font-semibold ${estouradas ? "text-expense" : "text-income"}`}>
+            {estouradas
+              ? `${estouradas} ${estouradas === 1 ? "passou" : "passaram"} do limite`
+              : "Todas dentro do limite"}
+          </p>
+        </section>
+      </div>
 
-          const nomeCategoria =
-            itemCat.nome.charAt(0).toUpperCase() + itemCat.nome.slice(1);
-
-          const gasto = transacaoCategoria
-            .filter((item) => item.categoriaId === itemCat.id)
-            .reduce((total, item) => total + Number(item.valor ?? 0), 0);
-
-          const limite = Number(orcamentoCategoria?.valor ?? 0);
-
-          const percentual =
-            limite > 0 ? Math.min((gasto / limite) * 100, 100) : 0;
-          const Icone =
-            iconesCategoria.find(
-              (icone) => icone.nome === iconesSalvos[itemCat.id],
-            )?.componente ?? Home;
-          return (
-            <div
-              key={itemCat.id}
-              className="w-full  max-w-sm    rounded-2xl border     border-border  bg-surface   p-5  hover:shadow-md"
-            >
-              <div className="mb-5 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full ">
-                    <Icone size={20} className="text-foreground" />
-                  </div>
-
-                  <div>
-                    <h1 className="font-semibold text-foreground">
-                      {nomeCategoria}
-                    </h1>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="rounded-lg p-1 text-muted hover:bg-muted/50"
-                  onClick={() => {
-                    setCategoriaParaExcluir(itemCat);
-                    setModalAberto(true);
-                  }}
-                >
-                  <MoreVertical size={18} />
-                </button>
-              </div>
-
-              {orcamentoCategoria ? (
-                <>
-                  <div className="mb-2 flex items-baseline justify-between">
-                    <span className="text-2xl font-bold text-foreground">
-                      {formatarMoeda(orcamentoCategoria.valor)}
+      <section>
+        <h2 className="mb-4 text-base font-bold text-primary">Por categoria</h2>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {cards.map((c) => {
+            const s = situacao(c.uso);
+            return (
+              <article key={c.id} className="card flex flex-col p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                      style={{ background: `color-mix(in srgb, ${s.cor} 14%, transparent)`, color: s.cor }}
+                    >
+                      <IconeCategoria categoriaId={c.id} size={20} />
                     </span>
-
-                    <span className="text-sm text-muted">limite</span>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-bold text-foreground">{formatarNomeCategoria(c.nome)}</h3>
+                      <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${s.classe}`}>
+                        {s.texto}
+                      </span>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    aria-label={`Excluir categoria ${formatarNomeCategoria(c.nome)}`}
+                    onClick={() => {
+                      setErroExclusao("");
+                      setParaExcluir(c);
+                    }}
+                    className="rounded-lg p-1.5 text-muted-light transition hover:bg-expense-light hover:text-expense"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
 
-                  <div className="mb-2 h-2 overflow-hidden rounded-full bg-surface-dim">
-                    <div
-                      className={`h-full w-0 rounded-full transition-all ${percentual >= 100 ? "bg-expense" : "bg-income"}`}
-                      style={{ width: `${percentual}%` }}
-                    />
-                  </div>
-
-                  <p className="mb-4 text-right text-xs text-muted">
-                    {formatarMoeda(gasto)} gastos ({percentual.toFixed(0)}% do
-                    limite)
-                  </p>
-                </>
-              ) : (
-                <div className="mb-4 rounded-xl  p-3">
-                  <p className="text-sm text-muted">
-                    Essa categoria ainda não possui um orçamento definido.
+                <div className="mt-5 flex items-baseline justify-between gap-2">
+                  <p className="num text-2xl font-extrabold text-foreground">{formatarMoeda(c.gasto)}</p>
+                  <p className="num text-sm text-muted">
+                    {c.limite !== null ? `de ${formatarMoeda(c.limite)}` : "gastos no mês"}
                   </p>
                 </div>
-              )}
 
-              <hr className="mb-3 border-border" />
-            </div>
-          );
-        })
-      )}
-      <CriarCategoria />
-      {modalAberto && categoriaParaExcluir && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
-            <div>
-              <h2 className="text-lg font-bold text-foreground">
-                Excluir categoria
-              </h2>
+                {c.limite !== null && (
+                  <>
+                    <div className="progress mt-3">
+                      <span style={{ width: `${Math.min(c.uso ?? 0, 1) * 100}%`, background: s.cor }} />
+                    </div>
+                    <p className="num mt-2 text-xs text-muted">
+                      {c.limite - c.gasto >= 0
+                        ? `Ainda pode gastar ${formatarMoeda(c.limite - c.gasto)}`
+                        : `Passou ${formatarMoeda(c.gasto - c.limite)} do limite`}
+                    </p>
+                  </>
+                )}
+              </article>
+            );
+          })}
+          <CriarCategoria />
+        </div>
+      </section>
 
-              <p className="mt-2 text-sm text-muted">
-                Tem certeza que deseja excluir a categoria{" "}
-                <strong>{categoriaParaExcluir.nome}</strong>?
-              </p>
-            </div>
-
+      {paraExcluir && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="excluir-categoria-titulo">
+          <div className="modal-content">
+            <h2 id="excluir-categoria-titulo" className="text-lg font-bold text-foreground">
+              Excluir categoria
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Excluir <strong className="text-foreground">{formatarNomeCategoria(paraExcluir.nome)}</strong>? As
+              transações continuam salvas, apenas ficam sem categoria. O limite desta categoria também será
+              removido.
+            </p>
+            {erroExclusao && <p className="mt-3 text-sm font-medium text-expense">{erroExclusao}</p>}
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setModalAberto(false);
-                  setCategoriaParaExcluir(null);
-                }}
-                disabled={excluindo}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/10 disabled:opacity-50"
-              >
+              <button type="button" className="btn btn-ghost h-10" onClick={() => setParaExcluir(null)} disabled={excluindo}>
                 Cancelar
               </button>
-
-              <button
-                type="button"
-                onClick={handleExcluirCategoria}
-                disabled={excluindo}
-                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
+              <button type="button" className="btn btn-danger h-10" onClick={excluir} disabled={excluindo}>
                 {excluindo ? "Excluindo..." : "Excluir"}
               </button>
             </div>

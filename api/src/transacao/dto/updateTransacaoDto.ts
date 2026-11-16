@@ -1,5 +1,5 @@
 import {
-  IsDate,
+  IsDateString,
   IsInt,
   IsOptional,
   IsPositive,
@@ -20,6 +20,6 @@ export class updateTransacaoDto {
   categoriaId?: number;
 
   @IsOptional()
-  @IsDate()
-  data?: Date;
+  @IsDateString()
+  data?: string;
 }

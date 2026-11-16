@@ -1,4 +1,5 @@
 "use client";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 import NovaConta from "@/app/components/contas/NovaConta";
 import ListaContas from "@/app/components/contas/ListarContas";
@@ -12,31 +13,26 @@ function Page() {
   return (
     <div className="page-container animate-fade-in">
      
-      <header className="page-header">
-        <div>
-          <p className="page-eyebrow">Patrimônio</p>
-          <h1 className="page-title">Minhas contas</h1>
-          <p className="page-subtitle">
-            Gerencie suas contas e acompanhe seus saldos.
-          </p>
-        </div>
-
-        <Button
-          onClick={() => setMostrarFormulario((v) => !v)}
-        >
-          {mostrarFormulario ? (
-            <>
-              <X size={17} />
-              Fechar formulário
-            </>
-          ) : (
-            <>
-              <Plus size={17} />
-              Nova conta
-            </>
-          )}
-        </Button>
-      </header>
+      <PageHeader
+        eyebrow="Patrimônio"
+        title="Minhas contas"
+        subtitle="Veja onde está o seu dinheiro e quanto já está guardado."
+        actions={
+          <Button onClick={() => setMostrarFormulario((v) => !v)}>
+            {mostrarFormulario ? (
+              <>
+                <X size={17} />
+                Fechar formulário
+              </>
+            ) : (
+              <>
+                <Plus size={17} />
+                Nova conta
+              </>
+            )}
+          </Button>
+        }
+      />
 
       
       {mostrarFormulario && (

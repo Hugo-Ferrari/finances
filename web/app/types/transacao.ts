@@ -2,7 +2,8 @@ export interface CreateTransacao {
   tipoTransacao: "ENTRADA" | "SAIDA";
   valor: number;
   descricao?: string;
-  data: Date;
+  /** Dia da transação no formato YYYY-MM-DD */
+  data: string;
   contaId: number;
   categoriaId?: number;
 }

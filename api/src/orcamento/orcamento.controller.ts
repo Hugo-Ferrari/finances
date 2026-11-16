@@ -35,9 +35,8 @@ export class OrcamentoController {
     @Req() req: AuthenticatedRequest,
     @Body() dados: UpdateOrcamento,
     @Param('id', ParseIntPipe) id: number,
-    categoriaId: number,
   ) {
-    return this.orcamentoService.atualizar(id, dados, req.user.id, categoriaId);
+    return this.orcamentoService.atualizar(id, dados, req.user.id);
   }
   @Delete(':id')
   deletar(

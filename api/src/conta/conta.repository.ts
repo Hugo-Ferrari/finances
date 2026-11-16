@@ -48,20 +48,31 @@ export class ContaRepository {
     });
   }
 
-  async atualizarSaldo(
+  async possuiTransacoes(id: number) {
+    const total = await this.prisma.transacao.count({ where: { contaId: id } });
+    return total > 0;
+  }
+
+  /**
+   * Soma `delta` ao saldo numa única instrução SQL (sem ler antes), evitando
+   * perder atualizações quando duas transações chegam ao mesmo tempo.
+   * Com `exigirSaldo`, só debita se houver saldo suficiente; retorna false
+   * quando não houver.
+   */
+  async ajustarSaldo(
     id: number,
-    novoSaldo: Decimal,
-    usuarioId: number,
-    tx?: Prisma.TransactionClient,
+    delta: Decimal,
+    tx: Prisma.TransactionClient,
+    exigirSaldo = false,
   ) {
-    const prisma = tx ?? this.prisma;
-    const conta = await prisma.conta.findFirst({
-      where: { id: id, AND: { usuarioId: usuarioId } },
+    const debito = delta.isNegative();
+    const { count } = await tx.conta.updateMany({
+      where: {
+        id,
+        ...(exigirSaldo && debito && { saldo: { gte: delta.abs() } }),
+      },
+      data: { saldo: { increment: delta } },
     });
-    if (!conta) return null;
-    return prisma.conta.update({
-      where: { id: id },
-      data: { saldo: novoSaldo },
-    });
+    return count > 0;
   }
 }

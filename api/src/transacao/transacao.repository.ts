@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client.ts/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { updateTransacaoDto } from './dto/updateTransacaoDto';
 import { Decimal } from '@prisma/client/runtime/client';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class TransacaoRepository {
 
   async atualizar(
     id: number,
-    dados: updateTransacaoDto,
+    dados: Prisma.TransacaoUncheckedUpdateInput,
     usuarioId: number,
     tx?: Prisma.TransactionClient,
   ) {
@@ -102,10 +101,17 @@ export class TransacaoRepository {
     return { totalEntradas, totalSaidas, saldoPeriodo };
   }
 
-  async despesaPorCategoria(usuarioId: number) {
+  async despesaPorCategoria(
+    usuarioId: number,
+    periodo?: { inicio: Date; fim: Date },
+  ) {
     return this.prisma.transacao.groupBy({
       by: ['categoriaId'],
-      where: { tipoTransacao: 'SAIDA', conta: { usuarioId } },
+      where: {
+        tipoTransacao: 'SAIDA',
+        conta: { usuarioId },
+        ...(periodo && { data: { gte: periodo.inicio, lte: periodo.fim } }),
+      },
       _sum: { valor: true },
     });
   }

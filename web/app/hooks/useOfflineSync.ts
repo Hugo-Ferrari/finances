@@ -2,15 +2,20 @@
 
 import { useEffect } from "react";
 import { processarFila } from "@/app/services/offline/transacao.queue";
+import { useAuthStore } from "@/app/store/auth.store";
 
 export function useOfflineSync() {
+  const usuarioId = useAuthStore((state) => state.usuario?.id);
+
   useEffect(() => {
+    if (usuarioId === undefined) return;
+
     const sincronizar = async () => {
       if (!navigator.onLine) {
         return;
       }
 
-      await processarFila();
+      await processarFila(usuarioId);
     };
 
     window.addEventListener("online", sincronizar); //pedindo pro navegador avisar quando voltar a ficar online
@@ -20,5 +25,5 @@ export function useOfflineSync() {
     return () => {
       window.removeEventListener("online", sincronizar);
     };
-  }, []);
+  }, [usuarioId]);
 }

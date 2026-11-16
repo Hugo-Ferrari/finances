@@ -1,4 +1,3 @@
-import { Ysabeau } from "next/font/google";
 import api from "./api";
 import { Conta } from "../types/conta";
 
@@ -23,7 +22,10 @@ export async function excluirConta(id: number) {
   return response.data;
 }
 
-export async function update(id: number, dados: Conta) {
+export async function update(
+  id: number,
+  dados: Pick<Conta, "nome" | "tipo">,
+) {
   const response = await api.patch(`/conta/${id}`, dados);
   return response.data;
 }

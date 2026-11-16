@@ -1,3 +1,4 @@
+import { mensagemDeErro } from "@/app/lib/erros";
 import { criarTransacao } from "@/app/services/transacao.service";
 import { CreateTransacao } from "@/app/types/transacao";
 import React, { useState } from "react";
@@ -5,7 +6,8 @@ import React, { useState } from "react";
 interface SalvarTransacaoProps {
   tipoTransacao: "ENTRADA" | "SAIDA";
   valor: number;
-  data: Date;
+  /** YYYY-MM-DD */
+  data: string;
   descricao: string;
   categoriaId?: number;
   contaId?: number;
@@ -39,14 +41,15 @@ function SalvarTransacao(props: SalvarTransacaoProps) {
         categoriaId: props.categoriaId,
       };
 
-      console.log("Dados enviados para criar transação:", dados);
+      const resultado = await criarTransacao(dados);
 
-      await criarTransacao(dados);
-
-      setMensagem("Transação salva com sucesso!");
+      setMensagem(
+        resultado.offline
+          ? "Sem conexão: a transação foi guardada e será enviada quando a internet voltar."
+          : "Transação salva com sucesso!",
+      );
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao salvar transação.");
+      setMensagem(mensagemDeErro(error, "Erro ao salvar transação."));
     } finally {
       setLoading(false);
     }
@@ -57,12 +60,12 @@ function SalvarTransacao(props: SalvarTransacaoProps) {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="mt-4 w-full rounded-xl bg-[#11152f] px-5 py-3 font-semibold text-white transition hover:bg-[#1b2045] disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn btn-primary h-12 w-full"
       >
         {loading ? "Salvando..." : "Salvar transação"}
       </button>
 
-      {mensagem && <p className="mt-3 text-sm text-gray-600">{mensagem}</p>}
+      {mensagem && <p role="status" className="mt-3 text-sm font-medium text-muted">{mensagem}</p>}
     </div>
   );
 }

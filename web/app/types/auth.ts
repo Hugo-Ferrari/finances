@@ -5,6 +5,7 @@ export interface AuthLogin {
 }
 export interface Usuario {
   id: number;
+  nome: string;
   email: string;
 }
 

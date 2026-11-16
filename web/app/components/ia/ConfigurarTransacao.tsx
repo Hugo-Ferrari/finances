@@ -1,3 +1,4 @@
+import { formatarNomeCategoria } from "@/app/lib/financas";
 import { listarCategoria } from "@/app/services/categoria.service";
 import { listarConta } from "@/app/services/conta.service";
 import { DespesaCategoria } from "@/app/types/categoria";
@@ -45,9 +46,9 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
   }, []);
 
   return (
-    <div className="space-y-5">
-      <div>
-        <label className="mb-2 block text-sm font-medium text-[#11152f]">
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2">
+        <label className="form-label">
           Descrição
         </label>
 
@@ -56,12 +57,12 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
           value={props.descricao}
           onChange={(e) => props.setDescricao(e.target.value)}
           placeholder="Ex: Compra no supermercado"
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#11152f] outline-none transition placeholder:text-gray-400 focus:border-[#8b7cf6] focus:ring-2 focus:ring-[#eeeaff]"
+          className="form-input"
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#11152f]">
+        <label className="form-label">
           Categoria
         </label>
 
@@ -74,7 +75,7 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
               valor > 0 ? valor : undefined,
             );
           }}
-          className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#11152f] outline-none transition focus:border-[#8b7cf6] focus:ring-2 focus:ring-[#eeeaff]"
+          className="form-select"
         >
           <option value="">
             Selecione uma categoria
@@ -85,14 +86,14 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
               key={categoria.id}
               value={categoria.id}
             >
-              {categoria.nome?.toLocaleUpperCase()}
+              {formatarNomeCategoria(categoria.nome ?? "")}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#11152f]">
+        <label className="form-label">
           Conta
         </label>
 
@@ -105,7 +106,7 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
               valor > 0 ? valor : undefined,
             );
           }}
-          className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#11152f] outline-none transition focus:border-[#8b7cf6] focus:ring-2 focus:ring-[#eeeaff]"
+          className="form-select"
         >
           <option value="">
             Selecione uma conta
@@ -116,7 +117,7 @@ function ConfigurarTransacao(props: ConfigurarTransacaoProps) {
               key={conta.id}
               value={conta.id}
             >
-              {conta.nome.toLocaleUpperCase()}
+              {conta.nome}
             </option>
           ))}
         </select>

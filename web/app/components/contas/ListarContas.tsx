@@ -33,11 +33,12 @@ function ListaContas() {
 
   return (
     <div>
-      <CabecalhoMinhasContas saldoTotal={saldoTotal} />
+      <CabecalhoMinhasContas contas={contas} />
 
       {contas.length === 0 ? (
-        <div className="bg-surface border border-border rounded-2xl p-10 text-center">
-          <p className="text-muted">Nenhuma conta cadastrada.</p>
+        <div className="card p-10 text-center">
+          <p className="text-sm font-semibold text-muted">Nenhuma conta cadastrada</p>
+          <p className="mt-1 text-xs text-muted-light">Crie sua primeira conta para começar a acompanhar seu dinheiro.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -45,6 +46,7 @@ function ListaContas() {
             <BlocoConta
               key={item.id}
               conta={item}
+              patrimonio={saldoTotal}
               onContaExcluida={(id) =>
                 setContas((contasAtuais) =>
                   contasAtuais.filter((conta) => conta.id !== id),

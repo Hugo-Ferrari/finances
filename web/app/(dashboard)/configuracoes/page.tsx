@@ -4,13 +4,15 @@ import {
   Bell,
   Check,
   LoaderCircle,
+  LogOut,
   Mail,
   Save,
-  Settings,
   UserRound,
 } from "lucide-react";
 import { startTransition, useEffect, useState } from "react";
-import { buscarUsuario, atualizarUsuario } from "@/app/services/auth.service";
+import { buscarUsuario, atualizarUsuario, encerrarSessao } from "@/app/services/auth.service";
+import { useRouter } from "next/navigation";
+import PageHeader from "@/app/components/ui/PageHeader";
 import { useAuthStore } from "@/app/store/auth.store";
 
 type Perfil = {
@@ -26,6 +28,19 @@ const preferenciasPadrao = {
 
 function Page() {
   const setUsuario = useAuthStore((state) => state.setUsuario);
+  const logout = useAuthStore((state) => state.logout);
+  const router = useRouter();
+  const [saindo, setSaindo] = useState(false);
+
+  async function sair() {
+    setSaindo(true);
+    try {
+      await encerrarSessao();
+    } finally {
+      logout();
+      router.replace("/login");
+    }
+  }
   const [perfil, setPerfil] = useState<Perfil>({ id: 0, nome: "", email: "" });
   const [preferencias, setPreferencias] = useState(preferenciasPadrao);
   const [carregando, setCarregando] = useState(true);
@@ -109,22 +124,15 @@ function Page() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 p-5 sm:p-8">
-      <header className="border-b border-border pb-6">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-accent">
-          Minha conta
-        </p>
-        <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-          <Settings size={28} /> Configurações
-        </h1>
-        <p className="mt-2 text-sm text-muted">
-          Atualize seus dados e escolha como o FinLogic deve funcionar para
-          você.
-        </p>
-      </header>
+    <div className="page-container max-w-5xl animate-fade-in">
+      <PageHeader
+        eyebrow="Minha conta"
+        title="Configurações"
+        subtitle="Atualize seus dados e escolha como o FinLogic deve funcionar para você."
+      />
 
       <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+        <section className="card p-5 sm:p-6">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light text-primary">
               <UserRound size={20} />
@@ -183,7 +191,7 @@ function Page() {
           </form>
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+        <section className="card p-5 sm:p-6">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/25 text-primary">
               <Bell size={20} />
@@ -251,6 +259,17 @@ function Page() {
           {erro || sucesso}
         </p>
       )}
+
+      {/* No celular o menu inferior não tem o botão Sair. */}
+      <section className="card flex items-center justify-between gap-4 p-5 sm:hidden">
+        <div>
+          <p className="font-semibold text-foreground">Sair da conta</p>
+          <p className="text-xs text-muted">Encerra a sessão neste aparelho.</p>
+        </div>
+        <button type="button" onClick={sair} disabled={saindo} className="btn btn-ghost h-10 text-expense">
+          <LogOut size={16} /> {saindo ? "Saindo..." : "Sair"}
+        </button>
+      </section>
     </div>
   );
 }

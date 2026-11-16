@@ -163,7 +163,8 @@ export class IaService {
       valor: Math.round(bruto.valor * 100) / 100,
       data: dataValida ? (bruto.data as string) : this.hoje(),
       dataEstimada: !dataValida,
-      descricao: (bruto.descricao ?? '').trim().slice(0, 100) || 'Sem descrição',
+      descricao:
+        (bruto.descricao ?? '').trim().slice(0, 100) || 'Sem descrição',
       categoriaId: categoria?.id ?? null,
       categoriaNome: categoria?.nome ?? null,
     };

@@ -1,84 +1,18 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, TrendingUp, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import NextImage from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/auth.store";
-import { login } from "../../services/auth.service";
+import { buscarUsuario, login } from "../../services/auth.service";
+import { mensagemDeErro } from "../../lib/erros";
+import axios from "axios";
 import Button from "../../components/ui/Button";
+import PainelAuth from "../../components/PainelAuth";
 
 
-function PainelDecorativos() {
-  return (
-    <aside
-      className="relative hidden min-h-screen overflow-hidden bg-primary p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14"
-      aria-hidden="true"
-    >
-      
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      
-      <div className="absolute -right-24 -top-24 h-[480px] w-[480px] rounded-full bg-secondary/10 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 h-[420px] w-[420px] rounded-full bg-accent/10 blur-3xl" />
-
-      
-      <div className="relative z-10">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-secondary/8 px-4 py-2 text-xs font-semibold text-secondary">
-          <TrendingUp size={14} />
-          Sua vida financeira, mais simples
-        </div>
-        <h2 className="text-4xl font-extrabold leading-[1.1] tracking-tight xl:text-[2.75rem]">
-          Entenda seu dinheiro.<br />
-          Tome melhores decisões.
-        </h2>
-        <p className="mt-5 max-w-md text-[15px] leading-7 text-white/55">
-          Tenha uma visão clara das suas contas, receitas, despesas e objetivos
-          financeiros em um só lugar.
-        </p>
-      </div>
-
-      
-      <div className="relative z-10 pb-4">
-        <div className="relative w-full max-w-sm rounded-2xl bg-surface p-5 text-foreground shadow-2xl">
-          <p className="text-xs font-semibold text-muted">Resumo do mês</p>
-          <p className="mt-1 text-xl font-bold text-foreground">Saldo em contas</p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight text-primary">
-            R$ 4.860,00
-          </p>
-          <div className="mt-4 flex items-center gap-2 text-xs text-muted">
-            <ArrowRight size={12} className="-rotate-45 text-income" />
-            12% a mais que o mês anterior
-          </div>
-
-          
-          <div className="absolute -right-4 -top-5 flex items-center gap-2 rounded-xl bg-income-light px-4 py-2.5 shadow-lg">
-            <TrendingUp size={14} className="text-income" />
-            <div className="leading-tight">
-              <p className="text-[10px] font-medium text-income/70">Economias</p>
-              <p className="text-sm font-bold text-income">R$ 350,40</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-     
-      <div className="relative z-10 flex justify-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-white/25" />
-        <span className="h-1.5 w-5 rounded-full bg-secondary" />
-        <span className="h-1.5 w-1.5 rounded-full bg-white/25" />
-      </div>
-    </aside>
-  );
-}
 
 
 function LoginPage() {
@@ -89,13 +23,8 @@ function LoginPage() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
-  const usuario = useAuthStore((state) => state.usuario);
   const setUsuario = useAuthStore((state) => state.setUsuario);
   const router = useRouter();
-
-  useEffect(() => {
-    if (usuario) router.replace("/dashboard");
-  }, [router, usuario]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,11 +32,16 @@ function LoginPage() {
 
     try {
       setCarregando(true);
-      const response = await login({ email, senha, lembrarDeMim });
-      setUsuario(response);
-      router.push("/dashboard");
-    } catch {
-      setErro("Não foi possível entrar. Confira seu e-mail e senha.");
+      await login({ email, senha, lembrarDeMim });
+      setUsuario(await buscarUsuario());
+      router.replace("/dashboard");
+    } catch (error) {
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      setErro(
+        status === 401
+          ? "Não foi possível entrar. Confira seu e-mail e senha."
+          : mensagemDeErro(error, "Não foi possível conectar. Tente novamente em instantes."),
+      );
     } finally {
       setCarregando(false);
     }
@@ -222,31 +156,6 @@ function LoginPage() {
                 {carregando ? "Entrando..." : "Entrar"}
               </Button>
 
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-background px-3 text-xs text-muted-light">
-                    ou continue com
-                  </span>
-                </div>
-              </div>
-
-              
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-surface py-3 text-sm font-medium text-foreground transition-colors hover:border-accent/50 hover:bg-surface-dim"
-              >
-                <svg width="16" height="16" viewBox="0 0 48 48">
-                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z" />
-                  <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z" />
-                  <path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.2-5.6l-6.6-5.6C29.4 34.5 26.9 35.5 24 35.5c-5.3 0-9.7-3.1-11.3-7.5l-6.6 5.1C9.5 39.6 16.2 44 24 44z" />
-                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l6.6 5.6C41.8 36 44 30.4 44 24c0-1.3-.1-2.7-.4-3.5z" />
-                </svg>
-                Continuar com Google
-              </button>
             </form>
           </div>
 
@@ -258,7 +167,7 @@ function LoginPage() {
         </section>
 
         
-        <PainelDecorativos />
+        <PainelAuth />
       </div>
     </main>
   );

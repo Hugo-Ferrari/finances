@@ -5,9 +5,11 @@ import { exportarTransacoes } from "@/app/services/ExportarTransacao.service";
 function ExportarPlanilha() {
   async function handleExportar() {
     try {
-      await exportarTransacoes();
+      const exportou = await exportarTransacoes();
+      if (!exportou) alert("Você ainda não tem transações para exportar.");
     } catch (error) {
       console.error("Erro ao exportar transações:", error);
+      alert("Não foi possível exportar as transações. Tente novamente.");
     }
   }
 

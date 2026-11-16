@@ -2,28 +2,34 @@
 
 import { Conta } from "@/app/types/conta";
 import { formatarMoeda } from "@/app/lib/formatters";
+import { mensagemDeErro } from "@/app/lib/erros";
+import { rotuloTipoConta } from "@/app/lib/financas";
 import {
   excluirConta,
   update as atualizarConta,
 } from "@/app/services/conta.service";
 import {
   AlertTriangle,
-  ArrowUpRight,
+  Landmark,
   MoreVertical,
+  PiggyBank,
   Save,
   Wallet,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface BlocoContaProps {
   conta: Conta;
+  patrimonio: number;
   onContaExcluida: (id: number) => void;
   onContaAtualizada: (conta: Conta) => void;
 }
 
+const ICONES_TIPO = { CORRENTE: Landmark, POUPANCA: PiggyBank, CARTEIRA: Wallet } as const;
+
 function BlocoConta({
   conta,
+  patrimonio,
   onContaExcluida,
   onContaAtualizada,
 }: BlocoContaProps) {
@@ -33,7 +39,8 @@ function BlocoConta({
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const [erro, setErro] = useState("");
   const [nomeConta, setNomeConta] = useState(conta.nome);
-  const [saldoConta, setSaldoConta] = useState(String(conta.saldo));
+  const IconeTipo = ICONES_TIPO[conta.tipo] ?? Wallet;
+  const parte = patrimonio > 0 ? Math.max(Number(conta.saldo), 0) / patrimonio : 0;
   const [tipoConta, setTipoConta] = useState<Conta["tipo"]>(conta.tipo);
 
   useEffect(() => {
@@ -53,7 +60,6 @@ function BlocoConta({
 
   function abrirModal() {
     setNomeConta(conta.nome);
-    setSaldoConta(String(conta.saldo));
     setTipoConta(conta.tipo);
     setConfirmandoExclusao(false);
     setErro("");
@@ -70,27 +76,17 @@ function BlocoConta({
       return;
     }
 
-    const saldo = Number(saldoConta.replace(",", "."));
-    if (!Number.isFinite(saldo)) {
-      setErro("Informe um saldo válido.");
-      return;
-    }
-
-    const contaAtualizada: Conta = {
-      ...conta,
-      nome,
-      saldo: String(saldo),
-      tipo: tipoConta,
-    };
+    const contaAtualizada: Conta = { ...conta, nome, tipo: tipoConta };
 
     try {
       setSalvando(true);
-      await atualizarConta(conta.id, contaAtualizada);
+      await atualizarConta(conta.id, { nome, tipo: tipoConta });
       onContaAtualizada(contaAtualizada);
       setModalAberto(false);
     } catch (error) {
-      console.error("Erro ao atualizar conta:", error);
-      setErro("Não foi possível atualizar a conta. Tente novamente.");
+      setErro(
+        mensagemDeErro(error, "Não foi possível atualizar a conta. Tente novamente."),
+      );
     } finally {
       setSalvando(false);
     }
@@ -105,60 +101,53 @@ function BlocoConta({
       onContaExcluida(conta.id);
       setModalAberto(false);
     } catch (error) {
-      console.error("Erro ao excluir conta:", error);
-      setErro("Não foi possível excluir a conta. Tente novamente.");
+      setErro(
+        mensagemDeErro(error, "Não foi possível excluir a conta. Tente novamente."),
+      );
     } finally {
       setExcluindo(false);
     }
   }
 
   return (
-    <article className="card p-5 transition-shadow hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-light">
-            <Wallet size={20} className="text-primary" />
+    <article className="card flex flex-col p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-light text-accent">
+            <IconeTipo size={20} />
           </div>
-
-          <div>
-            <h2 className="font-bold text-foreground">{conta.nome}</h2>
-            <p className="text-xs text-muted">{conta.tipo}</p>
+          <div className="min-w-0">
+            <h2 className="truncate font-bold text-foreground">{conta.nome}</h2>
+            <p className="text-xs text-muted">{rotuloTipoConta(conta.tipo)}</p>
           </div>
         </div>
 
-        <span
-          className={`badge ${
-            conta.ativa ? "badge-income" : "badge-expense"
-          }`}
-        >
-          {conta.ativa ? "Ativa" : "Inativa"}
-        </span>
-        <button
-          type="button"
-          aria-label={`Gerenciar conta ${conta.nome}`}
-          title="Gerenciar conta"
-          onClick={abrirModal}
-          className="rounded-lg p-1 text-muted transition-colors hover:bg-muted/10 hover:text-foreground"
-        >
-          <MoreVertical size={18} />
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          {!conta.ativa && <span className="badge badge-expense">Inativa</span>}
+          <button
+            type="button"
+            aria-label={`Gerenciar conta ${conta.nome}`}
+            title="Gerenciar conta"
+            onClick={abrirModal}
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-dim hover:text-foreground"
+          >
+            <MoreVertical size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="mt-6">
-        <p className="text-xs text-muted">Saldo disponível</p>
-        <p className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+        <p className="text-xs text-muted">Saldo</p>
+        <p className="num mt-1 text-2xl font-extrabold tracking-tight text-foreground">
           {formatarMoeda(conta.saldo)}
         </p>
       </div>
 
-      <div className="mt-5 border-t border-border pt-4">
-        <Link
-          href="/transacoes"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted transition-colors hover:text-primary"
-        >
-          Ver transações
-          <ArrowUpRight size={15} />
-        </Link>
+      <div className="mt-4">
+        <div className="progress h-1.5">
+          <span style={{ width: `${parte * 100}%`, background: "var(--accent)" }} />
+        </div>
+        <p className="num mt-1.5 text-xs text-muted">{Math.round(parte * 100)}% do patrimônio</p>
       </div>
 
       {modalAberto && (
@@ -246,12 +235,14 @@ function BlocoConta({
                   <span className="form-label">Saldo</span>
                   <input
                     type="text"
-                    inputMode="decimal"
-                    value={saldoConta}
-                    onChange={(event) => setSaldoConta(event.target.value)}
+                    value={formatarMoeda(conta.saldo)}
                     className="form-input"
-                    disabled={salvando}
+                    readOnly
+                    disabled
                   />
+                  <span className="text-xs text-muted">
+                    O saldo é atualizado automaticamente pelas transações.
+                  </span>
                 </label>
 
                 <label className="flex flex-col gap-1.5">
