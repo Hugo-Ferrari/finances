@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { manterAcordada } from './common/manter-acordada';
 
 async function bootstrap() {
   if (!process.env.JWT_SECRET) {
@@ -56,6 +57,9 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port, '0.0.0.0');
+
+  // Render gratuito: não deixa o serviço dormir (só liga dentro do Render).
+  manterAcordada();
 }
 
 void bootstrap();
