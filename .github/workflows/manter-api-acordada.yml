@@ -1,0 +1,19 @@
+# O plano gratuito do Render desliga a API após 15 minutos sem acesso,
+# e o primeiro acesso depois disso demora quase 1 minuto.
+# Este workflow chama /health a cada 10 minutos para mantê-la ligada.
+name: Manter API acordada
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Chamar /health
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 20 --max-time 90 https://finances-koqv.onrender.com/health
