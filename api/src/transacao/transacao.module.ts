@@ -9,5 +9,6 @@ import { ContaModule } from 'src/conta/conta.module';
   controllers: [TransacaoController],
   imports: [PrismaModule, ContaModule],
   providers: [TransacaoService, TransacaoRepository],
+  exports: [TransacaoService],
 })
 export class TransacaoModule {}

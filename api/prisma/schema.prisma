@@ -23,7 +23,10 @@ model Usuario  {
   categoria   Categoria[]
   orcamento   Orcamento[]
   caixinhas   Caixinha[]
+  recorrentes Recorrente[]
 
+  // Planejamento: % da renda que a pessoa quer guardar (usado no "pode gastar hoje")
+  metaEconomia Decimal @default(20)
 }
 
 
@@ -37,6 +40,7 @@ model Conta{
   usuario         Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade) 
   transacao       Transacao[]
   movimentosCaixinha MovimentoCaixinha[]
+  recorrentes     Recorrente[]
 }
 
 model Categoria{
@@ -46,6 +50,7 @@ model Categoria{
   usuario      Usuario      @relation(fields:[usuarioId],references:[id], onDelete:Cascade)    
   transacao   Transacao[]
   orcamento   Orcamento[]
+  recorrentes Recorrente[]
 
    @@unique([usuarioId, nome]) // um usuario nn pode ter categorias com o mesmo nome 
 }
@@ -60,6 +65,7 @@ model Transacao {
   conta         Conta         @relation(fields: [contaId], references: [id])
   categoriaId   Int?
   categoria     Categoria?    @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  ocorrenciaRecorrente OcorrenciaRecorrente?
 }
 model Orcamento {
   id          Int      @id @default(autoincrement())
@@ -134,4 +140,52 @@ enum TipoMovimentoCaixinha {
   DEPOSITO
   RETIRADA
   AJUSTE
+}
+
+
+// ── Planejamento: contas fixas, salário e compras parceladas ──
+
+// Lançamento que se repete todo mês no mesmo dia (salário, aluguel, assinatura)
+// ou compra parcelada (parcelasTotal preenchido). Nada é lançado sozinho: cada
+// mês a pessoa confirma ("Marcar como paga") e aí vira uma Transacao.
+model Recorrente {
+  id             Int           @id @default(autoincrement())
+  descricao      String
+  valor          Decimal       // valor de cada mês / de cada parcela
+  tipoTransacao  TipoTransacao @default(SAIDA)
+  // Primeira ocorrência (meia-noite UTC). O dia dela é o dia de todo mês;
+  // em meses mais curtos vale o último dia (31 → 30/11, 28/02).
+  inicio         DateTime
+  // Compra parcelada: total de parcelas e número da parcela da 1ª ocorrência
+  // (compra antiga já com 3 pagas → parcelaInicial = 4).
+  parcelasTotal  Int?
+  parcelaInicial Int           @default(1)
+  valorAVista    Decimal?      // preço à vista, para mostrar os juros
+  ehSalario      Boolean       @default(false)
+  ativo          Boolean       @default(true)
+  criadoEm       DateTime      @default(now())
+  usuarioId      Int
+  usuario        Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  contaId        Int?
+  conta          Conta?        @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  categoriaId    Int?
+  categoria      Categoria?    @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  ocorrencias    OcorrenciaRecorrente[]
+
+  @@index([usuarioId])
+}
+
+// O que aconteceu com um mês de um Recorrente: pago (com a transação criada)
+// ou pulado (transacaoId nulo). Mês sem linha = pendente.
+model OcorrenciaRecorrente {
+  id           Int        @id @default(autoincrement())
+  competencia  String     // AAAA-MM
+  criadaEm     DateTime   @default(now())
+  recorrenteId Int
+  recorrente   Recorrente @relation(fields: [recorrenteId], references: [id], onDelete: Cascade)
+  // Apagar a transação devolve o mês para "pendente".
+  transacaoId  Int?       @unique
+  transacao    Transacao? @relation(fields: [transacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([recorrenteId, competencia])
 }

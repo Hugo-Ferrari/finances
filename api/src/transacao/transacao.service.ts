@@ -37,8 +37,17 @@ export class TransacaoService {
       );
   }
 
-  async criar(dto: createTransacaoDto, usuarioId: number) {
-    return this.prisma.$transaction(async (tx) => {
+  /**
+   * Cria a transação e ajusta o saldo da conta. Com `tx`, roda dentro da
+   * transação de quem chamou (ex.: confirmar uma conta fixa grava a transação
+   * e o mês pago juntos).
+   */
+  async criar(
+    dto: createTransacaoDto,
+    usuarioId: number,
+    txExterna?: Prisma.TransactionClient,
+  ) {
+    const executar = async (tx: Prisma.TransactionClient) => {
       await this.validarCategoria(dto.categoriaId, usuarioId, tx);
 
       const conta = await this.contaRepository.buscarPorId(
@@ -68,10 +77,16 @@ export class TransacaoService {
       }
 
       return this.repository.criarTransacao(
-        { ...dto, data: dataDaTransacao(dto.data) },
+        // valor com 2 casas: o número do JS (99.9) chegava ao banco como 99.90000000000001
+        {
+          ...dto,
+          valor: valor.toDecimalPlaces(2),
+          data: dataDaTransacao(dto.data),
+        },
         tx,
       );
-    });
+    };
+    return txExterna ? executar(txExterna) : this.prisma.$transaction(executar);
   }
 
   async listar(usuarioid: number) {
