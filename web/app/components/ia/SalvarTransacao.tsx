@@ -1,30 +1,36 @@
 import { mensagemDeErro } from "@/app/lib/erros";
+import { lerValor } from "@/app/lib/financas";
 import { criarTransacao } from "@/app/services/transacao.service";
 import { CreateTransacao } from "@/app/types/transacao";
 import React, { useState } from "react";
+import { FormularioComprovante } from "./ConfigurarTransacao";
 
 interface SalvarTransacaoProps {
-  tipoTransacao: "ENTRADA" | "SAIDA";
-  valor: number;
-  /** YYYY-MM-DD */
-  data: string;
-  descricao: string;
-  categoriaId?: number;
-  contaId?: number;
+  formulario: FormularioComprovante;
+  /** Chamado depois de salvar (online ou na fila offline). */
+  onSalvo?(): void;
 }
 
-function SalvarTransacao(props: SalvarTransacaoProps) {
+function SalvarTransacao({ formulario, onSalvo }: SalvarTransacaoProps) {
   const [loading, setLoading] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  // Evita salvar a mesma transação duas vezes.
+  const [salvo, setSalvo] = useState(false);
 
   async function handleSubmit() {
-    if (!props.contaId) {
-      setMensagem("Selecione uma conta.");
-      return;
-    }
-
-    if (!props.categoriaId) {
-      setMensagem("Selecione uma categoria.");
+    const valor = lerValor(formulario.valor);
+    const faltando =
+      !Number.isFinite(valor) || valor <= 0
+        ? "Informe um valor maior que zero."
+        : !formulario.data
+          ? "Informe a data."
+          : !formulario.contaId
+            ? "Selecione uma conta."
+            : !formulario.categoriaId
+              ? "Selecione uma categoria."
+              : "";
+    if (faltando) {
+      setMensagem(faltando);
       return;
     }
 
@@ -33,12 +39,12 @@ function SalvarTransacao(props: SalvarTransacaoProps) {
 
     try {
       const dados: CreateTransacao = {
-        tipoTransacao: props.tipoTransacao,
-        valor: props.valor,
-        data: props.data,
-        descricao: props.descricao,
-        contaId: props.contaId,
-        categoriaId: props.categoriaId,
+        tipoTransacao: formulario.tipoTransacao,
+        valor: Math.round(valor * 100) / 100,
+        data: formulario.data,
+        descricao: formulario.descricao.trim(),
+        contaId: formulario.contaId!,
+        categoriaId: formulario.categoriaId!,
       };
 
       const resultado = await criarTransacao(dados);
@@ -48,6 +54,8 @@ function SalvarTransacao(props: SalvarTransacaoProps) {
           ? "Sem conexão: a transação foi guardada e será enviada quando a internet voltar."
           : "Transação salva com sucesso!",
       );
+      setSalvo(true);
+      onSalvo?.();
     } catch (error) {
       setMensagem(mensagemDeErro(error, "Erro ao salvar transação."));
     } finally {
@@ -58,14 +66,19 @@ function SalvarTransacao(props: SalvarTransacaoProps) {
   return (
     <div>
       <button
+        type="button"
         onClick={handleSubmit}
-        disabled={loading}
+        disabled={loading || salvo}
         className="btn btn-primary h-12 w-full"
       >
-        {loading ? "Salvando..." : "Salvar transação"}
+        {loading ? "Salvando..." : salvo ? "Transação salva" : "Salvar transação"}
       </button>
 
-      {mensagem && <p role="status" className="mt-3 text-sm font-medium text-muted">{mensagem}</p>}
+      {mensagem && (
+        <p role="status" className="mt-3 text-sm font-medium text-muted">
+          {mensagem}
+        </p>
+      )}
     </div>
   );
 }

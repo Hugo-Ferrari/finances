@@ -1,34 +1,100 @@
 "use client";
 
 import { RegistroDeComprovanteIA } from "@/app/services/IA.service";
-import { RegistroDeComprovanteDTO } from "@/app/types/ia";
-import React, { useState } from "react";
-import ConfigurarTransacao from "./ConfigurarTransacao";
+import { OrigemLeitura } from "@/app/types/ia";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import ConfigurarTransacao, { FormularioComprovante } from "./ConfigurarTransacao";
 import SalvarTransacao from "./SalvarTransacao";
-import { CheckCircle2, File, FileText, Sparkles, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  File,
+  FileText,
+  RotateCcw,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import PageHeader from "@/app/components/ui/PageHeader";
-import { formatarNomeCategoria } from "@/app/lib/financas";
 import { mensagemDeErro } from "@/app/lib/erros";
-import { formatarData, formatarMoeda } from "@/app/lib/formatters";
 
 const TIPOS_PERMITIDOS = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
+/** Como os dados chegaram ao formulário. `manual`: nada foi lido. */
+type Modo = OrigemLeitura | "manual";
+
+function hoje(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
+const formularioVazio = (): FormularioComprovante => ({
+  tipoTransacao: "SAIDA",
+  valor: "",
+  data: hoje(),
+  descricao: "",
+});
+
+/** Erros do próprio arquivo (formato, tamanho): não adianta abrir o formulário. */
+function erroDoArquivo(error: unknown): boolean {
+  return axios.isAxiosError(error) && [400, 413].includes(error.response?.status ?? 0);
+}
+
+const CABECALHO: Record<Modo, { titulo: string; texto: string }> = {
+  leitura: {
+    titulo: "Lido direto do PDF",
+    texto: "Os dados vieram do próprio comprovante, sem IA. Confira e complete a transação.",
+  },
+  ia: {
+    titulo: "Lido pela IA",
+    texto: "Confira os dados identificados e complete a transação.",
+  },
+  "leitura-parcial": {
+    titulo: "Leitura parcial",
+    texto: "A IA não respondeu agora. Preenchemos o que deu para ler do PDF; confira com atenção.",
+  },
+  manual: {
+    titulo: "Preencha os dados",
+    texto: "Não conseguimos ler o comprovante agora. Preencha os campos olhando o arquivo ao lado.",
+  },
+};
+
 function ResultadoAnalise() {
-  const [descricao, setDescricao] = useState("");
-  const [categoriaId, setCategoriaId] = useState<number | undefined>(undefined);
-  const [contaId, setContaId] = useState<number | undefined>(undefined);
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [previa, setPrevia] = useState<string | null>(null);
 
-  const [resultado, setResultado] = useState<RegistroDeComprovanteDTO | null>(
-    null,
-  );
-
-  const [imagem, setImagem] = useState<File | null>(null);
+  const [modo, setModo] = useState<Modo | null>(null);
+  const [formulario, setFormulario] = useState<FormularioComprovante>(formularioVazio);
+  const [dataEstimada, setDataEstimada] = useState(false);
+  // Muda a cada análise, para o botão de salvar voltar ao estado inicial.
+  const [analise, setAnalise] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Endereço local (blob:) do arquivo para a prévia; liberado ao trocar e ao sair.
+  const previaAtual = useRef<string | null>(null);
+  function trocarPrevia(novo: File | null) {
+    if (previaAtual.current) URL.revokeObjectURL(previaAtual.current);
+    previaAtual.current = novo ? URL.createObjectURL(novo) : null;
+    setPrevia(previaAtual.current);
+  }
+  useEffect(
+    () => () => {
+      if (previaAtual.current) URL.revokeObjectURL(previaAtual.current);
+    },
+    [],
+  );
+
+  function alterar<K extends keyof FormularioComprovante>(
+    campo: K,
+    valor: FormularioComprovante[K],
+  ) {
+    setFormulario((atual) => ({ ...atual, [campo]: valor }));
+  }
+
   async function handleAnaliseComprovante() {
-    if (!imagem) {
+    if (!arquivo) {
       setError("Selecione um comprovante.");
       return;
     }
@@ -37,66 +103,78 @@ function ResultadoAnalise() {
     setError("");
 
     try {
-      const response = await RegistroDeComprovanteIA(imagem);
+      const response = await RegistroDeComprovanteIA(arquivo);
 
-      setResultado(response);
-      setDescricao(response.descricao);
-      setCategoriaId(response.categoriaId ?? undefined);
-      // A conta sempre precisa ser escolhida pelo usuário.
-      setContaId(undefined);
+      setFormulario({
+        tipoTransacao: response.tipoTransacao,
+        valor: response.valor.toFixed(2).replace(".", ","),
+        data: response.data,
+        descricao: response.descricao,
+        categoriaId: response.categoriaId ?? undefined,
+        // A conta sempre precisa ser escolhida pelo usuário.
+        contaId: undefined,
+      });
+      setDataEstimada(response.dataEstimada);
+      setModo(response.origem);
 
       if (response.categoriaId === null) {
-        setError(
-          "Nenhuma das suas categorias combinou com o comprovante. Escolha uma abaixo.",
-        );
+        setError("Nenhuma das suas categorias combinou com o comprovante. Escolha uma abaixo.");
       }
     } catch (error) {
-      setError(mensagemDeErro(error, "Erro ao analisar comprovante."));
+      const mensagem = mensagemDeErro(error, "Não foi possível analisar o comprovante.");
+      if (erroDoArquivo(error)) {
+        setError(mensagem);
+        return;
+      }
+      // IA fora do ar, limite atingido ou sem conexão: o usuário preenche à mão.
+      setError(mensagem);
+      setFormulario(formularioVazio());
+      setDataEstimada(false);
+      setModo("manual");
     } finally {
+      setAnalise((n) => n + 1);
       setLoading(false);
     }
   }
 
-  function handleFileChange(evento: React.ChangeEvent<HTMLInputElement>) {
-    if (!evento.target.files || evento.target.files.length === 0) {
+  function selecionar(novo: File | undefined) {
+    if (!novo) {
       setError("Arquivo não encontrado");
       return;
     }
-
-    const arquivo = evento.target.files[0];
-
-    if (!TIPOS_PERMITIDOS.includes(arquivo.type)) {
+    if (!TIPOS_PERMITIDOS.includes(novo.type)) {
       setError("Formato inválido. Envie JPG, PNG, WEBP ou PDF.");
       return;
     }
-
-    setImagem(arquivo);
+    setArquivo(novo);
+    trocarPrevia(novo);
+    setModo(null);
     setError("");
   }
 
-  function handleDrop(evento: React.DragEvent<HTMLLabelElement>) {
-    evento.preventDefault();
-    const arquivo = evento.dataTransfer.files?.[0];
-    if (!arquivo) return;
-    if (!TIPOS_PERMITIDOS.includes(arquivo.type)) {
-      setError("Formato inválido. Envie JPG, PNG, WEBP ou PDF.");
-      return;
-    }
-    setImagem(arquivo);
+  function recomecar() {
+    setArquivo(null);
+    trocarPrevia(null);
+    setModo(null);
     setError("");
+    setFormulario(formularioVazio());
   }
 
   const passos = [
     { icone: Upload, titulo: "Envie o comprovante", texto: "Foto da nota, cupom fiscal, Pix ou PDF." },
-    { icone: Sparkles, titulo: "A IA lê os dados", texto: "Valor, data, descrição e a categoria mais provável." },
+    { icone: Sparkles, titulo: "Lemos os dados", texto: "PDF de banco é lido na hora; fotos passam pela IA." },
     { icone: CheckCircle2, titulo: "Confira e salve", texto: "Escolha a conta e registre em segundos." },
   ];
+
+  const pdf = arquivo?.type === "application/pdf";
+  const cabecalho = modo ? CABECALHO[modo] : null;
+  const alerta = modo === "manual" || modo === "leitura-parcial";
 
   return (
     <div className="page-container animate-fade-in">
       <PageHeader
         eyebrow="Assistente"
-        title="Ler comprovante com IA"
+        title="Ler comprovante"
         subtitle="Envie um comprovante e registre a transação sem digitar nada."
       />
 
@@ -108,26 +186,62 @@ function ResultadoAnalise() {
           <label
             htmlFor="comprovante"
             onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
-            className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-hover px-6 py-10 text-center transition hover:border-accent hover:bg-accent-light/50"
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files?.[0]) selecionar(e.dataTransfer.files[0]);
+            }}
+            className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-hover px-6 py-8 text-center transition hover:border-accent hover:bg-accent-light/50"
           >
             <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-light text-accent">
-              {imagem ? <File size={24} /> : <FileText size={24} />}
+              {arquivo ? <File size={24} /> : <FileText size={24} />}
             </span>
-            <p className="font-semibold text-foreground">
-              {imagem ? imagem.name : "Clique ou arraste o arquivo aqui"}
+            <p className="break-all font-semibold text-foreground">
+              {arquivo ? arquivo.name : "Clique ou arraste o arquivo aqui"}
             </p>
             <p className="mt-1 text-xs text-muted">
-              {imagem ? "Clique para trocar o arquivo" : "JPG, PNG, WEBP ou PDF"}
+              {arquivo ? "Clique para trocar o arquivo" : "JPG, PNG, WEBP ou PDF"}
             </p>
             <input
               id="comprovante"
               type="file"
               accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
-              onChange={handleFileChange}
+              onChange={(e) => {
+                selecionar(e.target.files?.[0]);
+                e.target.value = "";
+              }}
               className="hidden"
             />
           </label>
+
+          {arquivo && previa && (
+            <div className="mt-4">
+              {pdf ? (
+                <>
+                  <object
+                    data={previa}
+                    type="application/pdf"
+                    aria-label="Prévia do comprovante"
+                    className="hidden h-80 w-full rounded-xl border border-border lg:block"
+                  />
+                  <a
+                    href={previa}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
+                  >
+                    <ExternalLink size={15} /> Abrir o PDF
+                  </a>
+                </>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element -- prévia local (blob:), sem otimização possível
+                <img
+                  src={previa}
+                  alt="Prévia do comprovante"
+                  className="max-h-80 w-full rounded-xl border border-border bg-surface-hover object-contain"
+                />
+              )}
+            </div>
+          )}
 
           {error && (
             <div role="alert" className="mt-4 rounded-xl border border-expense/20 bg-expense-light px-4 py-3 text-sm font-medium text-expense">
@@ -138,7 +252,7 @@ function ResultadoAnalise() {
           <button
             type="button"
             onClick={handleAnaliseComprovante}
-            disabled={loading || !imagem}
+            disabled={loading || !arquivo}
             className="btn btn-primary mt-5 h-12 w-full"
           >
             {loading ? (
@@ -151,10 +265,15 @@ function ResultadoAnalise() {
               </>
             )}
           </button>
+          {loading && (
+            <p className="mt-2 text-center text-xs text-muted">
+              Pode levar até 1 minuto se o servidor estiver acordando.
+            </p>
+          )}
         </section>
 
         <section className="lg:col-span-3">
-          {!resultado ? (
+          {!modo || !cabecalho ? (
             <div className="card p-6">
               <h2 className="text-base font-bold text-primary">Como funciona</h2>
               <ol className="mt-5 flex flex-col gap-5">
@@ -175,56 +294,33 @@ function ResultadoAnalise() {
             </div>
           ) : (
             <div className="card p-6 animate-fade-in">
-              <h2 className="text-base font-bold text-primary">Resultado da análise</h2>
-              <p className="mt-0.5 text-sm text-muted">Confira os dados identificados e complete a transação.</p>
-
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-surface-hover p-4">
-                  <p className="text-xs text-muted">Valor</p>
-                  <p className={`num mt-1 text-xl font-extrabold ${resultado.tipoTransacao === "ENTRADA" ? "text-income" : "text-foreground"}`}>
-                    {formatarMoeda(resultado.valor)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-surface-hover p-4">
-                  <p className="text-xs text-muted">Data</p>
-                  <p className="mt-1 font-bold text-foreground">{formatarData(resultado.data)}</p>
-                  {resultado.dataEstimada && (
-                    <p className="text-[11px] text-warning">Não encontrada, usamos a de hoje</p>
-                  )}
-                </div>
-                <div className="rounded-2xl bg-surface-hover p-4">
-                  <p className="text-xs text-muted">Tipo</p>
-                  <p className="mt-1 font-bold text-foreground">
-                    {resultado.tipoTransacao === "ENTRADA" ? "Entrada" : "Saída"}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-surface-hover p-4">
-                  <p className="text-xs text-muted">Categoria sugerida</p>
-                  <p className="mt-1 font-bold text-foreground">
-                    {resultado.categoriaNome ? formatarNomeCategoria(resultado.categoriaNome) : "Nenhuma"}
-                  </p>
-                </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-base font-bold text-primary">Transação</h2>
+                <span className={`chip ${alerta ? "bg-warning-light text-warning" : "bg-accent-light text-accent"}`}>
+                  {alerta ? <AlertTriangle size={13} /> : modo === "ia" ? <Sparkles size={13} /> : <FileText size={13} />}
+                  {cabecalho.titulo}
+                </span>
               </div>
+              <p className={`mt-2 text-sm ${alerta ? "rounded-xl bg-warning-light px-3 py-2 font-medium text-warning" : "text-muted"}`}>
+                {cabecalho.texto}
+              </p>
 
-              <div className="mt-6 border-t border-border pt-6">
+              <div className="mt-6">
                 <ConfigurarTransacao
-                  descricao={descricao}
-                  categoriaId={categoriaId}
-                  contaId={contaId}
-                  setDescricao={setDescricao}
-                  setCategoriaId={setCategoriaId}
-                  setContaId={setContaId}
+                  formulario={formulario}
+                  alterar={alterar}
+                  dataEstimada={dataEstimada}
                 />
                 <div className="mt-6">
-                  <SalvarTransacao
-                    tipoTransacao={resultado.tipoTransacao}
-                    valor={resultado.valor}
-                    data={resultado.data}
-                    descricao={descricao}
-                    categoriaId={categoriaId}
-                    contaId={contaId}
-                  />
+                  <SalvarTransacao key={analise} formulario={formulario} />
                 </div>
+                <button
+                  type="button"
+                  onClick={recomecar}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-sm font-semibold text-muted hover:text-foreground"
+                >
+                  <RotateCcw size={15} /> Ler outro comprovante
+                </button>
               </div>
             </div>
           )}
