@@ -1,6 +1,7 @@
 "use client";
 
 import { listarConta } from "@/app/services/conta.service";
+import { listarCaixinhas } from "@/app/services/caixinha.service";
 import { Conta } from "@/app/types/conta";
 import { useEffect, useState } from "react";
 
@@ -9,6 +10,7 @@ import BlocoConta from "./BlocoConta";
 
 function ListaContas() {
   const [contas, setContas] = useState<Conta[]>([]);
+  const [totalCaixinhas, setTotalCaixinhas] = useState(0);
 
   useEffect(() => {
     async function carregarContas() {
@@ -21,19 +23,20 @@ function ListaContas() {
     }
 
     carregarContas();
+    listarCaixinhas()
+      .then((lista) => setTotalCaixinhas(lista.reduce((t, c) => t + c.saldo, 0)))
+      .catch(() => setTotalCaixinhas(0));
 
     window.addEventListener("conta-criada", carregarContas);
     return () => window.removeEventListener("conta-criada", carregarContas);
   }, []);
 
-  const saldoTotal = contas.reduce(
-    (total, conta) => total + Number(conta.saldo),
-    0,
-  );
+  const saldoTotal =
+    contas.reduce((total, conta) => total + Number(conta.saldo), 0) + totalCaixinhas;
 
   return (
     <div>
-      <CabecalhoMinhasContas contas={contas} />
+      <CabecalhoMinhasContas contas={contas} totalCaixinhas={totalCaixinhas} />
 
       {contas.length === 0 ? (
         <div className="card p-10 text-center">

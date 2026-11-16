@@ -11,6 +11,7 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtGuard } from './auth/guards/jwt-auth.guard';
 import { OrcamentoModule } from './orcamento/orcamento.module';
 import { IaModule } from './IA/ia.module';
+import { CaixinhaModule } from './caixinha/caixinha.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
@@ -29,6 +30,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     OrcamentoModule,
     IaModule,
+    CaixinhaModule,
   ],
   controllers: [AppController],
   providers: [

@@ -17,6 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface BlocoContaProps {
   conta: Conta;
@@ -150,6 +151,19 @@ function BlocoConta({
         <p className="num mt-1.5 text-xs text-muted">{Math.round(parte * 100)}% do patrimônio</p>
       </div>
 
+      {conta.tipo === "POUPANCA" && conta.ativa && Number(conta.saldo) > 0 && (
+        <Link
+          href={`/caixinhas/nova?${new URLSearchParams({
+            conta: String(conta.id),
+            nome: conta.nome,
+            valor: String(conta.saldo).replace(".", ","),
+          })}`}
+          className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-semibold text-accent hover:underline"
+        >
+          <PiggyBank size={15} /> Transformar em caixinha
+        </Link>
+      )}
+
       {modalAberto && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center  backdrop-blur-xs px-4 animate-in fade-in duration-200"
@@ -256,7 +270,7 @@ function BlocoConta({
                     disabled={salvando}
                   >
                     <option value="CORRENTE">Conta corrente</option>
-                    <option value="POUPANCA">Poupança</option>
+                    {conta.tipo === "POUPANCA" && <option value="POUPANCA">Poupança</option>}
                     <option value="CARTEIRA">Carteira</option>
                   </select>
                 </label>

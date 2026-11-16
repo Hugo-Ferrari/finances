@@ -18,6 +18,8 @@ import { useAuthStore } from "@/app/store/auth.store";
 import { listarTodasTransacoes } from "@/app/services/transacao.service";
 import { listarConta } from "@/app/services/conta.service";
 import { listarOrcamento } from "@/app/services/orcamento.service";
+import { listarCaixinhas } from "@/app/services/caixinha.service";
+import { ResumoCaixinha } from "@/app/types/caixinha";
 import {
   Orcamento,
   chaveMesAtual,
@@ -32,15 +34,22 @@ import {
 import { Transacao } from "@/app/types/transacao";
 import { Conta } from "@/app/types/conta";
 
-type Dados = { transacoes: Transacao[]; contas: Conta[]; orcamentos: Orcamento[] };
+type Dados = {
+  transacoes: Transacao[];
+  contas: Conta[];
+  orcamentos: Orcamento[];
+  caixinhas: ResumoCaixinha[];
+};
 
 async function buscarDados(): Promise<Dados> {
-  const [transacoes, contas, orcamentos] = await Promise.all([
+  const [transacoes, contas, orcamentos, caixinhas] = await Promise.all([
     listarTodasTransacoes(),
     listarConta(),
     listarOrcamento(),
+    // As caixinhas são um extra: se falharem, o dashboard abre sem elas.
+    listarCaixinhas().catch(() => [] as ResumoCaixinha[]),
   ]);
-  return { transacoes, contas, orcamentos };
+  return { transacoes, contas, orcamentos, caixinhas };
 }
 
 function saudacao() {
@@ -88,6 +97,10 @@ function Page() {
       gastoOrcado,
       recentes: ordenarPorDataDesc(dados.transacoes).slice(0, 6),
       saldo: saldoTotal(dados.contas),
+      caixinhas: {
+        total: dados.caixinhas.reduce((t, c) => t + c.saldo, 0),
+        rendimentoMes: dados.caixinhas.reduce((t, c) => t + c.rendimentoMes, 0),
+      },
     };
   }, [dados, mes]);
 
@@ -131,7 +144,12 @@ function Page() {
       {calculos && (
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <CardEconomia saldoContas={calculos.saldo} resumo={calculos.resumo} nomeMes={nomeDoMes(mes)} />
+            <CardEconomia
+              saldoContas={calculos.saldo}
+              caixinhas={calculos.caixinhas}
+              resumo={calculos.resumo}
+              nomeMes={nomeDoMes(mes)}
+            />
           </div>
           <CardOrcamento
             gasto={calculos.gastoOrcado}
@@ -147,7 +165,7 @@ function Page() {
           <div className="lg:col-span-2">
             <TransacoesRecentes transacoes={calculos.recentes} />
           </div>
-          <ContasResumo contas={dados!.contas} />
+          <ContasResumo contas={dados!.contas} caixinhas={dados!.caixinhas} />
         </div>
       )}
     </div>

@@ -1,13 +1,14 @@
+import Link from "next/link";
 import { Landmark, PiggyBank, Wallet } from "lucide-react";
 import { formatarMoeda } from "@/app/lib/formatters";
 import { Conta } from "@/app/types/conta";
 
 /** Patrimônio total separado entre dinheiro disponível e reserva guardada. */
-function CabecalhoMinhasContas({ contas }: { contas: Conta[] }) {
+function CabecalhoMinhasContas({ contas, totalCaixinhas }: { contas: Conta[]; totalCaixinhas: number }) {
   const soma = (tipos: Conta["tipo"][]) =>
     contas.filter((c) => tipos.includes(c.tipo)).reduce((t, c) => t + Number(c.saldo), 0);
-  const total = soma(["CORRENTE", "POUPANCA", "CARTEIRA"]);
-  const guardado = soma(["POUPANCA"]);
+  const total = soma(["CORRENTE", "POUPANCA", "CARTEIRA"]) + totalCaixinhas;
+  const guardado = soma(["POUPANCA"]) + totalCaixinhas;
   const disponivel = total - guardado;
   const parteGuardada = total > 0 ? Math.max(guardado, 0) / total : 0;
 
@@ -19,6 +20,7 @@ function CabecalhoMinhasContas({ contas }: { contas: Conta[] }) {
           <p className="num mt-2 text-3xl font-extrabold">{formatarMoeda(total)}</p>
           <p className="mt-1 text-sm text-white/60">
             {contas.length} {contas.length === 1 ? "conta" : "contas"}
+            {totalCaixinhas > 0 && " + caixinhas"}
           </p>
         </div>
       </section>
@@ -39,7 +41,7 @@ function CabecalhoMinhasContas({ contas }: { contas: Conta[] }) {
               <PiggyBank size={19} />
             </span>
             <div className="min-w-0">
-              <p className="text-xs text-muted">Guardado na poupança</p>
+              <Link href="/caixinhas" className="text-xs text-muted hover:text-accent">Guardado em caixinhas</Link>
               <p className="num truncate text-lg font-extrabold text-accent">{formatarMoeda(guardado)}</p>
             </div>
           </div>

@@ -3,11 +3,18 @@ import { ChevronRight, Landmark, PiggyBank, Wallet } from "lucide-react";
 import { formatarMoeda } from "@/app/lib/formatters";
 import { rotuloTipoConta } from "@/app/lib/financas";
 import { Conta } from "@/app/types/conta";
+import { ResumoCaixinha } from "@/app/types/caixinha";
 import EmptyState from "@/app/components/ui/EmptyState";
 
 const ICONES = { CORRENTE: Landmark, POUPANCA: PiggyBank, CARTEIRA: Wallet } as const;
 
-export default function ContasResumo({ contas }: { contas: Conta[] }) {
+export default function ContasResumo({
+  contas,
+  caixinhas = [],
+}: {
+  contas: Conta[];
+  caixinhas?: ResumoCaixinha[];
+}) {
   const total = contas.reduce((t, c) => t + Number(c.saldo), 0);
   const ordenadas = [...contas].sort((a, b) => Number(b.saldo) - Number(a.saldo));
 
@@ -55,6 +62,31 @@ export default function ContasResumo({ contas }: { contas: Conta[] }) {
             );
           })}
         </ul>
+      )}
+
+      {caixinhas.length > 0 && (
+        <div className="mt-5 border-t border-border pt-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Caixinhas</p>
+          <ul className="flex flex-col gap-2">
+            {caixinhas.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/caixinhas/${c.id}`}
+                  className="flex items-center gap-3 rounded-2xl bg-accent-light/50 p-3 transition hover:bg-accent-light"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white">
+                    <PiggyBank size={17} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">{c.nome}</p>
+                    <p className="num text-xs text-accent">+ {formatarMoeda(c.rendimentoMes)} este mês</p>
+                  </div>
+                  <p className="num shrink-0 text-sm font-bold text-foreground">{formatarMoeda(c.saldo)}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

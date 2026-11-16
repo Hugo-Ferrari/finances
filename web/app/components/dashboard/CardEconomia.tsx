@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, PiggyBank } from "lucide-react";
 import { formatarMoeda } from "@/app/lib/formatters";
 import { META_TAXA_ECONOMIA, ResumoMes } from "@/app/lib/financas";
 
 interface CardEconomiaProps {
   saldoContas: number;
+  caixinhas: { total: number; rendimentoMes: number };
   resumo: ResumoMes;
   nomeMes: string;
 }
@@ -16,7 +18,7 @@ function mensagemTaxa(taxa: number | null, economia: number) {
 }
 
 /** Destaque do dashboard: patrimônio e quanto sobrou no mês. */
-export default function CardEconomia({ saldoContas, resumo, nomeMes }: CardEconomiaProps) {
+export default function CardEconomia({ saldoContas, caixinhas, resumo, nomeMes }: CardEconomiaProps) {
   const taxa = resumo.taxa;
   const percentual = taxa === null ? 0 : Math.max(0, Math.min(taxa, 1));
   const atingiuMeta = taxa !== null && taxa >= META_TAXA_ECONOMIA;
@@ -26,11 +28,23 @@ export default function CardEconomia({ saldoContas, resumo, nomeMes }: CardEcono
       <div className="relative z-10 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-            Patrimônio em contas
+            Patrimônio
           </p>
           <p className="num mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            {formatarMoeda(saldoContas)}
+            {formatarMoeda(saldoContas + caixinhas.total)}
           </p>
+          {caixinhas.total > 0 && (
+            <Link
+              href="/caixinhas"
+              className="num mt-2 inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-white/10 px-3 py-1 text-xs text-white/80 ring-1 ring-white/15 hover:bg-white/15"
+            >
+              <PiggyBank size={13} className="text-secondary" />
+              {formatarMoeda(caixinhas.total)} em caixinhas
+              <span className="font-semibold text-secondary">
+                + {formatarMoeda(caixinhas.rendimentoMes)} de juros este mês
+              </span>
+            </Link>
+          )}
 
           <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4">
             <div className="rounded-2xl bg-white/8 p-3 ring-1 ring-white/10 sm:p-4">

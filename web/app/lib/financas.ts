@@ -149,3 +149,17 @@ export function formatarNomeCategoria(nome: string): string {
   const texto = palavras.join(" ");
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
+
+/** "1% ao mês" / "12% ao ano" */
+export function rotuloTaxa(t: { taxa: number; periodo: "MENSAL" | "ANUAL" } | null): string {
+  if (!t) return "Sem taxa";
+  const valor = t.taxa.toLocaleString("pt-BR", { maximumFractionDigits: 4 });
+  return `${valor}% ${t.periodo === "MENSAL" ? "ao mês" : "ao ano"}`;
+}
+
+/** Converte texto digitado ("1.234,56" ou "1234.56") em número. */
+export function lerValor(texto: string): number {
+  const limpo = texto.trim().replace(/\s/g, "").replace(/^R\$/, "");
+  const normalizado = limpo.includes(",") ? limpo.replace(/\./g, "").replace(",", ".") : limpo;
+  return Number(normalizado);
+}

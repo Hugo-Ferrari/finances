@@ -22,6 +22,7 @@ model Usuario  {
   conta       Conta[] 
   categoria   Categoria[]
   orcamento   Orcamento[]
+  caixinhas   Caixinha[]
 
 }
 
@@ -35,6 +36,7 @@ model Conta{
   usuarioId       Int // guardando chave estrangeira que guarda o id do usuario
   usuario         Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade) 
   transacao       Transacao[]
+  movimentosCaixinha MovimentoCaixinha[]
 }
 
 model Categoria{
@@ -84,3 +86,52 @@ enum TipoTransacao{
   SAIDA
 }
 
+
+// ── Caixinhas: dinheiro guardado que rende, separado das contas do dia a dia ──
+
+model Caixinha {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  instituicao String?
+  isentaIR    Boolean  @default(false)
+  criadaEm    DateTime @default(now())
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  taxas       TaxaCaixinha[]
+  movimentos  MovimentoCaixinha[]
+}
+
+// Histórico de taxas: cada taxa vale a partir de `inicio` (não refaz o passado).
+model TaxaCaixinha {
+  id         Int         @id @default(autoincrement())
+  taxa       Decimal     // em %, ex.: 1 = 1%
+  periodo    PeriodoTaxa
+  inicio     DateTime    // dia (meia-noite UTC), mesma convenção das transações
+  caixinhaId Int
+  caixinha   Caixinha    @relation(fields: [caixinhaId], references: [id], onDelete: Cascade)
+}
+
+model MovimentoCaixinha {
+  id         Int                   @id @default(autoincrement())
+  tipo       TipoMovimentoCaixinha
+  // DEPOSITO/RETIRADA: valor movimentado; AJUSTE: saldo informado pelo banco
+  valor      Decimal
+  data       DateTime
+  criadoEm   DateTime              @default(now())
+  caixinhaId Int
+  caixinha   Caixinha              @relation(fields: [caixinhaId], references: [id], onDelete: Cascade)
+  // Conta de onde saiu (depósito) ou para onde foi (retirada) o dinheiro
+  contaId    Int?
+  conta      Conta?                @relation(fields: [contaId], references: [id], onDelete: SetNull)
+}
+
+enum PeriodoTaxa {
+  MENSAL
+  ANUAL
+}
+
+enum TipoMovimentoCaixinha {
+  DEPOSITO
+  RETIRADA
+  AJUSTE
+}

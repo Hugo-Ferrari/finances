@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   LogOut,
   LucideIcon,
+  PiggyBank,
   Settings,
   Tags,
   X,
@@ -31,6 +32,7 @@ type NavItemDef = {
 const NAV_ITEMS: NavItemDef[] = [
   { id: "dashboard",  label: "Dashboard",   icon: LayoutGrid,    href: "/dashboard" },
   { id: "contas",     label: "Contas",       icon: Landmark,      href: "/contas" },
+  { id: "caixinhas",  label: "Caixinhas",    icon: PiggyBank,     href: "/caixinhas" },
   { id: "transacoes", label: "Transações",   icon: ArrowLeftRight, href: "/transacoes" },
   { id: "categorias", label: "Categorias",   icon: Tags,          href: "/categorias" },
   { id: "ia",         label: "IA",           icon: Bot,           href: "/ia" },
@@ -152,7 +154,7 @@ function NavBar() {
           <NavLink
             key={item.id}
             item={item}
-            isActive={pathname === item.href}
+            isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
             expanded={expanded}
           />
         ))}

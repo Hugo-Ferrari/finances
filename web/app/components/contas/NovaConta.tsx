@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { criarConta } from "@/app/services/conta.service";
 import { Landmark, X, ArrowRight } from "lucide-react";
@@ -110,9 +111,12 @@ function NovaConta({ onClose }: NovaConta) {
             className="form-select"
           >
             <option value="CORRENTE">Conta corrente</option>
-            <option value="POUPANCA">Poupança</option>
             <option value="CARTEIRA">Carteira</option>
           </select>
+          <span className="text-xs text-muted">
+            Dinheiro guardado que rende fica melhor numa{" "}
+            <Link href="/caixinhas/nova" className="font-semibold text-accent hover:underline">caixinha</Link>.
+          </span>
         </label>
 
        
