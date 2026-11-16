@@ -1,7 +1,6 @@
 import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsuarioRepository } from 'src/usuario/usuario.repository';
 import type { Request } from 'express';
 
 interface JwtPayload {
@@ -10,7 +9,7 @@ interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly repository: UsuarioRepository) {
+  constructor() {
     super({
       jwtFromRequest: (request: Request) => {
         const cookie = request.cookies as Record<string, string> | undefined;
@@ -20,16 +19,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
-    const usuario = await this.repository.buscarPorId(payload.sub);
-
-    if (!usuario) {
-      throw new UnauthorizedException('Usuário não encontrado');
+  /**
+   * O token é assinado pela API: confiar nele evita uma consulta ao banco em
+   * TODA requisição (banco e API ficam em regiões diferentes, ~0,2 s cada).
+   * Conta apagada: o GET /usuario responde 401 e a tela volta para o login.
+   */
+  validate(payload: JwtPayload) {
+    if (!Number.isInteger(payload?.sub)) {
+      throw new UnauthorizedException('Sessão inválida');
     }
-
-    return {
-      id: usuario.id,
-      email: usuario.email,
-    };
+    return { id: payload.sub };
   }
 }

@@ -84,47 +84,51 @@ export class PlanejamentoService {
     const hoje = hojeNoBrasil();
     const inicioMes = inicioDoDia(`${hoje.slice(0, 7)}-01`);
 
-    const [contas, usuario, recorrentes] = await Promise.all([
-      this.prisma.conta.findMany({
-        where: { usuarioId, ativa: true, tipo: { in: [...TIPOS_DISPONIVEIS] } },
-        select: { id: true, saldo: true },
-      }),
-      this.prisma.usuario.findUnique({
-        where: { id: usuarioId },
-        select: { metaEconomia: true },
-      }),
-      this.recorrentesParaCalculo(usuarioId),
-    ]);
-    const ids = contas.map((c) => c.id);
-
-    const [gastoHoje, entradasDoMes, movimentos] = await Promise.all([
-      this.prisma.transacao.aggregate({
-        _sum: { valor: true },
-        where: {
-          contaId: { in: ids },
-          tipoTransacao: 'SAIDA',
-          data: { gte: inicioDoDia(hoje), lte: fimDoDia(hoje) },
-          // Contas fixas confirmadas não são "gasto do dia": já estavam previstas.
-          ocorrenciaRecorrente: { is: null },
-        },
-      }),
-      this.prisma.transacao.aggregate({
-        _sum: { valor: true },
-        where: {
-          contaId: { in: ids },
-          tipoTransacao: 'ENTRADA',
-          data: { gte: inicioMes, lte: fimDoDia(hoje) },
-        },
-      }),
-      this.prisma.movimentoCaixinha.findMany({
-        where: {
-          caixinha: { usuarioId },
-          contaId: { in: ids },
-          data: { gte: inicioDoDia(somarDias(hoje, -75)) },
-        },
-        select: { tipo: true, valor: true, data: true },
-      }),
-    ]);
+    // Uma rodada só: as consultas filtram pelas contas disponíveis com o
+    // próprio filtro (em vez de buscar os ids antes), e tudo vai em paralelo.
+    const contaDisponivel = {
+      usuarioId,
+      ativa: true,
+      tipo: { in: [...TIPOS_DISPONIVEIS] },
+    };
+    const [contas, usuario, recorrentes, gastoHoje, entradasDoMes, movimentos] =
+      await Promise.all([
+        this.prisma.conta.findMany({
+          where: contaDisponivel,
+          select: { saldo: true },
+        }),
+        this.prisma.usuario.findUnique({
+          where: { id: usuarioId },
+          select: { metaEconomia: true },
+        }),
+        this.recorrentesParaCalculo(usuarioId),
+        this.prisma.transacao.aggregate({
+          _sum: { valor: true },
+          where: {
+            conta: contaDisponivel,
+            tipoTransacao: 'SAIDA',
+            data: { gte: inicioDoDia(hoje), lte: fimDoDia(hoje) },
+            // Contas fixas confirmadas não são "gasto do dia": já estavam previstas.
+            ocorrenciaRecorrente: { is: null },
+          },
+        }),
+        this.prisma.transacao.aggregate({
+          _sum: { valor: true },
+          where: {
+            conta: contaDisponivel,
+            tipoTransacao: 'ENTRADA',
+            data: { gte: inicioMes, lte: fimDoDia(hoje) },
+          },
+        }),
+        this.prisma.movimentoCaixinha.findMany({
+          where: {
+            caixinha: { usuarioId },
+            conta: contaDisponivel,
+            data: { gte: inicioDoDia(somarDias(hoje, -75)) },
+          },
+          select: { tipo: true, valor: true, data: true },
+        }),
+      ]);
 
     return calcularGastarHoje({
       hoje,

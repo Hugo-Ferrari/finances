@@ -10,7 +10,16 @@ export class PrismaService
 {
   constructor() {
     const connectionString = process.env.DATABASE_URL;
-    const adapter = new PrismaPg({ connectionString });
+    // Banco (Neon, São Paulo) longe da API: abrir uma conexão nova custa caro
+    // (TLS + autenticação atravessando o continente). Mantém as conexões
+    // abertas por mais tempo e com keep-alive, em vez de fechar após 10 s.
+    const adapter = new PrismaPg({
+      connectionString,
+      max: 10,
+      idleTimeoutMillis: 5 * 60_000,
+      keepAlive: true,
+      connectionTimeoutMillis: 20_000,
+    });
 
     super({ adapter });
   }

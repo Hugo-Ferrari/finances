@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 
 import { buscarUsuario } from "../services/auth.service";
-import { useAuthStore } from "../store/auth.store";
+import { lembrarSessao, tinhaSessao, useAuthStore } from "../store/auth.store";
 import TelaCarregamento from "./TelaCarregamento";
 
 const ROTAS_PUBLICAS = ["/", "/login", "/cadastro"];
+
+const semInscricao = () => () => {};
 
 /**
  * Verifica a sessão uma única vez ao abrir o sistema e protege todas as
@@ -27,6 +29,7 @@ export default function AuthInitializer({
   const router = useRouter();
   const pathname = usePathname();
   const rotaPublica = ROTAS_PUBLICAS.includes(pathname);
+  const sessaoAnterior = useSyncExternalStore(semInscricao, tinhaSessao, () => false);
 
   const verificarSessao = useCallback(async () => {
     setStatus("verificando");
@@ -35,6 +38,7 @@ export default function AuthInitializer({
     } catch (error) {
       const naoAutenticado =
         axios.isAxiosError(error) && error.response?.status === 401;
+      if (naoAutenticado) lembrarSessao(false);
       setStatus(naoAutenticado ? "anonimo" : "erro");
     }
   }, [setStatus, setUsuario]);
@@ -51,11 +55,16 @@ export default function AuthInitializer({
     }
   }, [status, rotaPublica, router]);
 
-  if (status === "verificando") return <TelaCarregamento />;
-
   if (rotaPublica) {
-    return status === "autenticado" ? <TelaCarregamento /> : <>{children}</>;
+    // Login e página inicial aparecem na hora, enquanto a sessão é conferida
+    // por trás (a própria conferência já acorda a API). Só espera quem
+    // provavelmente está logado e vai ser levado ao dashboard.
+    if (status === "autenticado") return <TelaCarregamento />;
+    if (status === "verificando" && sessaoAnterior) return <TelaCarregamento />;
+    return <>{children}</>;
   }
+
+  if (status === "verificando") return <TelaCarregamento />;
 
   if (status === "erro") {
     return <TelaCarregamento erro onTentarNovamente={verificarSessao} />;

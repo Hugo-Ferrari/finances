@@ -40,26 +40,8 @@ import {
 import { Transacao } from "@/app/types/transacao";
 import { Conta } from "@/app/types/conta";
 
-type Dados = {
-  transacoes: Transacao[];
-  contas: Conta[];
-  orcamentos: Orcamento[];
-  caixinhas: ResumoCaixinha[];
-  gastarHoje: GastarHoje | null;
-};
-
-async function buscarDados(): Promise<Dados> {
-  const [transacoes, contas, orcamentos, caixinhas, gastarHoje] = await Promise.all([
-    listarTodasTransacoes(),
-    listarConta(),
-    listarOrcamento(),
-    // As caixinhas são um extra: se falharem, o dashboard abre sem elas.
-    listarCaixinhas().catch(() => [] as ResumoCaixinha[]),
-    // O planejamento também: sem ele o dashboard abre com os cartões de sempre.
-    obterGastarHoje().catch(() => null),
-  ]);
-  return { transacoes, contas, orcamentos, caixinhas, gastarHoje };
-}
+/** Carregando = undefined; falhou = null (os extras somem sem travar o resto). */
+type Talvez<T> = T | null | undefined;
 
 function saudacao() {
   const hora = new Date().getHours();
@@ -72,46 +54,67 @@ function Page() {
   const usuario = useAuthStore((state) => state.usuario);
   const primeiroNome = usuario?.nome.split(" ")[0] ?? "";
 
-  const [dados, setDados] = useState<Dados | null>(null);
+  // Cada fonte chega quando chegar: um card aparece assim que os dados DELE
+  // estão prontos, sem esperar as outras requisições (antes era tudo ou nada).
+  const [transacoes, setTransacoes] = useState<Transacao[] | undefined>();
+  const [contas, setContas] = useState<Conta[] | undefined>();
+  const [orcamentos, setOrcamentos] = useState<Orcamento[] | undefined>();
+  const [caixinhas, setCaixinhas] = useState<ResumoCaixinha[] | undefined>();
+  const [gastarHoje, setGastarHoje] = useState<Talvez<GastarHoje>>();
   const [erro, setErro] = useState(false);
 
-  const aplicar = useCallback((busca: Promise<Dados>) => {
-    busca.then(setDados).catch(() => setErro(true));
+  const carregar = useCallback(() => {
+    const falhou = () => setErro(true);
+    listarTodasTransacoes().then(setTransacoes).catch(falhou);
+    listarConta().then(setContas).catch(falhou);
+    listarOrcamento().then(setOrcamentos).catch(falhou);
+    // Extras: se falharem, o dashboard abre sem eles.
+    listarCaixinhas()
+      .then(setCaixinhas)
+      .catch(() => setCaixinhas([]));
+    obterGastarHoje()
+      .then(setGastarHoje)
+      .catch(() => setGastarHoje(null));
   }, []);
 
   useEffect(() => {
-    aplicar(buscarDados());
-  }, [aplicar]);
+    carregar();
+  }, [carregar]);
 
   function tentarNovamente() {
     setErro(false);
-    aplicar(buscarDados());
+    carregar();
   }
 
   const mes = chaveMesAtual();
-  const calculos = useMemo(() => {
-    if (!dados) return null;
-    const gastos = gastosPorCategoria(dados.transacoes, mes, dados.orcamentos);
-    const limite = dados.orcamentos.reduce((t, o) => t + Number(o.valor), 0);
+  const doMes = useMemo(
+    () =>
+      transacoes && {
+        resumo: resumoDoMes(transacoes, mes),
+        serie: serieMensal(transacoes, 6),
+        recentes: ordenarPorDataDesc(transacoes).slice(0, 6),
+      },
+    [transacoes, mes],
+  );
+  const orcamento = useMemo(() => {
+    if (!transacoes || !orcamentos) return undefined;
+    const gastos = gastosPorCategoria(transacoes, mes, orcamentos);
+    const limite = orcamentos.reduce((t, o) => t + Number(o.valor), 0);
     // Só conta no orçamento o que foi gasto em categorias com limite definido.
-    const comLimite = new Set(dados.orcamentos.map((o) => o.categoriaId));
+    const comLimite = new Set(orcamentos.map((o) => o.categoriaId));
     const gastoOrcado = gastos
       .filter((g) => g.categoriaId !== null && comLimite.has(g.categoriaId))
       .reduce((t, g) => t + g.valor, 0);
-    return {
-      resumo: resumoDoMes(dados.transacoes, mes),
-      serie: serieMensal(dados.transacoes, 6),
-      gastos,
-      limite,
-      gastoOrcado,
-      recentes: ordenarPorDataDesc(dados.transacoes).slice(0, 6),
-      saldo: saldoTotal(dados.contas),
-      caixinhas: {
-        total: dados.caixinhas.reduce((t, c) => t + c.saldo, 0),
-        rendimentoMes: dados.caixinhas.reduce((t, c) => t + c.rendimentoMes, 0),
+    return { gastos, limite, gastoOrcado };
+  }, [transacoes, orcamentos, mes]);
+  const guardado = useMemo(
+    () =>
+      caixinhas && {
+        total: caixinhas.reduce((t, c) => t + c.saldo, 0),
+        rendimentoMes: caixinhas.reduce((t, c) => t + c.rendimentoMes, 0),
       },
-    };
-  }, [dados, mes]);
+    [caixinhas],
+  );
 
   return (
     <div className="page-container animate-fade-in">
@@ -141,66 +144,80 @@ function Page() {
         </div>
       )}
 
-      {!calculos && !erro && (
-        <div className="grid gap-5 lg:grid-cols-3">
-          <SkeletonCard altura={260} className="lg:col-span-2" />
-          <SkeletonCard altura={260} />
-          <SkeletonCard altura={340} className="lg:col-span-2" />
-          <SkeletonCard altura={340} />
-        </div>
-      )}
-
-      {calculos && (
-        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          {doMes && contas && guardado ? (
             <CardEconomia
-              saldoContas={calculos.saldo}
-              caixinhas={calculos.caixinhas}
-              resumo={calculos.resumo}
+              saldoContas={saldoTotal(contas)}
+              caixinhas={guardado}
+              resumo={doMes.resumo}
               nomeMes={nomeDoMes(mes)}
-              meta={dados!.gastarHoje ? dados!.gastarHoje.metaPercentual / 100 : undefined}
+              meta={gastarHoje ? gastarHoje.metaPercentual / 100 : undefined}
             />
-          </div>
-          {dados!.gastarHoje ? (
-            <>
-              {/* No celular o "pode gastar hoje" vem primeiro. */}
-              <div className="order-first lg:order-none">
-                <CardGastarHoje dados={dados!.gastarHoje} />
-              </div>
-              <div className="lg:col-span-2">
-                <ProximosDias dias={dados!.gastarHoje.proximosDias} />
-              </div>
-              <ContasAPagar
-                contas={dados!.gastarHoje.contas}
-                hoje={dados!.gastarHoje.hoje}
-                ate={
-                  dados!.gastarHoje.proximoSalario
-                    ? dados!.gastarHoje.fimCiclo
-                    : somarDiasISO(dados!.gastarHoje.fimCiclo, -1)
-                }
-                onAtualizar={() => aplicar(buscarDados())}
-              />
-            </>
-          ) : null}
+          ) : (
+            <SkeletonCard altura={260} />
+          )}
+        </div>
 
-          <div className="lg:col-span-2">
-            <FluxoCaixa serie={calculos.serie} />
-          </div>
+        {gastarHoje !== null && (
+          <>
+            {/* No celular o "pode gastar hoje" vem primeiro. */}
+            <div className="order-first lg:order-none">
+              {gastarHoje ? <CardGastarHoje dados={gastarHoje} /> : <SkeletonCard altura={420} />}
+            </div>
+            <div className="lg:col-span-2">
+              {gastarHoje ? (
+                <ProximosDias dias={gastarHoje.proximosDias} />
+              ) : (
+                <SkeletonCard altura={180} />
+              )}
+            </div>
+            {gastarHoje ? (
+              <ContasAPagar
+                contas={gastarHoje.contas}
+                hoje={gastarHoje.hoje}
+                ate={
+                  gastarHoje.proximoSalario
+                    ? gastarHoje.fimCiclo
+                    : somarDiasISO(gastarHoje.fimCiclo, -1)
+                }
+                onAtualizar={carregar}
+              />
+            ) : (
+              <SkeletonCard altura={240} />
+            )}
+          </>
+        )}
+
+        <div className="lg:col-span-2">
+          {doMes ? <FluxoCaixa serie={doMes.serie} /> : <SkeletonCard altura={340} />}
+        </div>
+        {orcamento ? (
           <CardOrcamento
-            gasto={calculos.gastoOrcado}
-            limite={calculos.limite}
+            gasto={orcamento.gastoOrcado}
+            limite={orcamento.limite}
             diasRestantes={diasRestantesNoMes()}
           />
+        ) : (
+          <SkeletonCard altura={240} />
+        )}
 
-          <div className="lg:col-span-2">
-            <TransacoesRecentes transacoes={calculos.recentes} />
-          </div>
-          <div className="flex flex-col gap-5">
-            <GastosCategoria gastos={calculos.gastos} />
-            <ContasResumo contas={dados!.contas} caixinhas={dados!.caixinhas} />
-          </div>
+        <div className="lg:col-span-2">
+          {doMes ? (
+            <TransacoesRecentes transacoes={doMes.recentes} />
+          ) : (
+            <SkeletonCard altura={340} />
+          )}
         </div>
-      )}
+        <div className="flex flex-col gap-5">
+          {orcamento ? <GastosCategoria gastos={orcamento.gastos} /> : <SkeletonCard altura={260} />}
+          {contas && caixinhas ? (
+            <ContasResumo contas={contas} caixinhas={caixinhas} />
+          ) : (
+            <SkeletonCard altura={260} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UsuarioRepository } from './usuario.repository';
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
@@ -22,6 +22,9 @@ export class UsuarioService {
   }
   async buscarId(usuarioId: number) {
     const res = await this.repository.buscarPorId(usuarioId);
+    // O login não consulta mais o banco a cada requisição: se a conta foi
+    // apagada, é aqui (ao abrir o app) que a sessão deixa de valer.
+    if (!res) throw new UnauthorizedException('Usuário não encontrado');
     return res;
   }
 

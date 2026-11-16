@@ -1,7 +1,9 @@
-import { AuthLogin, CreateUsuario, UpdateUsuario } from "./../types/auth";
+import { AuthLogin, CreateUsuario, UpdateUsuario, Usuario } from "./../types/auth";
 import api from "./api";
 
-export const login = async (data: AuthLogin) => {
+export const login = async (
+  data: AuthLogin,
+): Promise<{ mensagem: string; usuario?: Usuario }> => {
   const response = await api.post("/auth/login", data);
   return response.data;
 };

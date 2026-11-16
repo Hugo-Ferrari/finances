@@ -18,7 +18,7 @@ import {
   TIPOS_ARQUIVO_PERMITIDOS,
 } from './ia.constants';
 
-type RequisicaoAutenticada = Request & { user: { id: number; email: string } };
+type RequisicaoAutenticada = Request & { user: { id: number } };
 
 @Controller('ia')
 export class ControllerIA {

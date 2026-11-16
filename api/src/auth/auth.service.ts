@@ -33,6 +33,9 @@ export class AuthService {
       },
     );
 
-    return token;
+    return {
+      token,
+      usuario: { id: user.id, nome: user.nome, email: user.email },
+    };
   }
 }

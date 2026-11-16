@@ -16,10 +16,41 @@ interface AuthState {
   logout: () => void;
 }
 
+/**
+ * Lembra (só neste aparelho) se a última verificação encontrou alguém logado.
+ * Quem não estava logado vê o login na hora, sem esperar a API acordar; quem
+ * estava vê a tela de carregamento e vai direto para o dashboard (sem piscar
+ * a página inicial).
+ */
+const CHAVE_SESSAO = "finlogic-sessao";
+
+export function lembrarSessao(ativa: boolean) {
+  try {
+    if (ativa) localStorage.setItem(CHAVE_SESSAO, "1");
+    else localStorage.removeItem(CHAVE_SESSAO);
+  } catch {
+    // Navegador sem localStorage (modo privado): só perde o atalho.
+  }
+}
+
+export function tinhaSessao(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_SESSAO) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   usuario: null,
   status: "verificando",
-  setUsuario: (usuario) => set({ usuario, status: "autenticado" }),
+  setUsuario: (usuario) => {
+    lembrarSessao(true);
+    set({ usuario, status: "autenticado" });
+  },
   setStatus: (status) => set({ status }),
-  logout: () => set({ usuario: null, status: "anonimo" }),
+  logout: () => {
+    lembrarSessao(false);
+    set({ usuario: null, status: "anonimo" });
+  },
 }));

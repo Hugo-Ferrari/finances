@@ -29,14 +29,15 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const token = await this.authService.login(dto);
+    const { token, usuario } = await this.authService.login(dto);
 
     response.cookie('access_token', token, {
       ...cookieBase(request),
       maxAge: dto.lembrarDeMim ? 30 * 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000,
     });
 
-    return { mensagem: 'Login realizado' };
+    // Devolve o usuário para a tela não precisar chamar GET /usuario em seguida.
+    return { mensagem: 'Login realizado', usuario };
   }
 
   @Public()

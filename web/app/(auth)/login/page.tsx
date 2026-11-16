@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import NextImage from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/auth.store";
@@ -22,6 +22,17 @@ function LoginPage() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
+  // Servidor gratuito dormindo leva até ~1 min para acordar: avisa em vez de parecer travado.
+  const [demorando, setDemorando] = useState(false);
+
+  useEffect(() => {
+    if (!carregando) return;
+    const timer = setTimeout(() => setDemorando(true), 5_000);
+    return () => {
+      clearTimeout(timer);
+      setDemorando(false);
+    };
+  }, [carregando]);
 
   const setUsuario = useAuthStore((state) => state.setUsuario);
   const router = useRouter();
@@ -32,8 +43,9 @@ function LoginPage() {
 
     try {
       setCarregando(true);
-      await login({ email, senha, lembrarDeMim });
-      setUsuario(await buscarUsuario());
+      const resposta = await login({ email, senha, lembrarDeMim });
+      // A API nova já devolve o usuário no login (uma ida ao servidor a menos).
+      setUsuario(resposta.usuario ?? (await buscarUsuario()));
       router.replace("/dashboard");
     } catch (error) {
       const status = axios.isAxiosError(error) ? error.response?.status : undefined;
@@ -155,6 +167,12 @@ function LoginPage() {
               >
                 {carregando ? "Entrando..." : "Entrar"}
               </Button>
+
+              {demorando && (
+                <p role="status" className="text-center text-xs leading-5 text-muted animate-fade-in">
+                  O servidor estava em repouso e está acordando. Pode levar até 1 minuto, só na primeira vez.
+                </p>
+              )}
 
             </form>
           </div>
