@@ -45,12 +45,12 @@ function Metrica({
   return (
     <div className={destaque ? "hero-card p-5" : "card p-5"}>
       <div className="relative z-10 flex items-center justify-between gap-3">
-        <div className="min-w-0">
+        <div className="caixa-valor flex-1">
           <p className={`text-xs font-medium ${destaque ? "text-white/70" : "text-muted"}`}>{rotulo}</p>
-          <p className={`num mt-1 truncate text-2xl font-extrabold ${cor}`}>{formatarMoeda(valor)}</p>
+          <p className={`num valor-ajustavel mt-1 font-extrabold ${cor}`}>{formatarMoeda(valor)}</p>
         </div>
         <span
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl md:hidden lg:flex ${
             destaque ? "bg-white/10 text-secondary" : "bg-surface-dim"
           } ${destaque ? "" : cor}`}
         >
@@ -102,7 +102,7 @@ function Page() {
           <h2 className="text-sm font-bold text-primary">Resumo</h2>
           <span className="chip">{ROTULO_PERIODO[filtros.periodo] ?? "Período filtrado"}</span>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Metrica rotulo="Entradas" valor={entradas} icone={<ArrowUpRight size={20} />} cor="text-income" />
           <Metrica rotulo="Saídas" valor={saidas} icone={<ArrowDownRight size={20} />} cor="text-expense" />
           <Metrica

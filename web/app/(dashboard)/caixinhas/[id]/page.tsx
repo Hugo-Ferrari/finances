@@ -118,7 +118,7 @@ function Page() {
         </div>
       </div>
 
-      <section className="hero-card p-6 sm:p-8">
+      <section className="hero-card p-5 sm:p-8">
         <div className="relative z-10 grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Saldo hoje</p>
@@ -142,14 +142,14 @@ function Page() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { rotulo: "Rendeu este mês", valor: `+ ${formatarMoeda(caixinha.rendimentoMes)}`, destaque: true },
-              { rotulo: "Rende por dia", valor: `+ ${formatarMoeda(caixinha.rendimentoDia)}`, destaque: true },
-              { rotulo: "Já rendeu no total", valor: `+ ${formatarMoeda(caixinha.rendimentoTotal)}`, destaque: true },
+              { rotulo: "Rendeu este mês", valor: `+\u00a0${formatarMoeda(caixinha.rendimentoMes)}`, destaque: true },
+              { rotulo: "Rende por dia", valor: `+\u00a0${formatarMoeda(caixinha.rendimentoDia)}`, destaque: true },
+              { rotulo: "Já rendeu no total", valor: `+\u00a0${formatarMoeda(caixinha.rendimentoTotal)}`, destaque: true },
               { rotulo: "Você colocou", valor: formatarMoeda(colocado), destaque: false },
             ].map((s) => (
-              <div key={s.rotulo} className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+              <div key={s.rotulo} className="caixa-valor rounded-2xl bg-white/8 p-3 ring-1 ring-white/10 sm:p-4">
                 <p className="text-xs text-white/60">{s.rotulo}</p>
-                <p className={`num mt-1 text-lg font-bold ${s.destaque ? "text-secondary" : ""}`}>{s.valor}</p>
+                <p className={`num valor-ajustavel mt-1 font-bold [--valor-max:1.125rem] ${s.destaque ? "text-secondary" : ""}`}>{s.valor}</p>
               </div>
             ))}
           </div>

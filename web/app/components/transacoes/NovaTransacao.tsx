@@ -112,8 +112,8 @@ function NovaTransacao() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-background px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-2xl animate-fade-in">
+    <div className="page-container animate-fade-in">
+      <div className="form-page">
 
        
         <div className="mb-8">
@@ -303,7 +303,7 @@ function NovaTransacao() {
               )}
 
               
-              <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+              <div className="form-actions">
                 <Button
                   type="button"
                   variant="ghost"

@@ -26,23 +26,23 @@ function CabecalhoMinhasContas({ contas, totalCaixinhas }: { contas: Conta[]; to
       </section>
 
       <section className="card flex flex-col justify-between gap-4 p-6 lg:col-span-2">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-dim text-primary">
               <Landmark size={19} />
             </span>
-            <div className="min-w-0">
+            <div className="caixa-valor flex-1">
               <p className="text-xs text-muted">Disponível para o dia a dia</p>
-              <p className="num truncate text-lg font-extrabold text-foreground">{formatarMoeda(disponivel)}</p>
+              <p className="num valor-ajustavel font-extrabold text-foreground [--valor-max:1.125rem]">{formatarMoeda(disponivel)}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-light text-accent">
               <PiggyBank size={19} />
             </span>
-            <div className="min-w-0">
+            <div className="caixa-valor flex-1">
               <Link href="/caixinhas" className="text-xs text-muted hover:text-accent">Guardado em caixinhas</Link>
-              <p className="num truncate text-lg font-extrabold text-accent">{formatarMoeda(guardado)}</p>
+              <p className="num valor-ajustavel font-extrabold text-accent [--valor-max:1.125rem]">{formatarMoeda(guardado)}</p>
             </div>
           </div>
         </div>

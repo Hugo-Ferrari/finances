@@ -11,6 +11,7 @@ import { mensagemDeErro } from "../../lib/erros";
 import axios from "axios";
 import Button from "../../components/ui/Button";
 import PainelAuth from "../../components/PainelAuth";
+import { usePaginaPronta } from "../../hooks/usePaginaPronta";
 
 
 
@@ -20,6 +21,7 @@ function LoginPage() {
   const [senha, setSenha] = useState("");
   const [lembrarDeMim, setLembrarDeMim] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const paginaPronta = usePaginaPronta();
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
   // Servidor gratuito dormindo leva até ~1 min para acordar: avisa em vez de parecer travado.
@@ -91,7 +93,7 @@ function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-5">
 
             
               <div className="flex flex-col gap-2">
@@ -161,6 +163,7 @@ function LoginPage() {
               <Button
                 type="submit"
                 loading={carregando}
+                disabled={!paginaPronta}
                 size="lg"
                 className="w-full rounded-xl"
               >

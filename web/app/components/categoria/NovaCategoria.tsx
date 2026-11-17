@@ -70,8 +70,8 @@ function NovaCategoria() {
   };
 
   return (
-    <div className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-2xl animate-fade-in">
+    <div className="page-container animate-fade-in">
+      <div className="form-page">
         <div className="mb-8">
           <button
             type="button"
@@ -90,11 +90,8 @@ function NovaCategoria() {
 
         <div className="card p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label
-                htmlFor="nome"
-                className="text-sm font-medium text-foreground"
-              >
+            <div>
+              <label htmlFor="nome" className="form-label">
                 Nome da categoria
               </label>
 
@@ -104,23 +101,21 @@ function NovaCategoria() {
                 value={nomeCategoria}
                 onChange={(e) => setNomeCategoria(e.target.value)}
                 placeholder="Ex: Alimentação"
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-foreground"
+                className="form-input"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Tipo de categoria
-              </label>
+            <div>
+              <p className="form-label">Tipo de categoria</p>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => setTipoSelecionado("FIXA")}
                   className={`rounded-xl border p-4 text-left transition ${
                     tipoSelecionado === "FIXA"
                       ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
-                      : "border-muted/60 hover:bg-muted"
+                      : "border-border hover:bg-surface-hover"
                   }`}
                 >
                   <p className="font-medium">Despesa Fixa</p>
@@ -142,7 +137,7 @@ function NovaCategoria() {
                   className={`rounded-xl border p-4 text-left transition ${
                     tipoSelecionado === "VARIAVEL"
                       ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
-                      : "border-muted/60 hover:bg-muted"
+                      : "border-border hover:bg-surface-hover"
                   }`}
                 >
                   <p className="font-medium">Despesa Variável</p>
@@ -160,18 +155,13 @@ function NovaCategoria() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="limite"
-                className="text-sm font-medium text-foreground"
-              >
+            <div>
+              <label htmlFor="limite" className="form-label">
                 Limite mensal
               </label>
 
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted">
-                  R$
-                </span>
+              <div className="form-input-group">
+                <span className="text-sm font-bold text-muted">R$</span>
 
                 <input
                   id="limite"
@@ -181,20 +171,20 @@ function NovaCategoria() {
                   value={valorOrcamento}
                   onChange={(e) => setValorOrcamento((e.target.value))}
                   placeholder="0,00"
-                  className="w-full rounded-xl border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition focus:border-foreground"
+                  className="form-input-control"
                 />
               </div>
 
-              <p className="text-xs text-muted">
+              <p className="mt-1.5 text-xs text-muted">
                 Defina quanto pretende gastar nessa categoria por mês.
               </p>
             </div>
 
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Ícone</p>
+                <p className="form-label mb-1">Ícone</p>
 
-                <p className="mt-1 text-xs text-muted">
+                <p className="text-xs text-muted">
                   Escolha um ícone para identificar sua categoria.
                 </p>
               </div>
@@ -214,7 +204,7 @@ function NovaCategoria() {
                       className={`flex h-12 items-center justify-center rounded-xl border transition ${
                         selecionado
                           ? "border-accent bg-accent-light text-accent ring-1 ring-accent/40"
-                          : "border-border bg-background text-foreground hover:bg-muted"
+                          : "border-border bg-background text-foreground hover:bg-surface-hover"
                       }`}
                     >
                       <Icone size={20} />
@@ -233,7 +223,7 @@ function NovaCategoria() {
               </div>
             )}
 
-            <div className="flex justify-end gap-3 border-t border-border pt-5">
+            <div className="form-actions">
               <button
                 type="button"
                 onClick={() => router.back()}

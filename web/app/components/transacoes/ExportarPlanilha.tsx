@@ -1,5 +1,7 @@
 "use client";
 
+import { FileSpreadsheet } from "lucide-react";
+
 import { exportarTransacoes } from "@/app/services/ExportarTransacao.service";
 
 function ExportarPlanilha() {
@@ -14,11 +16,8 @@ function ExportarPlanilha() {
   }
 
   return (
-    <button
-      onClick={handleExportar}
-      className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface hover:-translate-y-0"
-    >
-      Exportar Excel
+    <button type="button" onClick={handleExportar} className="btn btn-ghost">
+      <FileSpreadsheet size={16} /> Exportar Excel
     </button>
   );
 }

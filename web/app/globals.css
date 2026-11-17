@@ -390,6 +390,11 @@ button {
   flex: 0 0 6rem;
 }
 
+@media (max-width: 639px) {
+  .form-input-group--inline { width: 100%; }
+  .form-input-group--inline > .form-input-control { flex: 1 1 auto; }
+}
+
 .form-input-group--amount {
   height: 3.75rem;
 }
@@ -527,7 +532,9 @@ input[type="checkbox"] {
   padding-bottom: 1.5rem;
 }
 
-@media (min-width: 640px) {
+/* Título e botões lado a lado só quando há espaço (desktop). No celular e no
+   tablet os botões ficam numa linha abaixo do título. */
+@media (min-width: 1024px) {
   .page-header {
     flex-direction: row;
     align-items: flex-end;
@@ -561,6 +568,18 @@ input[type="checkbox"] {
   font-size: 0.875rem;
   color: var(--muted);
   line-height: 1.6;
+}
+
+/* Valor em dinheiro que diminui a fonte para caber no cartão, em vez de
+   ser cortado com "...". O elemento pai precisa ter .caixa-valor. */
+.caixa-valor {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.valor-ajustavel {
+  white-space: nowrap;
+  font-size: clamp(0.8125rem, 12.5cqi, var(--valor-max, 1.5rem));
 }
 
 /* Container padrão das páginas */
@@ -641,16 +660,25 @@ input[type="checkbox"] {
 
   .site-nav-list::-webkit-scrollbar { display: none; }
 
+  /* Os itens dividem a largura da barra: nenhum fica cortado em telas estreitas. */
   .site-nav-list li {
-    flex: 0 0 2.75rem;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
   }
 
   .site-nav-list a,
   .site-nav-list button {
-    width: 2.75rem;
+    width: 100%;
+    max-width: 3rem;
     min-height: 2.75rem;
     justify-content: center;
     padding: 0.5rem 0.25rem;
+  }
+
+  .site-nav-list li.so-desktop {
+    display: none;
   }
 
   .site-nav-list a span,
@@ -662,11 +690,33 @@ input[type="checkbox"] {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 
+  /* Botões do topo dividem a linha; a ação principal (última) ocupa a linha toda. */
   .page-header-actions { width: 100%; }
-  .page-header-actions > * { flex: 1 1 100%; }
-  .page-header-actions > .btn,
-  .page-header-actions > a,
-  .page-header-actions > button { width: 100%; }
+  .page-header-actions > * { flex: 1 1 auto; }
+  .page-header-actions > :last-child { flex-basis: 100%; }
+}
+
+/* Menu "Mais" da barra inferior (celular) */
+.menu-mais-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+}
+
+.menu-mais {
+  position: absolute;
+  right: 0.5rem;
+  bottom: calc(64px + env(safe-area-inset-bottom) + 0.5rem);
+  width: min(16rem, calc(100vw - 1rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: modal-sheet-in 0.15s ease both;
 }
 
 /* ============================================================
@@ -712,11 +762,24 @@ input[type="checkbox"] {
   animation: scale-in 0.2s ease;
 }
 
-.modal-actions {
+.modal-actions,
+.form-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
+}
+
+/* Rodapé dos formulários de página inteira (mesmo padrão dos modais). */
+.form-actions {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+/* Telas de formulário: mesma margem e alinhamento das outras telas. */
+.form-page {
+  width: 100%;
+  max-width: 48rem;
 }
 
 @media (max-width: 640px) {
@@ -736,21 +799,27 @@ input[type="checkbox"] {
     animation: modal-sheet-in 0.2s ease both;
   }
 
-  .modal-actions {
+  .modal-actions,
+  .form-actions {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .modal-actions > button {
+  .modal-actions > button,
+  .form-actions > button {
     width: 100%;
     min-height: 2.75rem;
   }
 
+  /* O rodapé cobre também o respiro inferior do modal; sem isso o conteúdo
+     rolado aparecia embaixo dos botões. */
   .modal-content .modal-actions {
     position: sticky;
-    bottom: 0;
+    bottom: calc(-1rem - env(safe-area-inset-bottom));
     z-index: 1;
     margin-inline: -1rem;
-    padding: 0.75rem 1rem;
+    margin-bottom: calc(-1rem - env(safe-area-inset-bottom));
+    padding: 0.75rem 1rem calc(0.75rem + 1rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
     background: var(--surface);
   }

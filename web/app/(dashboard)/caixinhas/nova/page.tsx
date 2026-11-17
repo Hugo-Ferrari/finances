@@ -73,8 +73,8 @@ function Formulario() {
   }
 
   return (
-    <div className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-2xl animate-fade-in">
+    <div className="page-container animate-fade-in">
+      <div className="form-page">
         <div className="mb-8">
           <button
             type="button"
@@ -158,7 +158,7 @@ function Formulario() {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-border pt-5">
+          <div className="form-actions">
             <button type="button" className="btn btn-ghost" onClick={() => router.back()}>Cancelar</button>
             <button type="submit" className="btn btn-primary" disabled={salvando}>
               {salvando ? "Criando..." : "Criar caixinha"}

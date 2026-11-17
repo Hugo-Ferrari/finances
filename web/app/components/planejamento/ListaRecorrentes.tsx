@@ -223,15 +223,17 @@ export default function ListaRecorrentes({
         </section>
       ) : (
         <>
-          <section className="grid grid-cols-3 gap-3">
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
               { rotulo: "Entra todo mês", valor: totalEntradas, cor: "text-income" },
               { rotulo: "Sai todo mês", valor: totalSaidas, cor: "text-expense" },
               { rotulo: "Sobra", valor: totalEntradas - totalSaidas, cor: totalEntradas - totalSaidas >= 0 ? "text-primary" : "text-expense" },
             ].map((k) => (
-              <div key={k.rotulo} className="card min-w-0 p-3 sm:p-4">
+              <div key={k.rotulo} className="card flex items-center justify-between gap-3 px-4 py-3 sm:block sm:p-4">
                 <p className="text-xs font-semibold text-muted">{k.rotulo}</p>
-                <p className={`num mt-1 truncate text-sm font-extrabold sm:text-xl ${k.cor}`}>{formatarMoeda(k.valor)}</p>
+                <div className="caixa-valor flex-1 text-right sm:text-left">
+                  <p className={`num valor-ajustavel font-extrabold [--valor-max:1.25rem] sm:mt-1 ${k.cor}`}>{formatarMoeda(k.valor)}</p>
+                </div>
               </div>
             ))}
           </section>
