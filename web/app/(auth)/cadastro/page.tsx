@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { cadastro } from "../../services/auth.service";
 import Button from "../../components/ui/Button";
 import PainelAuth from "../../components/PainelAuth";
+import { usePaginaPronta } from "../../hooks/usePaginaPronta";
 
 
 
@@ -18,6 +19,7 @@ function CadastroPage() {
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [aceitouTermos, setAceitouTermos] = useState(false);
+  const paginaPronta = usePaginaPronta();
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
   const router = useRouter();
@@ -69,7 +71,7 @@ function CadastroPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-5">
 
               
               <div className="flex flex-col gap-2">
@@ -172,6 +174,7 @@ function CadastroPage() {
               <Button
                 type="submit"
                 loading={carregando}
+                disabled={!paginaPronta}
                 size="lg"
                 className="w-full rounded-xl"
               >

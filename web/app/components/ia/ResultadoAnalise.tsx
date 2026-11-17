@@ -195,7 +195,7 @@ function ResultadoAnalise() {
             <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-light text-accent">
               {arquivo ? <File size={24} /> : <FileText size={24} />}
             </span>
-            <p className="break-all font-semibold text-foreground">
+            <p className="font-semibold text-foreground [overflow-wrap:anywhere]">
               {arquivo ? arquivo.name : "Clique ou arraste o arquivo aqui"}
             </p>
             <p className="mt-1 text-xs text-muted">

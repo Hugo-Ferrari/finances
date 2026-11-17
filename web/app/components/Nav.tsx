@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   LogOut,
   LucideIcon,
+  MoreHorizontal,
   PiggyBank,
   Settings,
   Tags,
@@ -17,7 +18,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuthStore } from "../store/auth.store";
 import { encerrarSessao } from "../services/auth.service";
 
@@ -27,6 +29,10 @@ type NavItemDef = {
   label: string;
   icon: LucideIcon;
   href: string;
+  /** Outras rotas que também marcam este item (ex.: telas de cadastro). */
+  rotasExtras?: string[];
+  /** No celular o item sai da barra e fica no menu "Mais". */
+  noMenuMais?: boolean;
 };
 
 
@@ -35,18 +41,18 @@ const NAV_ITEMS: NavItemDef[] = [
   { id: "planejamento", label: "Planejar",  icon: CalendarClock, href: "/planejamento" },
   { id: "contas",     label: "Contas",       icon: Landmark,      href: "/contas" },
   { id: "caixinhas",  label: "Caixinhas",    icon: PiggyBank,     href: "/caixinhas" },
-  { id: "transacoes", label: "Transações",   icon: ArrowLeftRight, href: "/transacoes" },
-  { id: "categorias", label: "Categorias",   icon: Tags,          href: "/categorias" },
-  { id: "ia",         label: "IA",           icon: Bot,           href: "/ia" },
+  { id: "transacoes", label: "Transações",   icon: ArrowLeftRight, href: "/transacoes", rotasExtras: ["/novaTransacao"] },
+  { id: "categorias", label: "Categorias",   icon: Tags,          href: "/categorias", rotasExtras: ["/novaCategoria"] },
+  { id: "ia",         label: "IA",           icon: Bot,           href: "/ia", noMenuMais: true },
 ];
 
-// No celular a barra inferior não tem rodapé: Configurações entra na lista.
-const ITEM_CONFIGURACOES: NavItemDef = {
-  id: "configuracoes",
-  label: "Ajustes",
-  icon: Settings,
-  href: "/configuracoes",
-};
+const ROTAS_MENU_MAIS = ["/ia", "/configuracoes"];
+
+function estaAtivo(item: NavItemDef, pathname: string) {
+  return [item.href, ...(item.rotasExtras ?? [])].some(
+    (rota) => pathname === rota || pathname.startsWith(`${rota}/`),
+  );
+}
 
 
 interface NavLinkProps {
@@ -84,6 +90,100 @@ function NavLink({ item, isActive, expanded, className }: NavLinkProps) {
         </span>
       </Link>
     </li>
+  );
+}
+
+
+interface MenuMaisProps {
+  ativo: boolean;
+  saindo: boolean;
+  erroAoSair: boolean;
+  onSair: () => void;
+}
+
+/** Celular: itens que não cabem na barra inferior (IA, Configurações e Sair). */
+function MenuMais({ ativo, saindo, erroAoSair, onSair }: MenuMaisProps) {
+  const [aberto, setAberto] = useState(false);
+  const pathname = usePathname();
+  const fechar = () => setAberto(false);
+
+  useEffect(() => {
+    if (!aberto) return;
+    const fecharNoEsc = (e: KeyboardEvent) => e.key === "Escape" && setAberto(false);
+    window.addEventListener("keydown", fecharNoEsc);
+    return () => window.removeEventListener("keydown", fecharNoEsc);
+  }, [aberto]);
+
+  const classeItem =
+    "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors";
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Mais opções"
+        aria-expanded={aberto}
+        aria-haspopup="menu"
+        onClick={() => setAberto((v) => !v)}
+        className={[
+          "flex h-11 items-center justify-center rounded-xl transition-all duration-200",
+          ativo || aberto
+            ? "bg-primary text-white shadow-sm ring-1 ring-accent/30"
+            : "text-muted hover:bg-accent-light hover:text-accent",
+        ].join(" ")}
+      >
+        <MoreHorizontal size={20} strokeWidth={ativo ? 2.5 : 2} />
+      </button>
+
+      {aberto &&
+        createPortal(
+          <div className="menu-mais-fundo" onClick={fechar}>
+            <div
+              role="menu"
+              aria-label="Mais opções"
+              className="menu-mais"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link
+                role="menuitem"
+                href="/ia"
+                onClick={fechar}
+                aria-current={pathname === "/ia" ? "page" : undefined}
+                className={`${classeItem} ${pathname === "/ia" ? "bg-accent-light text-accent" : "text-foreground hover:bg-surface-hover"}`}
+              >
+                <Bot size={19} /> Ler comprovante
+              </Link>
+              <Link
+                role="menuitem"
+                href="/configuracoes"
+                onClick={fechar}
+                aria-current={pathname === "/configuracoes" ? "page" : undefined}
+                className={`${classeItem} ${pathname === "/configuracoes" ? "bg-accent-light text-accent" : "text-foreground hover:bg-surface-hover"}`}
+              >
+                <Settings size={19} /> Configurações
+              </Link>
+              <div className="my-1 border-t border-border" />
+              {erroAoSair && (
+                <p role="alert" className="px-3 py-1 text-xs text-expense">
+                  Não foi possível sair. Tente novamente.
+                </p>
+              )}
+              <button
+                role="menuitem"
+                type="button"
+                onClick={onSair}
+                disabled={saindo}
+                aria-busy={saindo}
+                className={`${classeItem} text-expense hover:bg-expense-light`}
+              >
+                {saindo ? <span className="spinner" aria-hidden="true" /> : <LogOut size={19} />}
+                {saindo ? "Saindo..." : "Sair"}
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
@@ -158,16 +258,19 @@ function NavBar() {
           <NavLink
             key={item.id}
             item={item}
-            isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+            isActive={estaAtivo(item, pathname)}
             expanded={expanded}
+            className={item.noMenuMais ? "so-desktop" : undefined}
           />
         ))}
-        <NavLink
-          item={ITEM_CONFIGURACOES}
-          isActive={pathname === ITEM_CONFIGURACOES.href}
-          expanded={expanded}
-          className="sm:hidden"
-        />
+        <li className="sm:hidden">
+          <MenuMais
+            ativo={ROTAS_MENU_MAIS.includes(pathname)}
+            saindo={logoutLoading}
+            erroAoSair={logoutError}
+            onSair={handleLogout}
+          />
+        </li>
       </ul>
 
       

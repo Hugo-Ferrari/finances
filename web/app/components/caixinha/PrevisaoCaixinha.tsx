@@ -85,14 +85,14 @@ export default function PrevisaoCaixinha({ caixinhaId, isenta, versao }: Previsa
   const minimoEixo = inicio ? Math.floor((inicio.saldo * 0.9) / 100) * 100 : 0;
 
   return (
-    <section className="card p-6">
+    <section className="card p-5 sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-base font-bold text-primary">Quanto você vai ter</h2>
           <p className="mt-0.5 text-sm text-muted">Previsão com a taxa de hoje. Escolha o prazo e, se quiser, um depósito mensal.</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex gap-1 overflow-x-auto rounded-[var(--radius-lg)] bg-surface-dim p-1" role="radiogroup" aria-label="Prazo">
+          <div className="flex gap-1 rounded-[var(--radius-lg)] bg-surface-dim p-1" role="radiogroup" aria-label="Prazo">
             {PRAZOS.map((p) => (
               <button
                 key={p.meses}
@@ -100,7 +100,7 @@ export default function PrevisaoCaixinha({ caixinhaId, isenta, versao }: Previsa
                 role="radio"
                 aria-checked={meses === p.meses}
                 onClick={() => setMeses(p.meses)}
-                className={`h-8 shrink-0 whitespace-nowrap rounded-[var(--radius-md)] px-3 text-xs font-semibold transition ${
+                className={`h-8 min-w-0 flex-1 whitespace-nowrap rounded-[var(--radius-md)] px-1 text-[11px] font-semibold transition sm:flex-none sm:px-3 sm:text-xs ${
                   meses === p.meses ? "bg-surface text-accent shadow-sm" : "text-muted hover:text-foreground"
                 }`}
               >
@@ -177,8 +177,33 @@ export default function PrevisaoCaixinha({ caixinhaId, isenta, versao }: Previsa
             />
           </div>
 
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[420px] text-sm">
+          {/* Celular: um cartão por prazo, para nenhuma coluna ficar escondida. */}
+          <ul className="mt-4 flex flex-col gap-2 sm:hidden">
+            {MARCOS.filter((m) => m <= mesesPrevistos && pontos![m]).map((m) => {
+              const p = pontos![m];
+              return (
+                <li key={m} className="rounded-2xl bg-surface-hover p-4 text-sm">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-semibold text-foreground">{rotuloPrazo(m)}</span>
+                    <span className="num font-bold text-foreground">{formatarMoeda(p.saldo)}</span>
+                  </div>
+                  <div className="mt-1.5 flex items-baseline justify-between gap-3 text-xs">
+                    <span className="text-muted">Juros a partir de hoje</span>
+                    <span className="num font-semibold text-income">+ {formatarMoeda(jurosAte(m))}</span>
+                  </div>
+                  {!isenta && (
+                    <div className="mt-1 flex items-baseline justify-between gap-3 text-xs">
+                      <span className="text-muted">Líquido</span>
+                      <span className="num text-muted">{formatarMoeda(p.liquido)}</span>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-4 hidden sm:block">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted">
                   <th className="py-2 font-semibold">Prazo</th>

@@ -14,7 +14,7 @@ interface CampoTaxaProps {
 export default function CampoTaxa({ taxa, periodo, onTaxa, onPeriodo, id = "taxa" }: CampoTaxaProps) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
-      <div className="form-input-group flex-1">
+      <div className="form-input-group sm:flex-1">
         <input
           id={id}
           inputMode="decimal"
