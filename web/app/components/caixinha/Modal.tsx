@@ -9,9 +9,10 @@ interface ModalProps {
   onFechar: () => void;
   children: ReactNode;
   bloqueado?: boolean;
+  className?: string;
 }
 
-export default function Modal({ titulo, descricao, onFechar, children, bloqueado = false }: ModalProps) {
+export default function Modal({ titulo, descricao, onFechar, children, bloqueado = false, className = "" }: ModalProps) {
   useEffect(() => {
     const fechar = (e: KeyboardEvent) => e.key === "Escape" && !bloqueado && onFechar();
     window.addEventListener("keydown", fechar);
@@ -26,7 +27,7 @@ export default function Modal({ titulo, descricao, onFechar, children, bloqueado
       aria-label={titulo}
       onMouseDown={(e) => e.target === e.currentTarget && !bloqueado && onFechar()}
     >
-      <div className="modal-content max-h-[90svh] overflow-y-auto">
+      <div className={`modal-content max-h-[90svh] overflow-y-auto ${className}`}>
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-bold text-primary">{titulo}</h2>

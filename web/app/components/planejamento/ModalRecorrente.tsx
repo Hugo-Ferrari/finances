@@ -82,6 +82,7 @@ export default function ModalRecorrente({
       descricao="Algo que se repete todo mês. Você confirma quando pagar (ou receber) e o saldo é atualizado."
       onFechar={onFechar}
       bloqueado={salvando}
+      className="modal-content--planejamento"
     >
       <form onSubmit={salvar} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-surface-dim p-1" role="radiogroup" aria-label="Tipo">

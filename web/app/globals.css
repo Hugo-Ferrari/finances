@@ -744,6 +744,20 @@ input[type="checkbox"] {
     width: 100%;
     min-height: 2.75rem;
   }
+
+  .modal-content--planejamento form {
+    gap: 0.875rem;
+  }
+
+  .modal-content--planejamento .modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-inline: -1rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
 }
 
 @keyframes modal-sheet-in {

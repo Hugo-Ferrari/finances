@@ -81,6 +81,7 @@ export default function ModalPagar({
       descricao={`Vencimento ${diaPorExtenso(item.data, { day: "2-digit", month: "long" })}${parcela}. Vira uma transação na conta escolhida.`}
       onFechar={onFechar}
       bloqueado={salvando}
+      className="modal-content--planejamento"
     >
       <form onSubmit={confirmar} className="flex flex-col gap-4">
         <CampoDinheiro id="valor-pagar" rotulo={entrada ? "Valor recebido" : "Valor pago"} valor={valor} onValor={setValor} autoFocus />
