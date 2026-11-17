@@ -4,14 +4,40 @@ import { createPortal } from "react-dom";
 import { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
 
+/**
+ * Trava a página enquanto houver modal aberto. Só `overflow: hidden` não basta
+ * no iPhone: a página de trás continuava rolando junto com o dedo. Fixar o body
+ * na posição atual impede isso; ao fechar, a página volta para onde estava.
+ */
+let modaisAbertos = 0;
+let estiloAnterior = "";
+let posicaoAnterior = 0;
+
+function travarPagina() {
+  if (modaisAbertos++ > 0) return;
+  const body = document.body;
+  posicaoAnterior = window.scrollY;
+  estiloAnterior = body.style.cssText;
+  Object.assign(body.style, {
+    position: "fixed",
+    top: `-${posicaoAnterior}px`,
+    left: "0",
+    right: "0",
+    width: "100%",
+    overflow: "hidden",
+  });
+}
+
+function destravarPagina() {
+  if (--modaisAbertos > 0) return;
+  document.body.style.cssText = estiloAnterior;
+  window.scrollTo({ top: posicaoAnterior, behavior: "instant" });
+}
+
 export function ModalPortal({ children }: { children: ReactNode }) {
   useEffect(() => {
-    const body = document.body;
-    const overflow = body.style.overflow;
-    body.style.overflow = "hidden";
-    return () => {
-      body.style.overflow = overflow;
-    };
+    travarPagina();
+    return destravarPagina;
   }, []);
 
   return typeof document === "undefined" ? null : createPortal(children, document.body);
@@ -41,7 +67,7 @@ export default function Modal({ titulo, descricao, onFechar, children, bloqueado
         aria-label={titulo}
         onMouseDown={(e) => e.target === e.currentTarget && !bloqueado && onFechar()}
       >
-        <div className="modal-content max-h-[90svh] overflow-y-auto">
+        <div className="modal-content">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-primary">{titulo}</h2>

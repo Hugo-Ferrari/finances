@@ -132,7 +132,7 @@ export default function ModalRecorrente({
 
         {tipo === "ENTRADA" && (
           <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-surface-hover p-4">
-            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" checked={ehSalario} onChange={(e) => setEhSalario(e.target.checked)} />
+            <input type="checkbox" className="mt-0.5" checked={ehSalario} onChange={(e) => setEhSalario(e.target.checked)} />
             <span>
               <span className="block text-sm font-semibold text-foreground">É o meu salário</span>
               <span className="text-xs text-muted">O &quot;pode gastar hoje&quot; divide o dinheiro até o dia em que ele cai.</span>

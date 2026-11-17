@@ -236,34 +236,37 @@ function BlocoConta({
                 onSubmit={handleAtualizarConta}
                 className="mt-5 space-y-4"
               >
-                <label className="flex flex-col gap-1.5">
-                  <span className="form-label">Nome da conta</span>
+                <div>
+                  <label htmlFor={`conta-${conta.id}-nome`} className="form-label">Nome da conta</label>
                   <input
+                    id={`conta-${conta.id}-nome`}
                     value={nomeConta}
                     onChange={(event) => setNomeConta(event.target.value)}
                     className="form-input"
                     autoFocus
                     disabled={salvando}
                   />
-                </label>
+                </div>
 
-                <label className="flex flex-col gap-1.5">
-                  <span className="form-label">Saldo</span>
+                <div>
+                  <label htmlFor={`conta-${conta.id}-saldo`} className="form-label">Saldo</label>
                   <input
+                    id={`conta-${conta.id}-saldo`}
                     type="text"
                     value={formatarMoeda(conta.saldo)}
                     className="form-input"
                     readOnly
                     disabled
                   />
-                  <span className="text-xs text-muted">
+                  <p className="mt-1.5 text-xs text-muted">
                     O saldo é atualizado automaticamente pelas transações.
-                  </span>
-                </label>
+                  </p>
+                </div>
 
-                <label className="flex flex-col gap-1.5">
-                  <span className="form-label">Tipo de conta</span>
+                <div>
+                  <label htmlFor={`conta-${conta.id}-tipo`} className="form-label">Tipo de conta</label>
                   <select
+                    id={`conta-${conta.id}-tipo`}
                     value={tipoConta}
                     onChange={(event) =>
                       setTipoConta(event.target.value as Conta["tipo"])
@@ -275,7 +278,7 @@ function BlocoConta({
                     {conta.tipo === "POUPANCA" && <option value="POUPANCA">Poupança</option>}
                     <option value="CARTEIRA">Carteira</option>
                   </select>
-                </label>
+                </div>
               </form>
             )}
 
