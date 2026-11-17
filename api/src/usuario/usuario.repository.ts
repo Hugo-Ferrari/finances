@@ -29,7 +29,22 @@ export class UsuarioRepository {
       select: { id: true, email: true, nome: true },
     });
   }
-  async remover(id: number) {
-    return this.prisma.usuario.delete({ where: { id: id } });
+  async buscarSenha(id: number) {
+    return this.prisma.usuario.findUnique({
+      where: { id },
+      select: { senha: true },
+    });
+  }
+
+  /**
+   * Apaga o usuário e tudo o que é dele. As transações vão primeiro porque a
+   * ligação transação → conta não apaga em cascata (de propósito: excluir uma
+   * conta com transações continua bloqueado). O resto sai pelo Cascade.
+   */
+  async removerComDados(id: number) {
+    await this.prisma.$transaction([
+      this.prisma.transacao.deleteMany({ where: { conta: { usuarioId: id } } }),
+      this.prisma.usuario.delete({ where: { id } }),
+    ]);
   }
 }

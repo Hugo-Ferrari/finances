@@ -11,6 +11,7 @@ import { mensagemDeErro } from "../../lib/erros";
 import axios from "axios";
 import Button from "../../components/ui/Button";
 import PainelAuth from "../../components/PainelAuth";
+import Autoria from "../../components/Autoria";
 import { usePaginaPronta } from "../../hooks/usePaginaPronta";
 
 
@@ -184,6 +185,8 @@ function LoginPage() {
             <ShieldCheck size={13} />
             <span>Seus dados são protegidos com segurança.</span>
           </div>
+
+          <Autoria className="mt-6" />
         </section>
 
         

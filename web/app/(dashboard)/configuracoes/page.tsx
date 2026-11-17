@@ -15,6 +15,8 @@ import CardMetaEconomia from "@/app/components/planejamento/CardMetaEconomia";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
 import { useAuthStore } from "@/app/store/auth.store";
+import ExcluirConta from "@/app/components/configuracoes/ExcluirConta";
+import Autoria from "@/app/components/Autoria";
 
 type Perfil = {
   id: number;
@@ -273,6 +275,10 @@ function Page() {
           <LogOut size={16} /> {saindo ? "Saindo..." : "Sair"}
         </button>
       </section>
+
+      <ExcluirConta />
+
+      <Autoria className="pt-2" />
     </div>
   );
 }

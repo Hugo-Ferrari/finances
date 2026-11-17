@@ -13,10 +13,12 @@ import {
   File,
   FileText,
   RotateCcw,
+  ShieldAlert,
   Sparkles,
   Upload,
 } from "lucide-react";
 import PageHeader from "@/app/components/ui/PageHeader";
+import Link from "next/link";
 import { mensagemDeErro } from "@/app/lib/erros";
 
 const TIPOS_PERMITIDOS = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
@@ -248,6 +250,18 @@ function ResultadoAnalise() {
               {error}
             </div>
           )}
+
+          <p className="mt-4 flex gap-2 rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-xs leading-5 text-muted">
+            <ShieldAlert size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+            <span>
+              Fotos e PDFs escaneados são enviados ao Google Gemini para leitura. Na versão gratuita,
+              o Google pode usar o conteúdo para melhorar a IA dele. Não envie documentos com dados
+              que você não quer compartilhar.{" "}
+              <Link href="/privacidade" className="font-semibold text-primary hover:underline">
+                Saiba mais
+              </Link>
+            </span>
+          </p>
 
           <button
             type="button"

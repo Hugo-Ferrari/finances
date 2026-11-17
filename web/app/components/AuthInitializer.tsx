@@ -9,6 +9,8 @@ import { lembrarSessao, tinhaSessao, useAuthStore } from "../store/auth.store";
 import TelaCarregamento from "./TelaCarregamento";
 
 const ROTAS_PUBLICAS = ["/", "/login", "/cadastro"];
+// Abertas para todos e sem redirecionar: quem está logado também lê.
+const ROTAS_LIVRES = ["/termos", "/privacidade"];
 
 const semInscricao = () => () => {};
 
@@ -29,6 +31,7 @@ export default function AuthInitializer({
   const router = useRouter();
   const pathname = usePathname();
   const rotaPublica = ROTAS_PUBLICAS.includes(pathname);
+  const rotaLivre = ROTAS_LIVRES.includes(pathname);
   const sessaoAnterior = useSyncExternalStore(semInscricao, tinhaSessao, () => false);
 
   const verificarSessao = useCallback(async () => {
@@ -48,12 +51,15 @@ export default function AuthInitializer({
   }, [verificarSessao]);
 
   useEffect(() => {
+    if (rotaLivre) return;
     if (status === "autenticado" && rotaPublica) {
       router.replace("/dashboard");
     } else if (status === "anonimo" && !rotaPublica) {
       router.replace("/login");
     }
-  }, [status, rotaPublica, router]);
+  }, [status, rotaPublica, rotaLivre, router]);
+
+  if (rotaLivre) return <>{children}</>;
 
   if (rotaPublica) {
     // Login e página inicial aparecem na hora, enquanto a sessão é conferida

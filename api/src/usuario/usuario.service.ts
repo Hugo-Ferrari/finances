@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UsuarioRepository } from './usuario.repository';
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
@@ -33,8 +37,16 @@ export class UsuarioService {
 
     return user;
   }
-  async deletar(id: number) {
-    const user = await this.repository.remover(id);
-    return user;
+  /** Exclusão da conta pelo próprio usuário (LGPD, art. 18), com a senha. */
+  async excluirConta(id: number, senha: string) {
+    const usuario = await this.repository.buscarSenha(id);
+    if (!usuario) throw new UnauthorizedException('Usuário não encontrado');
+
+    // 403 e não 401: o front trata 401 como sessão expirada e desloga.
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaCorreta) throw new ForbiddenException('Senha incorreta.');
+
+    await this.repository.removerComDados(id);
+    return { mensagem: 'Conta excluída' };
   }
 }

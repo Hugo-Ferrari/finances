@@ -432,3 +432,13 @@ finances/
 - [Prisma](https://www.prisma.io/docs)
 - [PostgreSQL](https://www.postgresql.org/docs/)
 - [Material UI](https://mui.com/material-ui/)
+
+## Autor
+
+Desenvolvido por **Hugo Ferrari**.
+
+Contato: contato.finlogic@gmail.com
+
+## Licença
+
+Todos os direitos reservados. Veja o arquivo [LICENSE](LICENSE). O uso do sistema segue os [Termos de Uso](<web/app/(legal)/termos/page.tsx>) e a [Política de Privacidade](<web/app/(legal)/privacidade/page.tsx>), publicados em `/termos` e `/privacidade`.

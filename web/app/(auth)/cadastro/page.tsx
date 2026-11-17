@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { cadastro } from "../../services/auth.service";
 import Button from "../../components/ui/Button";
 import PainelAuth from "../../components/PainelAuth";
+import Autoria from "../../components/Autoria";
 import { usePaginaPronta } from "../../hooks/usePaginaPronta";
 
 
@@ -149,11 +150,11 @@ function CadastroPage() {
                 />
                 <span>
                   Concordo com os{" "}
-                  <a href="#" className="font-semibold text-primary hover:underline">
-                    Termos de Serviço
+                  <a href="/termos" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+                    Termos de Uso
                   </a>{" "}
                   e a{" "}
-                  <a href="#" className="font-semibold text-primary hover:underline">
+                  <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
                     Política de Privacidade
                   </a>
                   .
@@ -188,6 +189,8 @@ function CadastroPage() {
             <ShieldCheck size={13} />
             <span>Seus dados são protegidos com segurança.</span>
           </div>
+
+          <Autoria className="mt-6" />
         </section>
 
         

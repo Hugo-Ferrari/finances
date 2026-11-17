@@ -27,3 +27,9 @@ export const atualizarUsuario = async (data: UpdateUsuario) => {
   const response = await api.patch("/usuario", data);
   return response.data;
 };
+
+/** Apaga a conta e todos os dados do usuário. Exige a senha atual. */
+export const excluirConta = async (senha: string) => {
+  const response = await api.delete("/usuario", { data: { senha } });
+  return response.data;
+};
