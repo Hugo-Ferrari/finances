@@ -108,7 +108,7 @@ export default function PrevisaoCaixinha({ caixinhaId, isenta, versao }: Previsa
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background px-3 text-sm focus-within:border-[var(--border-focus)]">
+          <label className="form-input-group form-input-group--compact form-input-group--inline">
             <span className="whitespace-nowrap text-xs font-semibold text-muted">+ por mês R$</span>
             <input
               inputMode="decimal"
@@ -116,7 +116,7 @@ export default function PrevisaoCaixinha({ caixinhaId, isenta, versao }: Previsa
               aria-label="Depósito mensal"
               value={aporteTexto}
               onChange={(e) => setAporteTexto(e.target.value)}
-              className="h-10 w-24 bg-transparent outline-none focus-visible:outline-none"
+              className="form-input-control"
             />
           </label>
         </div>

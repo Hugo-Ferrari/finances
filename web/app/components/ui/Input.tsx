@@ -19,9 +19,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         <div
-          className={`flex items-center gap-3 rounded-xl border bg-surface px-4 py-3 transition-all duration-150
-            ${error ? "border-expense ring-2 ring-expense/10" : "border-border focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12"}
-            ${className}`}
+          className={`form-input-group ${className}`}
+          data-invalid={Boolean(error)}
         >
           {icon && (
             <span className="shrink-0 text-muted-light">{icon}</span>
@@ -30,7 +29,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={id}
-            className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+            className="form-input-control"
             {...rest}
           />
 

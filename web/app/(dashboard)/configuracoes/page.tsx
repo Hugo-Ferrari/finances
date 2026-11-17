@@ -147,7 +147,7 @@ function Page() {
           <form onSubmit={salvarPerfil} className="flex flex-col gap-5">
             <label className="flex flex-col gap-2 text-sm font-semibold text-foreground">
               Nome completo
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-3 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15">
+              <div className="form-input-group">
                 <UserRound size={18} className="text-muted" />
                 <input
                   required
@@ -156,14 +156,14 @@ function Page() {
                   onChange={(event) =>
                     setPerfil({ ...perfil, nome: event.target.value })
                   }
-                  className="w-full bg-transparent text-sm font-normal outline-none"
+                  className="form-input-control font-normal"
                 />
               </div>
             </label>
 
             <label className="flex flex-col gap-2 text-sm font-semibold text-foreground">
               Email
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-3 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15">
+              <div className="form-input-group">
                 <Mail size={18} className="text-muted" />
                 <input
                   required
@@ -172,7 +172,7 @@ function Page() {
                   onChange={(event) =>
                     setPerfil({ ...perfil, email: event.target.value })
                   }
-                  className="w-full bg-transparent text-sm font-normal outline-none"
+                  className="form-input-control font-normal"
                 />
               </div>
             </label>

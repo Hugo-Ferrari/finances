@@ -19,14 +19,14 @@ export function CampoDinheiro({
   return (
     <div>
       <label htmlFor={id} className="form-label">{rotulo}</label>
-      <div className="flex items-center rounded-[var(--radius-lg)] border border-border bg-background pl-4 focus-within:border-[var(--border-focus)]">
+      <div className="form-input-group">
         <span className="text-sm font-bold text-muted">R$</span>
         <input
           id={id}
           inputMode="decimal"
           autoFocus={autoFocus}
           placeholder="0,00"
-          className="h-11 w-full bg-transparent px-3 text-sm outline-none focus-visible:outline-none"
+          className="form-input-control"
           value={valor}
           onChange={(e) => onValor(e.target.value)}
           required={obrigatorio}

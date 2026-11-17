@@ -74,7 +74,7 @@ function CadastroPage() {
               
               <div className="flex flex-col gap-2">
                 <label htmlFor="nome" className="form-label">Nome completo</label>
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12">
+                <div className="form-input-group">
                   <User size={17} className="shrink-0 text-muted-light" />
                   <input
                     id="nome"
@@ -84,7 +84,7 @@ function CadastroPage() {
                     autoComplete="name"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+                    className="form-input-control"
                   />
                 </div>
               </div>
@@ -92,7 +92,7 @@ function CadastroPage() {
               
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="form-label">E-mail</label>
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12">
+                <div className="form-input-group">
                   <Mail size={17} className="shrink-0 text-muted-light" />
                   <input
                     id="email"
@@ -102,7 +102,7 @@ function CadastroPage() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+                    className="form-input-control"
                   />
                 </div>
               </div>
@@ -110,7 +110,7 @@ function CadastroPage() {
              
               <div className="flex flex-col gap-2">
                 <label htmlFor="senha" className="form-label">Senha</label>
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12">
+                <div className="form-input-group">
                   <Lock size={17} className="shrink-0 text-muted-light" />
                   <input
                     id="senha"
@@ -120,7 +120,7 @@ function CadastroPage() {
                     autoComplete="new-password"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+                    className="form-input-control"
                   />
                   <button
                     type="button"
@@ -143,7 +143,7 @@ function CadastroPage() {
                   required
                   checked={aceitouTermos}
                   onChange={(e) => setAceitouTermos(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
+                  className="mt-0.5 shrink-0"
                 />
                 <span>
                   Concordo com os{" "}

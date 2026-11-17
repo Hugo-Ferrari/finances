@@ -14,14 +14,14 @@ interface CampoTaxaProps {
 export default function CampoTaxa({ taxa, periodo, onTaxa, onPeriodo, id = "taxa" }: CampoTaxaProps) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
-      <div className="flex flex-1 items-center rounded-[var(--radius-lg)] border border-border bg-background pr-4 focus-within:border-[var(--border-focus)] focus-within:shadow-[0_0_0_3px_rgba(11,155,120,0.14)]">
+      <div className="form-input-group flex-1">
         <input
           id={id}
           inputMode="decimal"
           placeholder="Ex.: 1 ou 0,85"
           value={taxa}
           onChange={(e) => onTaxa(e.target.value)}
-          className="h-11 w-full bg-transparent px-4 text-sm outline-none focus-visible:outline-none placeholder:text-muted-light"
+          className="form-input-control"
           required
         />
         <span className="text-sm font-bold text-muted">%</span>

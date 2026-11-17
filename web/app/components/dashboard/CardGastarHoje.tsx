@@ -111,13 +111,13 @@ export default function CardGastarHoje({ dados }: { dados: GastarHoje }) {
         <label htmlFor="simular-gasto" className="text-xs font-bold uppercase tracking-wide text-muted">
           E se eu gastar…
         </label>
-        <div className="mt-1.5 flex items-center rounded-xl border border-border bg-surface pl-3 focus-within:border-[var(--border-focus)]">
+        <div className="form-input-group mt-1.5">
           <span className="text-sm font-bold text-muted">R$</span>
           <input
             id="simular-gasto"
             inputMode="decimal"
             placeholder="0,00"
-            className="h-10 w-full bg-transparent px-2 text-sm font-bold outline-none focus-visible:outline-none"
+            className="form-input-control font-bold"
             value={simulacao}
             onChange={(e) => setSimulacao(e.target.value)}
           />

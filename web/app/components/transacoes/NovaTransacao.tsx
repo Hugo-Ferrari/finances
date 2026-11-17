@@ -155,13 +155,10 @@ function NovaTransacao() {
             </div>
 
             <div
-              className={`flex items-center rounded-xl border bg-background px-4 py-3 transition-all focus-within:ring-2 ${
-                tipoTransacao === "ENTRADA"
-                  ? "border-income/50 focus-within:ring-income/15"
-                  : "border-expense/50 focus-within:ring-expense/15"
-              }`}
+              className="form-input-group form-input-group--amount"
+              data-tone={tipoTransacao === "ENTRADA" ? "income" : "expense"}
             >
-              <span className="mr-3 text-sm font-bold text-muted">R$</span>
+              <span className="text-sm font-bold text-muted">R$</span>
               <input
                 id="valor"
                 name="valor"
@@ -171,7 +168,7 @@ function NovaTransacao() {
                 placeholder="0,00"
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
-                className="w-full bg-transparent text-3xl font-extrabold tracking-tight text-foreground outline-none placeholder:text-muted-light/60"
+                className="form-input-control"
               />
             </div>
           </div>

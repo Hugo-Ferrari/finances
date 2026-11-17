@@ -335,6 +335,89 @@ button {
     box-shadow var(--transition-fast);
 }
 
+.form-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  padding: 0 1rem;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.form-input-group:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(11, 155, 120, 0.14);
+}
+
+.form-input-group[data-invalid="true"] {
+  border-color: var(--expense);
+  box-shadow: 0 0 0 3px rgba(217, 67, 75, 0.1);
+}
+
+.form-input-control {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.form-input-control::placeholder {
+  color: var(--muted-light);
+}
+
+.form-input-group--compact {
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.form-input-group--inline {
+  width: fit-content;
+}
+
+.form-input-group--inline > .form-input-control {
+  width: 6rem;
+  flex: 0 0 6rem;
+}
+
+.form-input-group--amount {
+  height: 3.75rem;
+}
+
+.form-input-group--amount > .form-input-control {
+  font-size: 1.875rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.form-input-group--amount[data-tone="income"] {
+  border-color: color-mix(in srgb, var(--income) 50%, transparent);
+}
+
+.form-input-group--amount[data-tone="expense"] {
+  border-color: color-mix(in srgb, var(--expense) 50%, transparent);
+}
+
+.form-input-group--amount[data-tone="income"]:focus-within {
+  border-color: var(--income);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--income) 15%, transparent);
+}
+
+.form-input-group--amount[data-tone="expense"]:focus-within {
+  border-color: var(--expense);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--expense) 15%, transparent);
+}
+
 .form-input::placeholder {
   color: var(--muted-light);
 }
@@ -354,6 +437,14 @@ button {
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 0.5rem;
+}
+
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 /* ============================================================

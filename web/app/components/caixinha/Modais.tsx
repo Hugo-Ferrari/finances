@@ -37,9 +37,9 @@ function CampoValor({ id, valor, onValor, rotulo }: { id: string; valor: string;
   return (
     <div>
       <label htmlFor={id} className="form-label">{rotulo}</label>
-      <div className="flex items-center rounded-[var(--radius-lg)] border border-border bg-background pl-4 focus-within:border-[var(--border-focus)]">
+      <div className="form-input-group">
         <span className="text-sm font-bold text-muted">R$</span>
-        <input id={id} inputMode="decimal" autoFocus placeholder="0,00" className="h-11 w-full bg-transparent px-3 text-sm outline-none focus-visible:outline-none" value={valor} onChange={(e) => onValor(e.target.value)} required />
+        <input id={id} inputMode="decimal" autoFocus placeholder="0,00" className="form-input-control" value={valor} onChange={(e) => onValor(e.target.value)} required />
       </div>
     </div>
   );
@@ -220,7 +220,7 @@ export function ModalEditar({ caixinha, onFechar, onSalvo }: Omit<ModalMovimento
           <input id="editar-instituicao" className="form-input" value={instituicao} maxLength={40} onChange={(e) => setInstituicao(e.target.value)} />
         </div>
         <label className="flex cursor-pointer items-center gap-3 text-sm text-foreground">
-          <input type="checkbox" className="h-4 w-4 accent-[var(--accent)]" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
+          <input type="checkbox" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
           Isenta de imposto de renda
         </label>
         <Erro texto={erro} />

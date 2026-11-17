@@ -96,7 +96,7 @@ function LoginPage() {
             
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="form-label">E-mail</label>
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12">
+                <div className="form-input-group">
                   <Mail size={17} className="shrink-0 text-muted-light" />
                   <input
                     id="email"
@@ -106,7 +106,7 @@ function LoginPage() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+                    className="form-input-control"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ function LoginPage() {
               
               <div className="flex flex-col gap-2">
                 <label htmlFor="senha" className="form-label">Senha</label>
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/12">
+                <div className="form-input-group">
                   <Lock size={17} className="shrink-0 text-muted-light" />
                   <input
                     id="senha"
@@ -124,7 +124,7 @@ function LoginPage() {
                     autoComplete="current-password"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-light"
+                    className="form-input-control"
                   />
                   <button
                     type="button"
@@ -143,7 +143,6 @@ function LoginPage() {
                   type="checkbox"
                   checked={lembrarDeMim}
                   onChange={(e) => setLembrarDeMim(e.target.checked)}
-                  className="h-4 w-4 rounded border-border accent-primary"
                 />
                 Lembrar de mim
               </label>

@@ -102,9 +102,9 @@ function Formulario() {
             </div>
             <div>
               <label htmlFor="valor" className="form-label">Quanto você tem aplicado</label>
-              <div className="flex items-center rounded-[var(--radius-lg)] border border-border bg-background pl-4 focus-within:border-[var(--border-focus)]">
+              <div className="form-input-group">
                 <span className="text-sm font-bold text-muted">R$</span>
-                <input id="valor" inputMode="decimal" className="h-11 w-full bg-transparent px-3 text-sm outline-none focus-visible:outline-none" placeholder="0,00" value={valor} onChange={(e) => setValor(e.target.value)} required />
+                <input id="valor" inputMode="decimal" className="form-input-control" placeholder="0,00" value={valor} onChange={(e) => setValor(e.target.value)} required />
               </div>
             </div>
             <div>
@@ -140,7 +140,7 @@ function Formulario() {
           </div>
 
           <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-surface-hover p-4">
-            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
+            <input type="checkbox" className="mt-0.5" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
             <span>
               <span className="block text-sm font-semibold text-foreground">Isenta de imposto de renda</span>
               <span className="text-xs text-muted">Marque para LCI, LCA e outras aplicações isentas. Caso contrário, mostramos também o valor líquido.</span>

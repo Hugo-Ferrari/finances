@@ -79,7 +79,7 @@ function ConfigurarTransacao({ formulario, alterar, dataEstimada }: ConfigurarTr
         <label htmlFor="ia-valor" className="form-label">
           Valor
         </label>
-        <div className="flex items-center rounded-xl border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-accent/20">
+        <div className="form-input-group">
           <span className="mr-2 text-sm font-bold text-muted">R$</span>
           <input
             id="ia-valor"
@@ -88,7 +88,7 @@ function ConfigurarTransacao({ formulario, alterar, dataEstimada }: ConfigurarTr
             placeholder="0,00"
             value={formulario.valor}
             onChange={(e) => alterar("valor", e.target.value)}
-            className="num h-11 w-full bg-transparent font-bold text-foreground outline-none"
+            className="form-input-control num font-bold"
           />
         </div>
       </div>

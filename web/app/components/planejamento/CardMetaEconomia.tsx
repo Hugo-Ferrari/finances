@@ -67,8 +67,8 @@ export default function CardMetaEconomia() {
         </div>
         <div className="flex items-center gap-2">
           <label htmlFor="meta-economia" className="sr-only">Meta em %</label>
-          <div className="flex h-11 w-28 items-center rounded-[var(--radius-lg)] border border-border bg-background pr-3 focus-within:border-[var(--border-focus)]">
-            <input id="meta-economia" inputMode="decimal" className="h-full w-full bg-transparent px-3 text-sm font-bold outline-none focus-visible:outline-none" value={meta} onChange={(e) => setMeta(e.target.value)} />
+          <div className="form-input-group form-input-group--compact w-28">
+            <input id="meta-economia" inputMode="decimal" className="form-input-control font-bold" value={meta} onChange={(e) => setMeta(e.target.value)} />
             <span className="text-sm font-bold text-muted">%</span>
           </div>
           <button type="submit" className="btn btn-primary h-11" disabled={salvando || lerValor(meta) === salva}>
