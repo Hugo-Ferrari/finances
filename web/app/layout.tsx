@@ -1,7 +1,8 @@
 import { Manrope, Inter } from "next/font/google";
-import type { Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AuthInitializer from "./components/AuthInitializer";
+import { AUTOR } from "./lib/sobre";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -9,9 +10,13 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "FinLogic",
   description: "Controle financeiro moderno e inteligente.",
+  applicationName: "FinLogic",
+  authors: [{ name: AUTOR }],
+  creator: AUTOR,
+  publisher: AUTOR,
 };
 
 const manrope = Manrope({

@@ -11,6 +11,7 @@ import type { Request } from 'express';
 import { UsuarioService } from './usuario.service';
 import { createUsuarioDto } from './dto/createUsuario.DTO';
 import { UpdateUsuarioDto } from './dto/updateUsuarioDto';
+import { ExcluirUsuarioDto } from './dto/excluirUsuarioDto';
 import { Public } from 'src/common/decorators/public.decorator';
 
 type AuthenticatedRequest = Request & {
@@ -36,7 +37,7 @@ export class UsuarioController {
   }
 
   @Delete()
-  deletar(@Req() req: AuthenticatedRequest) {
-    return this.usuarioService.deletar(req.user.id);
+  excluir(@Body() dto: ExcluirUsuarioDto, @Req() req: AuthenticatedRequest) {
+    return this.usuarioService.excluirConta(req.user.id, dto.senha);
   }
 }
