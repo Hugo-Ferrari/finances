@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ModalPortal } from "@/app/components/caixinha/Modal";
 
 interface BlocoContaProps {
   conta: Conta;
@@ -165,27 +166,28 @@ function BlocoConta({
       )}
 
       {modalAberto && (
-        <div
-          className="modal-overlay"
-          onMouseDown={(event) => {
-            if (
-              event.target === event.currentTarget &&
-              !excluindo &&
-              !salvando
-            ) {
-              setModalAberto(false);
-              setConfirmandoExclusao(false);
-              setErro("");
-            }
-          }}
-        >
+        <ModalPortal>
           <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="gerenciar-conta-titulo"
-            aria-describedby="gerenciar-conta-descricao"
-            className="modal-content max-w-md"
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                !excluindo &&
+                !salvando
+              ) {
+                setModalAberto(false);
+                setConfirmandoExclusao(false);
+                setErro("");
+              }
+            }}
           >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="gerenciar-conta-titulo"
+              aria-describedby="gerenciar-conta-descricao"
+              className="modal-content max-w-md"
+            >
             <div className="flex items-start gap-4">
               <div
                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
@@ -343,8 +345,9 @@ function BlocoConta({
                 </>
               )}
             </div>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </article>
   );

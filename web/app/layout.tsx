@@ -1,6 +1,13 @@
 import { Manrope, Inter } from "next/font/google";
+import type { Viewport } from "next";
 import "./globals.css";
 import AuthInitializer from "./components/AuthInitializer";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata = {
   title: "FinLogic",

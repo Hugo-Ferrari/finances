@@ -10,6 +10,7 @@ import { formatarMoeda, intervaloMesAtual } from "@/app/lib/formatters";
 import { diasRestantesNoMes, formatarNomeCategoria, Orcamento } from "@/app/lib/financas";
 import { mensagemDeErro } from "@/app/lib/erros";
 import { DespesaCategoria } from "@/app/types/categoria";
+import { ModalPortal } from "@/app/components/caixinha/Modal";
 import CardOrcamento from "@/app/components/dashboard/CardOrcamento";
 import SkeletonCard from "@/app/components/ui/Skeleton";
 import CriarCategoria from "./CriarCategoria";
@@ -176,40 +177,42 @@ function DetalhesCategorias() {
       </section>
 
       {paraExcluir && (
-        <div
-          className="modal-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !excluindo) {
-              setParaExcluir(null);
-              setErroExclusao("");
-            }
-          }}
-        >
+        <ModalPortal>
           <div
-            className="modal-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="excluir-categoria-titulo"
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !excluindo) {
+                setParaExcluir(null);
+                setErroExclusao("");
+              }
+            }}
           >
-            <h2 id="excluir-categoria-titulo" className="text-lg font-bold text-foreground">
-              Excluir categoria
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Excluir <strong className="text-foreground">{formatarNomeCategoria(paraExcluir.nome)}</strong>? As
-              transações continuam salvas, apenas ficam sem categoria. O limite desta categoria também será
-              removido.
-            </p>
-            {erroExclusao && <p className="mt-3 text-sm font-medium text-expense">{erroExclusao}</p>}
-            <div className="modal-actions mt-6">
-              <button type="button" className="btn btn-ghost h-10" onClick={() => setParaExcluir(null)} disabled={excluindo}>
-                Cancelar
-              </button>
-              <button type="button" className="btn btn-danger h-10" onClick={excluir} disabled={excluindo}>
-                {excluindo ? "Excluindo..." : "Excluir"}
-              </button>
+            <div
+              className="modal-content"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="excluir-categoria-titulo"
+            >
+              <h2 id="excluir-categoria-titulo" className="text-lg font-bold text-foreground">
+                Excluir categoria
+              </h2>
+              <p className="mt-2 text-sm text-muted">
+                Excluir <strong className="text-foreground">{formatarNomeCategoria(paraExcluir.nome)}</strong>? As
+                transações continuam salvas, apenas ficam sem categoria. O limite desta categoria também será
+                removido.
+              </p>
+              {erroExclusao && <p className="mt-3 text-sm font-medium text-expense">{erroExclusao}</p>}
+              <div className="modal-actions mt-6">
+                <button type="button" className="btn btn-ghost h-10" onClick={() => setParaExcluir(null)} disabled={excluindo}>
+                  Cancelar
+                </button>
+                <button type="button" className="btn btn-danger h-10" onClick={excluir} disabled={excluindo}>
+                  {excluindo ? "Excluindo..." : "Excluir"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

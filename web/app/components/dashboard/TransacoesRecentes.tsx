@@ -14,6 +14,7 @@ import { formatarData, formatarMoeda } from "@/app/lib/formatters";
 import { formatarNomeCategoria } from "@/app/lib/financas";
 import { Transacao } from "@/app/types/transacao";
 import EmptyState from "@/app/components/ui/EmptyState";
+import { ModalPortal } from "@/app/components/caixinha/Modal";
 import { deletarTransacao } from "@/app/services/transacao.service";
 import { mensagemDeErro } from "@/app/lib/erros";
 
@@ -106,65 +107,67 @@ export function LinhaTransacao({
         )}
       </div>
       {confirmandoExclusao && (
-        <div
-          className="modal-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !excluindo) {
-              setConfirmandoExclusao(false);
-              setErroExclusao("");
-            }
-          }}
-        >
+        <ModalPortal>
           <div
-            className="modal-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`excluir-transacao-${transacao.id}`}
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !excluindo) {
+                setConfirmandoExclusao(false);
+                setErroExclusao("");
+              }
+            }}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-expense-light text-expense">
-                <AlertTriangle size={20} />
-              </span>
-              <div className="min-w-0">
-                <h2
-                  id={`excluir-transacao-${transacao.id}`}
-                  className="text-lg font-bold text-foreground"
-                >
-                  Excluir transação?
-                </h2>
-                <p className="mt-2 text-sm text-muted">
-                  Essa ação é permanente. O saldo da conta será atualizado automaticamente.
+            <div
+              className="modal-content"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`excluir-transacao-${transacao.id}`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-expense-light text-expense">
+                  <AlertTriangle size={20} />
+                </span>
+                <div className="min-w-0">
+                  <h2
+                    id={`excluir-transacao-${transacao.id}`}
+                    className="text-lg font-bold text-foreground"
+                  >
+                    Excluir transação?
+                  </h2>
+                  <p className="mt-2 text-sm text-muted">
+                    Essa ação é permanente. O saldo da conta será atualizado automaticamente.
+                  </p>
+                </div>
+              </div>
+              {erroExclusao && (
+                <p className="mt-4 text-sm font-medium text-expense" role="alert">
+                  {erroExclusao}
                 </p>
+              )}
+              <div className="modal-actions mt-6">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setConfirmandoExclusao(false);
+                    setErroExclusao("");
+                  }}
+                  disabled={excluindo}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={excluir}
+                  disabled={excluindo}
+                >
+                  {excluindo ? "Excluindo..." : "Excluir transação"}
+                </button>
               </div>
             </div>
-            {erroExclusao && (
-              <p className="mt-4 text-sm font-medium text-expense" role="alert">
-                {erroExclusao}
-              </p>
-            )}
-            <div className="modal-actions mt-6">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={() => {
-                  setConfirmandoExclusao(false);
-                  setErroExclusao("");
-                }}
-                disabled={excluindo}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={excluir}
-                disabled={excluindo}
-              >
-                {excluindo ? "Excluindo..." : "Excluir transação"}
-              </button>
-            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </>
   );

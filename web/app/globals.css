@@ -745,11 +745,7 @@ input[type="checkbox"] {
     min-height: 2.75rem;
   }
 
-  .modal-content--planejamento form {
-    gap: 0.875rem;
-  }
-
-  .modal-content--planejamento .modal-actions {
+  .modal-content .modal-actions {
     position: sticky;
     bottom: 0;
     z-index: 1;
