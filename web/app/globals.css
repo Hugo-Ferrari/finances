@@ -427,6 +427,49 @@ button {
   color: var(--muted-light);
 }
 
+/* Select e data com o mesmo visual dos outros campos em todo navegador
+   (o iPhone desenha esses dois do jeito dele, com outra altura e alinhamento). */
+.form-select,
+.form-input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  text-align: left;
+}
+
+.form-select {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235c6b74' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  text-overflow: ellipsis;
+}
+
+.form-input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+/* Campo só de leitura (ex.: saldo da conta): mesmo cinza em todo navegador;
+   o iPhone deixava o texto quase transparente. */
+.form-input:disabled,
+.form-select:disabled {
+  background-color: var(--surface-dim);
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* No celular a fonte dos campos fica em 16px: abaixo disso o iPhone dá zoom
+   ao tocar no campo e a tela fica deslizando. */
+@media (max-width: 640px) {
+  .form-input,
+  .form-select,
+  .form-input-control {
+    font-size: 1rem;
+  }
+}
+
 .form-input:focus,
 .form-select:focus {
   border-color: var(--border-focus);
@@ -740,6 +783,10 @@ input[type="checkbox"] {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
+  /* O fundo não rola nem "estica": só o conteúdo do modal rola. */
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -753,8 +800,10 @@ input[type="checkbox"] {
   width: 100%;
   max-width: 480px;
   max-height: calc(100svh - 2rem);
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   background: var(--surface);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-lg);
@@ -791,8 +840,9 @@ input[type="checkbox"] {
   .modal-content {
     width: 100%;
     max-width: none;
+    /* svh não muda quando a barra do navegador aparece ou some (dvh muda e o
+       modal ficava encolhendo e crescendo durante a rolagem). */
     max-height: calc(100svh - env(safe-area-inset-top) - 0.5rem);
-    max-height: calc(100dvh - env(safe-area-inset-top) - 0.5rem);
     padding: 1.25rem 1rem calc(1rem + env(safe-area-inset-bottom));
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     -webkit-overflow-scrolling: touch;

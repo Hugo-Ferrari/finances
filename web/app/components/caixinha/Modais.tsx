@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import CampoTaxa from "./CampoTaxa";
+import { CaixaErro, CampoDinheiro, Rodape } from "@/app/components/planejamento/Campos";
 import { listarConta } from "@/app/services/conta.service";
 import { alterarTaxa, atualizarCaixinha, registrarMovimento } from "@/app/services/caixinha.service";
 import { mensagemDeErro } from "@/app/lib/erros";
@@ -10,40 +11,6 @@ import { formatarMoeda, paraDiaISO } from "@/app/lib/formatters";
 import { lerValor, rotuloTaxa } from "@/app/lib/financas";
 import { Conta } from "@/app/types/conta";
 import { Caixinha, PeriodoTaxa, TipoMovimentoCaixinha } from "@/app/types/caixinha";
-
-function Erro({ texto }: { texto: string }) {
-  if (!texto) return null;
-  return (
-    <div role="alert" className="rounded-xl border border-expense/20 bg-expense-light px-4 py-3 text-sm font-medium text-expense">
-      {texto}
-    </div>
-  );
-}
-
-function Rodape({ onCancelar, salvando, rotulo }: { onCancelar: () => void; salvando: boolean; rotulo: string }) {
-  return (
-    <div className="modal-actions mt-2">
-      <button type="button" className="btn btn-ghost h-10" onClick={onCancelar} disabled={salvando}>
-        Cancelar
-      </button>
-      <button type="submit" className="btn btn-primary h-10" disabled={salvando}>
-        {salvando ? "Salvando..." : rotulo}
-      </button>
-    </div>
-  );
-}
-
-function CampoValor({ id, valor, onValor, rotulo }: { id: string; valor: string; onValor: (v: string) => void; rotulo: string }) {
-  return (
-    <div>
-      <label htmlFor={id} className="form-label">{rotulo}</label>
-      <div className="form-input-group">
-        <span className="text-sm font-bold text-muted">R$</span>
-        <input id={id} inputMode="decimal" autoFocus placeholder="0,00" className="form-input-control" value={valor} onChange={(e) => onValor(e.target.value)} required />
-      </div>
-    </div>
-  );
-}
 
 const TEXTOS: Record<TipoMovimentoCaixinha, { titulo: string; descricao: string; valor: string; botao: string }> = {
   DEPOSITO: { titulo: "Guardar dinheiro", descricao: "Coloque mais dinheiro na caixinha.", valor: "Quanto vai guardar", botao: "Guardar" },
@@ -105,7 +72,7 @@ export function ModalMovimento({ caixinha, tipo, onFechar, onSalvo }: ModalMovim
   return (
     <Modal titulo={textos.titulo} descricao={textos.descricao} onFechar={onFechar} bloqueado={salvando}>
       <form onSubmit={salvar} className="flex flex-col gap-4">
-        <CampoValor id="valor-movimento" rotulo={textos.valor} valor={valor} onValor={setValor} />
+        <CampoDinheiro id="valor-movimento" rotulo={textos.valor} valor={valor} onValor={setValor} autoFocus />
         {tipo === "RETIRADA" && (
           <p className="num -mt-2 text-xs text-muted">Disponível: {formatarMoeda(caixinha.saldo)}</p>
         )}
@@ -128,7 +95,7 @@ export function ModalMovimento({ caixinha, tipo, onFechar, onSalvo }: ModalMovim
             </select>
           </div>
         )}
-        <Erro texto={erro} />
+        <CaixaErro texto={erro} />
         <Rodape onCancelar={onFechar} salvando={salvando} rotulo={textos.botao} />
       </form>
     </Modal>
@@ -181,7 +148,7 @@ export function ModalTaxa({ caixinha, onFechar, onSalvo }: Omit<ModalMovimentoPr
             </ul>
           </div>
         )}
-        <Erro texto={erro} />
+        <CaixaErro texto={erro} />
         <Rodape onCancelar={onFechar} salvando={salvando} rotulo="Salvar taxa" />
       </form>
     </Modal>
@@ -219,11 +186,11 @@ export function ModalEditar({ caixinha, onFechar, onSalvo }: Omit<ModalMovimento
           <label htmlFor="editar-instituicao" className="form-label">Banco ou corretora</label>
           <input id="editar-instituicao" className="form-input" value={instituicao} maxLength={40} onChange={(e) => setInstituicao(e.target.value)} />
         </div>
-        <label className="flex cursor-pointer items-center gap-3 text-sm text-foreground">
-          <input type="checkbox" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
-          Isenta de imposto de renda
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-surface-hover p-4">
+          <input type="checkbox" className="mt-0.5" checked={isenta} onChange={(e) => setIsenta(e.target.checked)} />
+          <span className="text-sm font-semibold text-foreground">Isenta de imposto de renda</span>
         </label>
-        <Erro texto={erro} />
+        <CaixaErro texto={erro} />
         <Rodape onCancelar={onFechar} salvando={salvando} rotulo="Salvar" />
       </form>
     </Modal>

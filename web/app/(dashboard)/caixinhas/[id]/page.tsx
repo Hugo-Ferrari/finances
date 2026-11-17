@@ -180,7 +180,7 @@ function Page() {
           bloqueado={processando}
         >
           {erroAcao && <p className="mb-4 text-sm font-medium text-expense">{erroAcao}</p>}
-          <div className="flex justify-end gap-3">
+          <div className="modal-actions">
             <button type="button" className="btn btn-ghost h-10" onClick={fechar} disabled={processando}>Cancelar</button>
             <button type="button" className="btn btn-danger h-10" onClick={confirmar} disabled={processando}>
               {processando ? "Aguarde..." : acao.tipo === "excluir" ? "Excluir" : "Desfazer"}
